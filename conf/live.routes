@@ -1,0 +1,3 @@
+GET         /world                         controllers.LiveController.world
+GET         /user                          controllers.LiveController.user
+GET         /application                   controllers.LiveController.application

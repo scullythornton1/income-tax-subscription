@@ -1,9 +1,71 @@
-# income-tax-subscription
+API Example Microservice
+========================
 
-[![Build Status](https://travis-ci.org/hmrc/income-tax-subscription.svg)](https://travis-ci.org/hmrc/income-tax-subscription) [ ![Download](https://api.bintray.com/packages/hmrc/releases/income-tax-subscription/images/download.svg) ](https://bintray.com/hmrc/releases/income-tax-subscription/_latestVersion)
+This is a sample API to test API platform. It has 3 endpoints one for each level of authorisation.
+ 
+## api-example-microservice
+This is open resource without any authorisation
+request: 
+```
+GET /hello/world
+```
+response:
+```
+{
+    "message":"Hello World"
+}
+```
+In the definition `authType` should be set to `NONE`
+```
+"authType": "NONE"
+ ```   
+## hello-application
+This resource requires application token
+request: 
+```
+GET /hello/application
+```
+response:
+```
+{
+    "message":"Hello Application"
+}
+```
+In the definition `authType` should be set to `APPLICATION`
+```
+"authType": "APPLICATION"
+ ```   
+## hello-user
+This resource requires user token
+request: 
+```
+GET /hello/user
+```
+response:
+```
+{
+    "message":"Hello User"
+}
+```
+In the definition `authType` should be `USER`
+```
+"authType": "USER"
+ ```   
 
-This is a placeholder README.md for a new repository
+# Sandbox
+All the above endpoints are accessible on sandbox with `/sandbox` prefix on each endpoint,e.g.
+```
+    GET /sandbox/hello/world
+    GET /sandbox/hello/application
+    GET /sandbox/hello/user
+```
 
-### License
+# Definition
+API definition for the service will be available under `/api/definition` endpoint.
+See definition in `/conf/api-definition.json` for the format.
 
-This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html")
+# Version
+Version of API need to be provided in `Accept` request header
+```
+Accept: application/vnd.hmrc.v1.0+json
+```

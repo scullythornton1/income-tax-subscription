@@ -1,0 +1,32 @@
+<endpoint>
+    <name>Say Hello World</name>
+    <description>A simple example for integrating with an unrestricted service.</description>
+    <description>Any request to this endpoint initiates a 'Hello World' response.</description>
+    <section id="resource">
+        <title>Resource</title>
+        <resource>GET /hello/world</resource>
+    </section>
+    <section id="authorisation">
+        <title>Authorisation</title>
+        <authorisation>
+            <type>NONE</type>
+        </authorisation>
+    </section>
+    <section id="content-types">
+        <title>Accepted Media Types</title>
+        <list>
+            <item>
+                <code>application/vnd.hmrc.1.0+json</code>
+            </item>
+        </list>
+    </section>
+    <section id="response">
+        <title>Response</title>
+        <httpStatus>200 (OK)</httpStatus>
+        <json><![CDATA[
+{
+  "message": "Hello World"
+}
+		]]></json>
+    </section>
+</endpoint>

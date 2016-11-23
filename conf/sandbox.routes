@@ -1,0 +1,3 @@
+GET         /sandbox/world                         controllers.SandboxController.world
+GET         /sandbox/user                          controllers.SandboxController.user
+GET         /sandbox/application                   controllers.SandboxController.application

@@ -1,0 +1,44 @@
+{
+  "scopes": [
+    {
+      "key": "hello",
+      "name": "Say Hello",
+      "description": "Say Hello!"
+    }
+  ],
+  "api": {
+    "name": "Hello World",
+    "description": "A 'hello world' example of an API on the HMRC API Developer Hub.",
+    "context": "hello",
+    "versions": [
+      {
+        "version": "1.0",
+        "status": "PUBLISHED",
+        "endpoints": [
+          {
+            "uriPattern": "/world",
+            "endpointName": "Say Hello World",
+            "method": "GET",
+            "authType": "NONE",
+            "throttlingTier": "UNLIMITED"
+          },
+          {
+            "uriPattern": "/user",
+            "endpointName": "Say Hello User",
+            "method": "GET",
+            "authType": "USER",
+            "throttlingTier": "UNLIMITED",
+            "scope": "hello"
+          },
+          {
+            "uriPattern": "/application",
+            "endpointName": "Say Hello Application",
+            "method": "GET",
+            "authType": "APPLICATION",
+            "throttlingTier": "UNLIMITED"
+          }
+        ]
+      }
+    ]
+  }
+}
