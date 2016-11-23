@@ -3,6 +3,7 @@ package config
 import com.typesafe.config.Config
 import connectors.ServiceLocatorConnector
 import controllers._
+import models.{ErrorGenericBadRequest, ErrorInternalServerError, ErrorNotFound, ErrorUnauthorized}
 import net.ceedubs.ficus.Ficus._
 import play.api._
 import play.api.libs.json.Json

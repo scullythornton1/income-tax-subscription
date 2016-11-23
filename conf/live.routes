@@ -1,3 +1,4 @@
-GET         /world                         controllers.LiveController.world
-GET         /user                          controllers.LiveController.user
-GET         /application                   controllers.LiveController.application
+### Hello World Controller Live Routes
+GET         /hello-world                         controllers.LiveHelloWorldController.world
+GET         /hello-user                          controllers.LiveHelloWorldController.user
+GET         /hello-application                   controllers.LiveHelloWorldController.application

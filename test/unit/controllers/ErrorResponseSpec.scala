@@ -1,6 +1,6 @@
 package unit.controllers
 
-import controllers.ErrorAcceptHeaderInvalid
+import models.ErrorAcceptHeaderInvalid
 import org.scalatest.Matchers
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.test.UnitSpec

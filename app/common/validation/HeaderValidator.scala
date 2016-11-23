@@ -1,5 +1,6 @@
-package controllers
+package common.validation
 
+import models.ErrorAcceptHeaderInvalid
 import play.api.libs.json.Json
 import play.api.mvc.{ActionBuilder, Request, Result, Results}
 
@@ -17,7 +18,7 @@ trait HeaderValidator extends Results {
   val matchHeader: String => Option[Match] = new Regex( """^application/vnd[.]{1}hmrc[.]{1}(.*?)[+]{1}(.*)$""", "version", "contenttype") findFirstMatchIn _
 
   val acceptHeaderValidationRules: Option[String] => Boolean =
-    _ flatMap (a => matchHeader(a) map (res => validateContentType(res.group("contenttype")) && validateVersion(res.group("version")))) getOrElse (false)
+    _ flatMap (a => matchHeader(a) map (res => validateContentType(res.group("contenttype")) && validateVersion(res.group("version")))) getOrElse false
 
 
   def validateAccept(rules: Option[String] => Boolean) = new ActionBuilder[Request] {

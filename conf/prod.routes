@@ -1,9 +1,9 @@
 # Add all the application routes to the app.routes file
 
-->         /                     sandbox.Routes
-->         /                     live.Routes
+->         /income-tax-subscription           sandbox.Routes
+->         /income-tax-subscription           live.Routes
+->         /income-tax-subscription           definition.Routes
 
-->         /                     health.Routes
-->         /                     definition.Routes
+->         /                                  health.Routes
 
 GET        /admin/metrics        com.kenshoo.play.metrics.MetricsController.metrics

@@ -1,6 +1,6 @@
 package unit.controllers
 
-import controllers.HeaderValidator
+import common.validation.HeaderValidator
 import org.scalatest.Matchers
 import uk.gov.hmrc.play.test.UnitSpec
 

@@ -1,13 +1,21 @@
-API Example Microservice
-========================
+Income Tax Subscription MicroService
+====================================
 
-This is a sample API to test API platform. It has 3 endpoints one for each level of authorisation.
+This MicroService provides Third Party Applications with RESTful APIs to allow a User to Subscribe for the Making Tax Digital - Income Tax (MTD-IT) Service.
  
-## api-example-microservice
-This is open resource without any authorisation
+## API Live Endpoints
+It currently supports the following end-points: 
+ 
+#### GET /income-tax-subscription/hello-world
+
+This is an open resource without any authorisation required. It needs an 'Accept' header on the request with the following:
+```
+Accept: application/vnd.hmrc.1.0+json
+```
+
 request: 
 ```
-GET /hello/world
+GET /income-tax-subscription/hello-world
 ```
 response:
 ```
@@ -15,15 +23,13 @@ response:
     "message":"Hello World"
 }
 ```
-In the definition `authType` should be set to `NONE`
-```
-"authType": "NONE"
- ```   
-## hello-application
-This resource requires application token
+
+
+#### GET /income-tax-subscription/hello-application
+This resource requires an application token as well as the 'Accept' header.
 request: 
 ```
-GET /hello/application
+GET /income-tax-subscription/hello-application
 ```
 response:
 ```
@@ -31,15 +37,13 @@ response:
     "message":"Hello Application"
 }
 ```
-In the definition `authType` should be set to `APPLICATION`
-```
-"authType": "APPLICATION"
- ```   
-## hello-user
-This resource requires user token
+
+
+#### GET /income-tax-subscription/hello-user
+This resource requires user token as well as the 'Accept' header.
 request: 
 ```
-GET /hello/user
+GET /income-tax-subscription/hello-user
 ```
 response:
 ```
@@ -47,25 +51,21 @@ response:
     "message":"Hello User"
 }
 ```
-In the definition `authType` should be `USER`
-```
-"authType": "USER"
- ```   
 
-# Sandbox
-All the above endpoints are accessible on sandbox with `/sandbox` prefix on each endpoint,e.g.
+## API Sandbox Endpoints
+All the above endpoints are accessible on sandbox with `sandbox` included in the URL of each endpoint,e.g.
 ```
-    GET /sandbox/hello/world
-    GET /sandbox/hello/application
-    GET /sandbox/hello/user
+    GET /income-tax-subscription/sandbox/hello-world
+    GET /income-tax-subscription/sandbox/hello-application
+    GET /income-tax-subscription/sandbox/hello-user
 ```
 
-# Definition
-API definition for the service will be available under `/api/definition` endpoint.
+## API Definition
+API definition for the service will be available under `/income-tax-subscription/api/definition` endpoint.
 See definition in `/conf/api-definition.json` for the format.
 
-# Version
-Version of API need to be provided in `Accept` request header
+## API Version
+Version of API is 1.0 and needs to be provided in `Accept` request header
 ```
-Accept: application/vnd.hmrc.v1.0+json
+Accept: application/vnd.hmrc.1.0+json
 ```

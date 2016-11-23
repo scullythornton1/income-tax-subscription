@@ -4,7 +4,7 @@
     <description>Any authorised request to this endpoint initiates a 'Hello Application' response. </description>
     <section id="resource">
         <title>Resource</title>
-        <resource>GET /hello/application</resource>
+        <resource>GET income-tax-subscription/hello-application</resource>
     </section>
     <section id="authorisation">
         <title>Authorisation</title>

@@ -14,12 +14,8 @@ trait ServiceLocatorConnector {
   val serviceUrl: String
   val handlerOK: () => Unit
   val handlerError: Throwable => Unit
-
   val metadata: Option[Map[String, String]]
-
-
   val http: HttpPost
-
 
   def register(implicit hc: HeaderCarrier): Future[Boolean] = {
     val registration = Registration(appName, appUrl, metadata)

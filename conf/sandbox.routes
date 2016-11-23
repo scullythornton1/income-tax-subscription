@@ -1,3 +1,4 @@
-GET         /sandbox/world                         controllers.SandboxController.world
-GET         /sandbox/user                          controllers.SandboxController.user
-GET         /sandbox/application                   controllers.SandboxController.application
+### Hello World Controller Sandbox Routes
+GET         /sandbox/hello-world                         controllers.SandboxHelloWorldController.world
+GET         /sandbox/hello-user                          controllers.SandboxHelloWorldController.user
+GET         /sandbox/hello-application                   controllers.SandboxHelloWorldController.application
