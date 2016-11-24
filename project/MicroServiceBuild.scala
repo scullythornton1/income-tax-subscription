@@ -3,7 +3,7 @@ import sbt._
 object MicroServiceBuild extends Build with MicroService {
   import scala.util.Properties.envOrElse
 
-  val appName = "api-example-microservice"
+  val appName = "income-tax-subscription"
   val appVersion = envOrElse("API_EXAMPLE_MICROSERVICE_VERSION", "999-SNAPSHOT")
 
   override lazy val appDependencies: Seq[ModuleID] = AppDependencies()
