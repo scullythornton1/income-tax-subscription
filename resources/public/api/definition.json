@@ -16,14 +16,14 @@
         "status": "PUBLISHED",
         "endpoints": [
           {
-            "uriPattern": "income-tax-subscription/hello-world",
+            "uriPattern": "income-tax/hello-world",
             "endpointName": "Say Hello World",
             "method": "GET",
             "authType": "NONE",
             "throttlingTier": "UNLIMITED"
           },
           {
-            "uriPattern": "income-tax-subscription/hello-user",
+            "uriPattern": "income-tax/hello-user",
             "endpointName": "Say Hello User",
             "method": "GET",
             "authType": "USER",
@@ -31,7 +31,7 @@
             "scope": "hello"
           },
           {
-            "uriPattern": "income-tax-subscription/hello-application",
+            "uriPattern": "income-tax/hello-application",
             "endpointName": "Say Hello Application",
             "method": "GET",
             "authType": "APPLICATION",

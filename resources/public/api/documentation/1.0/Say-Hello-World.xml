@@ -4,7 +4,7 @@
     <description>Any request to this endpoint initiates a 'Hello World' response.</description>
     <section id="resource">
         <title>Resource</title>
-        <resource>GET income-tax-subscription/hello-world</resource>
+        <resource>GET income-tax/hello-world</resource>
     </section>
     <section id="authorisation">
         <title>Authorisation</title>

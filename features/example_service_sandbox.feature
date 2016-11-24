@@ -4,7 +4,7 @@ Feature: Fetch Hello Sandbox Sandbox
     Given header 'Accept' is 'valid'
 
   Scenario: Fetch World for Live
-    And I GET the SANDBOX resource '/income-tax-subscription/sandbox/hello-world'
+    And I GET the SANDBOX resource '/sandbox/income-tax/hello-world'
     Then the status code should be 'OK'
     And I should receive JSON response:
     """
@@ -15,7 +15,7 @@ Feature: Fetch Hello Sandbox Sandbox
 
 
   Scenario: Fetch User for Live
-    And I GET the SANDBOX resource '/income-tax-subscription/sandbox/hello-user'
+    And I GET the SANDBOX resource '/sandbox/income-tax/hello-user'
     Then the status code should be 'OK'
     And I should receive JSON response:
     """
@@ -25,7 +25,7 @@ Feature: Fetch Hello Sandbox Sandbox
     """
 
   Scenario: Fetch Application for Live
-    And I GET the SANDBOX resource '/income-tax-subscription/sandbox/hello-application'
+    And I GET the SANDBOX resource '/sandbox/income-tax/hello-application'
     Then the status code should be 'OK'
     And I should receive JSON response:
     """
