@@ -13,7 +13,7 @@ import play.api.test.{FakeApplication, TestServer}
 import component.steps.Env._
 @RunWith(classOf[Cucumber])
 @CucumberOptions(
-  features = Array("features"),
+  features = Array("test/features"),
   glue = Array("component/steps"),
   format = Array("pretty",
     "html:target/component-reports/cucumber",

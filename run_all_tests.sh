@@ -2,6 +2,4 @@
 
 set -e
 
-sbt test
-sbt it:test
-sbt component:test
+sbt test it:test component:test
