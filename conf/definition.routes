@@ -1,0 +1,3 @@
+GET        /api/definition                                  controllers.Documentation.definition()
+GET        /api/documentation/:version/:endpointName        controllers.Documentation.documentation(version,endpointName)
+GET        /api/conf/:version/*file                         controllers.Documentation.raml(version, file)
