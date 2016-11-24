@@ -3,6 +3,7 @@ package component
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import cucumber.api.CucumberOptions
 import cucumber.api.junit.Cucumber
@@ -13,7 +14,7 @@ import play.api.test.{FakeApplication, TestServer}
 import component.steps.Env._
 @RunWith(classOf[Cucumber])
 @CucumberOptions(
-  features = Array("test/features"),
+  features = Array("test/component/features"),
   glue = Array("component/steps"),
   format = Array("pretty",
     "html:target/component-reports/cucumber",
@@ -41,6 +42,7 @@ object FeatureSuite extends StubApplicationConfiguration {
   def setup() {
     wireMockServer.start()
     WireMock.configureFor(stubHost, stubPort)
+    stubFor(post(urlMatching("/registration")).willReturn(aResponse().withStatus(204)))
     testServer.start()
     isSetup = true
   }

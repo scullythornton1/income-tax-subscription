@@ -1,5 +1,6 @@
 package component.steps
 
+import com.github.tomakehurst.wiremock.client.WireMock._
 import component.steps.Request.{AcceptBadFormat, AcceptMissing, AcceptValid, _}
 import cucumber.api.scala.{EN, ScalaDsl}
 import org.scalatest.Matchers
