@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package unit.common.validation
+package common.validation
 
-import common.validation.HeaderValidator
 import org.scalatest.Matchers
 import uk.gov.hmrc.play.test.UnitSpec
 

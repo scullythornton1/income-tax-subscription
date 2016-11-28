@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package unit.connectors
+package connectors
 
-import connectors.ServiceLocatorConnector
 import domain.Registration
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures

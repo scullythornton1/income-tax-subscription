@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package unit.config
+package config
 
-import config.ServiceLocatorRegistration
 import connectors.ServiceLocatorConnector
 import org.mockito.Matchers._
 import org.mockito.Mockito._

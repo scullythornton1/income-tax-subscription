@@ -16,17 +16,18 @@
 
 package controllers
 
+import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
-trait Documentation extends AssetsBuilder with BaseController {
+trait DocumentationController extends AssetsBuilder with BaseController {
 
   val definition = super.at(s"/public/api", "definition.json")
 
-  def documentation(version: String, endpointName: String) =
-    super.at(s"/public/api/documentation/$version", s"${endpointName.replaceAll(" ", "-")}.xml")
+  val documentation: (String, String) => Action[AnyContent] = (version, endPointName) =>
+    super.at(s"/public/api/documentation/$version", s"${endPointName.replaceAll(" ", "-")}.xml")
 
-  def raml(version: String, file: String) =
+  val raml: (String, String) => Action[AnyContent] = (version, file) =>
     super.at(s"/public/api/conf/$version", file)
 }
 
-object Documentation extends Documentation
+object DocumentationController extends DocumentationController

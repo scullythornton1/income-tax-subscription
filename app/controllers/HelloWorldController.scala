@@ -16,12 +16,12 @@
 
 package controllers
 
-import common.validation.HeaderValidator
 import models.ErrorInternalServerError
 import play.api.libs.json.Json
 import services.{HelloWorldService, LiveHelloWorldService, SandboxHelloWorldService}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import common.validation.HeaderValidator
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait HelloWorldController extends BaseController with HeaderValidator {

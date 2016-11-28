@@ -56,6 +56,9 @@ trait MicroService {
       retrieveManaged := true,
       evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
     )
+    .settings(
+      unmanagedResourceDirectories in Compile += baseDirectory.value / "resources"
+    )
     .configs(IntegrationTest)
     .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
     .settings(
