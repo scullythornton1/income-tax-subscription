@@ -54,13 +54,7 @@ response:
 }
 ```
 
-## API Sandbox Endpoints## Requirements
-
-This service is written in [Scala](http://www.scala-lang.org/) and [Play](http://playframework.com/), so needs at least a [JRE] to run.
-
-## License
-
-This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html")
+## API Sandbox Endpoints
 All the above endpoints are accessible on sandbox with `sandbox` included in the URL of each endpoint,e.g.
 ```
     GET /sandbox/hello-world
