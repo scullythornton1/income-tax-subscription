@@ -18,7 +18,7 @@ package controllers
 
 import models.ErrorInternalServerError
 import play.api.libs.json.Json
-import services.{HelloWorldService, LiveHelloWorldService, SandboxHelloWorldService}
+import services.HelloWorldService
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import common.validation.HeaderValidator
@@ -48,14 +48,4 @@ trait HelloWorldController extends BaseController with HeaderValidator {
       case _ => Status(ErrorInternalServerError.httpStatusCode)(Json.toJson(ErrorInternalServerError))
     }
   }
-}
-
-object SandboxHelloWorldController extends HelloWorldController {
-  override val service = SandboxHelloWorldService
-  override implicit val hc: HeaderCarrier = HeaderCarrier()
-}
-
-object LiveHelloWorldController extends HelloWorldController {
-  override val service = LiveHelloWorldService
-  override implicit val hc: HeaderCarrier = HeaderCarrier()
 }
