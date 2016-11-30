@@ -14,28 +14,16 @@
  * limitations under the License.
  */
 
-package controllers
+package routesSpec
 
-import play.api.libs.json.{JsValue, Json}
-import play.api.test.FakeRequest
+import org.scalatest._
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.io.Source
-
-class DocumentationControllerSpec extends UnitSpec with WithFakeApplication {
-
-  val definitionSource: String = Source.fromFile("resources/public/api/definition.json").getLines.mkString
-  val expectedJsonDefinition: JsValue = Json.parse(definitionSource)
-
-  "Calling the .definition method" should {
-    lazy val result = DocumentationController.definition(FakeRequest())
-
-    "return Status OK (200)" in {
-      status(result) shouldBe 200
-    }
-
-    "return the Json Definition response" in {
-      jsonBodyOf(await(result)) shouldBe expectedJsonDefinition
+class SandboxRoutesSpec extends UnitSpec with WithFakeApplication with Matchers {
+  "The URL for the subscribe Action" should {
+    "be equal to /sandbox/subscription" in {
+      val path = controllers.sandbox.routes.SandboxSubscriptionController.subscribe().url
+      path shouldEqual "/sandbox/subscription"
     }
   }
 }

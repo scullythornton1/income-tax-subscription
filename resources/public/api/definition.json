@@ -1,41 +1,27 @@
 {
   "scopes": [
     {
-      "key": "hello",
-      "name": "Say Hello",
-      "description": "Say Hello!"
+      "key": "write:income-tax",
+      "name": "subscribe to MTD Income Tax",
+      "description": "Allows Taxpayers to subscribe to Making Tax Digital Income Tax service"
     }
   ],
   "api": {
-    "name": "Hello World",
-    "description": "A 'hello world' example of an API on the HMRC API Developer Hub.",
+    "name": "Income Tax",
+    "description": "Income Tax services, such as subscription to Making Tax Digital Income Tax.",
     "context": "income-tax",
     "versions": [
       {
         "version": "1.0",
-        "status": "PUBLISHED",
+        "status": "PROTOTYPED",
         "endpoints": [
           {
-            "uriPattern": "/hello-world",
-            "endpointName": "Say Hello World",
-            "method": "GET",
-            "authType": "NONE",
-            "throttlingTier": "UNLIMITED"
-          },
-          {
-            "uriPattern": "/hello-user",
-            "endpointName": "Say Hello User",
-            "method": "GET",
+            "uriPattern": "/subscription",
+            "endpointName": "Subscribe to MTD Income Tax",
+            "method": "POST",
             "authType": "USER",
             "throttlingTier": "UNLIMITED",
-            "scope": "hello"
-          },
-          {
-            "uriPattern": "/hello-application",
-            "endpointName": "Say Hello Application",
-            "method": "GET",
-            "authType": "APPLICATION",
-            "throttlingTier": "UNLIMITED"
+            "scope": "write:income-tax"
           }
         ]
       }

@@ -1,4 +1,4 @@
 ### Hello World Controller Live Routes
-GET         /hello-world                         controllers.LiveHelloWorldController.world
-GET         /hello-user                          controllers.LiveHelloWorldController.user
-GET         /hello-application                   controllers.LiveHelloWorldController.application
+GET         /hello-world                         controllers.live.LiveHelloWorldController.world
+GET         /hello-user                          controllers.live.LiveHelloWorldController.user
+GET         /hello-application                   controllers.live.LiveHelloWorldController.application

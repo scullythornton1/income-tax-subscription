@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.sandbox
 
-import uk.gov.hmrc.play.microservice.controller.BaseController
+import controllers.SubscriptionController
 
-trait SandboxSubscriptionController extends AssetsBuilder with BaseController {
-
-  val subscribe = TODO
-
-}
-
-object SandboxSubscriptionController extends SandboxSubscriptionController
+object SandboxSubscriptionController extends SubscriptionController
