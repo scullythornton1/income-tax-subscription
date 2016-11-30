@@ -21,7 +21,7 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class SubscriptionControllerSpec extends UnitSpec with WithFakeApplication {
 
-  "Calling .subscribe" should {
+  "Calling the .subscribe method of the SubscriptionController" should {
 
     lazy val result = SandboxSubscriptionController.subscribe(FakeRequest())
 
