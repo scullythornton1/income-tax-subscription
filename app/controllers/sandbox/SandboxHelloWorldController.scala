@@ -14,22 +14,13 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.sandbox
 
-import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import controllers.HelloWorldController
+import services.SandboxHelloWorldService
+import uk.gov.hmrc.play.http.HeaderCarrier
 
-class SubscriptionControllerSpec extends UnitSpec with WithFakeApplication {
-
-  object testController extends SubscriptionController
-
-  "Calling the .subscribe method of the SubscriptionController" should {
-
-    lazy val result = testController.subscribe(FakeRequest())
-
-    "return status 501" in {
-      status(result) shouldBe 501
-    }
-
-  }
+object SandboxHelloWorldController extends HelloWorldController {
+  override val service = SandboxHelloWorldService
+  override implicit val hc: HeaderCarrier = HeaderCarrier()
 }

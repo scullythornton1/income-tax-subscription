@@ -16,20 +16,10 @@
 
 package controllers
 
-import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.play.microservice.controller.BaseController
 
-class SubscriptionControllerSpec extends UnitSpec with WithFakeApplication {
+trait SubscriptionController extends AssetsBuilder with BaseController {
 
-  object testController extends SubscriptionController
+  val subscribe = TODO
 
-  "Calling the .subscribe method of the SubscriptionController" should {
-
-    lazy val result = testController.subscribe(FakeRequest())
-
-    "return status 501" in {
-      status(result) shouldBe 501
-    }
-
-  }
 }

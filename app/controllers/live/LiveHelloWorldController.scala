@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package routes
+package controllers.live
 
-import org.scalatest._
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import controllers.HelloWorldController
+import services.LiveHelloWorldService
+import uk.gov.hmrc.play.http.HeaderCarrier
 
-class SandboxRoutesSpec extends UnitSpec with WithFakeApplication with Matchers {
-  "The URL for the subscribe Action" should {
-    "be equal to /sandbox/subscription" in {
-      val path = controllers.routes.SandboxSubscriptionController.subscribe().url
-      path shouldEqual "/sandbox/subscription"
-    }
-  }
+object LiveHelloWorldController extends HelloWorldController {
+  override val service = LiveHelloWorldService
+  override implicit val hc: HeaderCarrier = HeaderCarrier()
 }

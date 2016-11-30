@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-package controllers
+package routesSpec
 
-import play.api.test.FakeRequest
+import org.scalatest._
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-class SubscriptionControllerSpec extends UnitSpec with WithFakeApplication {
-
-  object testController extends SubscriptionController
-
-  "Calling the .subscribe method of the SubscriptionController" should {
-
-    lazy val result = testController.subscribe(FakeRequest())
-
-    "return status 501" in {
-      status(result) shouldBe 501
+class SandboxRoutesSpec extends UnitSpec with WithFakeApplication with Matchers {
+  "The URL for the subscribe Action" should {
+    "be equal to /sandbox/subscription" in {
+      val path = controllers.sandbox.routes.SandboxSubscriptionController.subscribe().url
+      path shouldEqual "/sandbox/subscription"
     }
-
   }
 }
