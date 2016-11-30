@@ -1,0 +1,61 @@
+<endpoint>
+    <name>Post Making Tax Digital for Business - Income Tax subscription details</name>
+    <description>This endpoint allows users to subscribe to the Making Tax Digital for Business - Income Tax service.</description>
+
+    <section id="resource">
+        <title>Resource</title>
+        <resource>POST /income-tax/subscription</resource>
+    </section>
+
+    <section id="authorisation">
+        <title>Authorisation</title>
+        <authorisation>
+            <type>USER</type>
+            <scope>write:income-tax</scope>
+        </authorisation>
+    </section>
+
+    <section id="content-types">
+        <title>Accepted Media Types</title>
+        <list>
+            <item>
+                <code>application/vnd.hmrc.1.0+json</code>
+            </item>
+        </list>
+    </section>
+
+    <section id="sample-request">
+        <title>Request</title>
+        <json>
+<![CDATA[
+{
+    "email": "test@test.com",
+    "acceptsTermsAndConditions": true
+}
+]]>
+        </json>
+    </section>
+
+    <section id="response">
+        <title>Response</title>
+        <httpStatus>201 (CREATED)</httpStatus>
+    </section>
+
+    <section id="error-responses">
+        <title>Error Scenarios</title>
+        <table>
+            <headings>
+                <cell>Error Scenario</cell>
+                <cell>HTTP Status</cell>
+                <cell>Code</cell>
+            </headings>
+            <rows>
+                <row>
+                    <cell>tbc</cell>
+                    <cell><code>tbc</code></cell>
+                    <cell><code>tbc</code></cell>
+                </row>
+            </rows>
+        </table>
+    </section>
+</endpoint>
