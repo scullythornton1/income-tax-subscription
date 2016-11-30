@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Create MTD IT Subscription",
+  "type": "object",
+  "properties": {
+    "email": {
+      "description": "The email address used to contact the user about their MTD IT service subscription",
+      "type": "string"
+    },
+    "acceptsTermsAndConditions": {
+      "description": "A field to indicate whether the user agrees to the Terms & Conditions of the MTD IT service",
+      "type": "boolean"
+    }
+  },
+  "required": ["email","acceptsTermsAndConditions"]
+}

@@ -17,7 +17,7 @@
         "endpoints": [
           {
             "uriPattern": "/subscription",
-            "endpointName": "Subscribe to MTD Income Tax",
+            "endpointName": "Create Subscription",
             "method": "POST",
             "authType": "USER",
             "throttlingTier": "UNLIMITED",
