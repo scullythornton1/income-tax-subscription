@@ -21,9 +21,15 @@ import uk.gov.hmrc.play.test.UnitSpec
 class SubscriptionRequestModelSpec extends UnitSpec {
 
   "Creating a model for a subscription request" should {
+    val model = SubscriptionRequestModel(email = "john@123.com", declaration = true)
 
+    "Email should be john@123.com" in {
+      model.email shouldBe "john@123.com"
+    }
 
-
+    "Declaration should be true" in {
+      model.declaration shouldBe true
+    }
   }
 
 }
