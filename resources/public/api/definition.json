@@ -7,7 +7,7 @@
     }
   ],
   "api": {
-    "name": "Income Tax",
+    "name": "Making Tax Digital Income Tax Subscription",
     "description": "Income Tax services, such as subscription to Making Tax Digital Income Tax.",
     "context": "income-tax",
     "versions": [
@@ -17,7 +17,7 @@
         "endpoints": [
           {
             "uriPattern": "/subscription",
-            "endpointName": "Subscribe to MTD Income Tax",
+            "endpointName": "Create Subscription",
             "method": "POST",
             "authType": "USER",
             "throttlingTier": "UNLIMITED",
