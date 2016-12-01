@@ -17,19 +17,37 @@
 package controllers
 
 import play.api.test.FakeRequest
+import services.SandboxSubscriptionService
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import play.mvc.Http.HeaderNames._
+import play.mvc.Http.Status._
 
-//class SubscriptionControllerSpec extends UnitSpec with WithFakeApplication {
-//
-//  object testController extends SubscriptionController
-//
-//  "Calling the .subscribe method of the SubscriptionController" should {
-//
-//    lazy val result = testController.subscribe(FakeRequest())
-//
-//    "return status 501" in {
-//      status(result) shouldBe 501
-//    }
-//
-//  }
-//}
+class SubscriptionControllerSpec extends UnitSpec with WithFakeApplication {
+
+  object testController extends SubscriptionController {
+    override val service = SandboxSubscriptionService
+    override implicit val hc = HeaderCarrier()
+  }
+
+  "Calling the .subscribe method of the SubscriptionController" when {
+
+    "No accept header is suppliied" should {
+
+      lazy val result = testController.subscribe(FakeRequest())
+
+      "return status NOT_ACCEPTABLE (406)" in {
+        status(result) shouldBe NOT_ACCEPTABLE
+      }
+    }
+
+    "A valid Accept header is supplied" should {
+
+      lazy val result = testController.subscribe(FakeRequest().withHeaders((ACCEPT, "application/vnd.hmrc.1.0+json")))
+
+      "return status CREATED (201)" in {
+        status(result) shouldBe CREATED
+      }
+    }
+  }
+}
