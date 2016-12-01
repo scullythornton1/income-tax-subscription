@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class SubscriptionRequestModel (email: String, declaration: Boolean)
+case class SubscriptionRequestModel (email: String, acceptsTermsAndConditions: Boolean)
 
 object SubscriptionRequestModel {
   implicit val format = Json.format[SubscriptionRequestModel]
