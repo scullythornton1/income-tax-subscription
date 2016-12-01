@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package models
+package routes
 
-import play.api.libs.json.Json
+import org.scalatest._
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-case class HelloWorldModel(message: String)
-
-object HelloWorldModel {
-  implicit val format = Json.format[HelloWorldModel]
+class SandboxRoutesSpec extends UnitSpec with WithFakeApplication with Matchers {
+  "The URL for the subscribe Action" should {
+    "be equal to /sandbox/subscription" in {
+      val path = controllers.sandbox.routes.SandboxSubscriptionController.subscribe().url
+      path shouldEqual "/sandbox/subscription"
+    }
+  }
 }

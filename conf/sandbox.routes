@@ -1,7 +1,2 @@
-### Hello World Controller Sandbox Routes
-GET         /hello-world                         controllers.sandbox.SandboxHelloWorldController.world
-GET         /hello-user                          controllers.sandbox.SandboxHelloWorldController.user
-GET         /hello-application                   controllers.sandbox.SandboxHelloWorldController.application
-
 ### Subscription Controller Sandbox Routes
 POST        /subscription                        controllers.sandbox.SandboxSubscriptionController.subscribe
