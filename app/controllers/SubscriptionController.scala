@@ -16,10 +16,24 @@
 
 package controllers
 
+import models.ErrorInternalServerError
+import play.api.libs.json.Json
+import services.SubscriptionService
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import common.validation.HeaderValidator
+import play.api.mvc.{Action, AnyContent}
 
-trait SubscriptionController extends AssetsBuilder with BaseController {
+import scala.concurrent.ExecutionContext.Implicits.global
 
-  val subscribe = TODO
+trait SubscriptionController extends BaseController with HeaderValidator {
 
+  val service: SubscriptionService
+  implicit val hc: HeaderCarrier
+
+  val subscribe: Action[AnyContent] = validateAccept(acceptHeaderValidationRules).async {
+    service.createSubscription.map(result => result) recover {
+      case _ => Status(ErrorInternalServerError.httpStatusCode)(Json.toJson(ErrorInternalServerError))
+    }
+  }
 }

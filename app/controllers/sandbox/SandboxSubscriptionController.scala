@@ -17,5 +17,10 @@
 package controllers.sandbox
 
 import controllers.SubscriptionController
+import services.SandboxSubscriptionService
+import uk.gov.hmrc.play.http.HeaderCarrier
 
-object SandboxSubscriptionController extends SubscriptionController
+object SandboxSubscriptionController extends SubscriptionController {
+  override val service = SandboxSubscriptionService
+  override implicit val hc: HeaderCarrier = HeaderCarrier()
+}
