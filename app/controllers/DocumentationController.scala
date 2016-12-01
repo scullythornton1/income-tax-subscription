@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
-package config
+package controllers
 
-import play.api.Play._
-import uk.gov.hmrc.play.config.ServicesConfig
+import play.api.mvc.Action
+import play.api.mvc.AnyContent
 
-object AppContext extends ServicesConfig {
-  lazy val appName = current.configuration.getString("appName").getOrElse(throw new RuntimeException("appName is not configured"))
-  lazy val appUrl = current.configuration.getString("appUrl").getOrElse(throw new RuntimeException("appUrl is not configured"))
-  lazy val serviceLocatorUrl: String = baseUrl("service-locator")
-  lazy val registrationEnabled: Boolean = current.configuration.getBoolean("microservice.services.service-locator.enabled").getOrElse(true)
+trait DocumentationController extends AssetsBuilder {
+
+  def documentation(version: String, endpointName: String): Action[AnyContent] = {
+    super.at(s"/public/api/documentation/$version", s"${endpointName.replaceAll(" ", "-")}.xml")
+  }
+
+  def definition(): Action[AnyContent] = {
+    super.at(s"/public/api", "definition.json")
+  }
+
+  def raml(version: String, file: String): Action[AnyContent] = {
+    super.at(s"/public/api/conf/$version", file)
+  }
 }
+
+object DocumentationController extends DocumentationController

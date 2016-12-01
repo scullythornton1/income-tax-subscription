@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package config
+package utils
 
-import play.api.Play._
-import uk.gov.hmrc.play.config.ServicesConfig
+import play.api.Play
+import play.api.test.FakeApplication
 
-object AppContext extends ServicesConfig {
-  lazy val appName = current.configuration.getString("appName").getOrElse(throw new RuntimeException("appName is not configured"))
-  lazy val appUrl = current.configuration.getString("appUrl").getOrElse(throw new RuntimeException("appUrl is not configured"))
-  lazy val serviceLocatorUrl: String = baseUrl("service-locator")
-  lazy val registrationEnabled: Boolean = current.configuration.getBoolean("microservice.services.service-locator.enabled").getOrElse(true)
+trait MicroserviceLocalRunSugar {
+
+  val additionalConfiguration: Map[String, Any]
+
+  lazy val fakeApplication = FakeApplication(additionalConfiguration = additionalConfiguration)
+
+  def run(block: () => Unit) = {
+    Play.start(fakeApplication)
+    block()
+    Play.stop()
+  }
 }
