@@ -21,7 +21,6 @@ private object AppDependencies {
   private val hmrcPlayJsonLoggerVersion = "2.1.1"
   private val pegdownVersion = "1.6.0"
   private val cucumberVersion = "1.2.4"
-  private val playHmrcApiVersion = "0.6.0"
 
   val compile = Seq(
 
@@ -29,8 +28,7 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "microservice-bootstrap" % microserviceBootstrapVersion,
     "uk.gov.hmrc" %% "play-health" % playHealthVersion,
     "uk.gov.hmrc" %% "play-config" % playConfigVersion,
-    "uk.gov.hmrc" %% "play-json-logger" % hmrcPlayJsonLoggerVersion,
-    "uk.gov.hmrc" %% "play-hmrc-api" % playHmrcApiVersion
+    "uk.gov.hmrc" %% "play-json-logger" % hmrcPlayJsonLoggerVersion
   )
 
   trait TestDependencies {
