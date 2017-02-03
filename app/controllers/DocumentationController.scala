@@ -16,10 +16,11 @@
 
 package controllers
 
-import play.api.mvc.Action
-import play.api.mvc.AnyContent
+import javax.inject.Inject
 
-trait DocumentationController extends AssetsBuilder {
+import play.api.mvc.{Action, AnyContent}
+
+class DocumentationController @Inject()(errorHandler: play.api.http.HttpErrorHandler) extends AssetsBuilder(errorHandler) {
 
   def documentation(version: String, endpointName: String): Action[AnyContent] = {
     super.at(s"/public/api/documentation/$version", s"${endpointName.replaceAll(" ", "-")}.xml")
@@ -34,4 +35,3 @@ trait DocumentationController extends AssetsBuilder {
   }
 }
 
-object DocumentationController extends DocumentationController
