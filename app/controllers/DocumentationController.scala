@@ -18,9 +18,12 @@ package controllers
 
 import javax.inject.Inject
 
+import akka.stream.Materializer
 import play.api.mvc.{Action, AnyContent}
 
-class DocumentationController @Inject()(errorHandler: play.api.http.HttpErrorHandler) extends AssetsBuilder(errorHandler) {
+class DocumentationController @Inject()(errorHandler: play.api.http.HttpErrorHandler,
+                                        implicit val mat: Materializer
+                                       ) extends AssetsBuilder(errorHandler) {
 
   def documentation(version: String, endpointName: String): Action[AnyContent] = {
     super.at(s"/public/api/documentation/$version", s"${endpointName.replaceAll(" ", "-")}.xml")
