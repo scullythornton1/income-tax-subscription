@@ -19,14 +19,18 @@ package apiPlatformIntegration
 import akka.stream.Materializer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import controllers.DocumentationController
-import utils.{MicroserviceLocalRunSugar, WiremockServiceLocatorSugar}
-import org.scalatest.BeforeAndAfter
+import org.scalatest.{BeforeAndAfter, TestData}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
+import org.scalatestplus.play.{OneAppPerSuite, OneAppPerTest}
+import play.api.Application
 import play.api.http.HttpErrorHandler
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
+import utils.{MicroserviceLocalRunSugar, WiremockServiceLocatorSugar}
+
+import scala.concurrent.Future
 
 
 /**
@@ -42,9 +46,7 @@ import uk.gov.hmrc.play.test.UnitSpec
   *
   * See: https://confluence.tools.tax.service.gov.uk/display/ApiPlatform/API+Platform+Architecture+with+Flows
   */
-class PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutures with WiremockServiceLocatorSugar with BeforeAndAfter with OneServerPerSuite {
-  implicit lazy val httpErrorHandler = app.injector.instanceOf[HttpErrorHandler]
-  implicit lazy val mat = app.injector.instanceOf[Materializer]
+class PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutures with WiremockServiceLocatorSugar with BeforeAndAfter with OneAppPerTest {
 
   before {
     startMockServer()
@@ -55,32 +57,39 @@ class PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutur
     stopMockServer()
   }
 
-  trait Setup {
-    val documentationController = new DocumentationController(httpErrorHandler, mat)
+  val additionalConfiguration: Map[String, Any] = Map(
+    "microservice.services.service-locator.host" -> stubHost,
+    "microservice.services.service-locator.port" -> stubPort
+  )
+
+  implicit override def newAppForTest(testData: TestData): Application =
+    new GuiceApplicationBuilder().configure(additionalConfiguration).build()
+
+  trait Setup extends MicroserviceLocalRunSugar {
     val request = FakeRequest()
+
+    implicit lazy val mat = app.injector.instanceOf[Materializer]
+    lazy val httpErrorHandler = app.injector.instanceOf[HttpErrorHandler]
+    lazy val documentationController = new DocumentationController(app, httpErrorHandler, mat)
   }
 
   "microservice" should {
 
-    "register itelf to service-locator" in new MicroserviceLocalRunSugar with Setup {
-      override val additionalConfiguration: Map[String, Any] = Map(
-        "microservice.services.service-locator.host" -> stubHost,
-        "microservice.services.service-locator.port" -> stubPort
-      )
+    "register itelf to service-locator" in new Setup {
       run {
         () => {
-          verify(1, postRequestedFor(urlMatching("/registration")).
-            withHeader("content-type", equalTo("application/json")).
-            withRequestBody(equalTo(regPayloadStringFor("income-tax-subscription", "http://income-tax-subscription.service"))))
+          // dirty hack to ensure the startup is finished
+          val wait = Future.successful(Thread.sleep(1000))
+          await(wait)
+          verify(1, postRequestedFor(urlMatching("/registration"))
+            .withHeader("Content-Type", equalTo("application/json"))
+            .withRequestBody(equalTo(regPayloadStringFor("income-tax-subscription", "http://income-tax-subscription.service")))
+          )
         }
       }
     }
 
-    "provide definition endpoint and documentation endpoint for each api" in new MicroserviceLocalRunSugar with Setup {
-      override val additionalConfiguration: Map[String, Any] = Map(
-        "microservice.services.service-locator.host" -> stubHost,
-        "microservice.services.service-locator.port" -> stubPort
-      )
+    "provide definition endpoint and documentation endpoint for each api" in new Setup {
       run {
         () => {
           def normalizeEndpointName(endpointName: String): String = endpointName.replaceAll(" ", "-")
@@ -94,8 +103,9 @@ class PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutur
 
           val result = documentationController.definition()(request)
           status(result) shouldBe 200
+          val r = await(result)
 
-          val jsonResponse = jsonBodyOf(result).futureValue
+          val jsonResponse = jsonBodyOf(result)(mat).futureValue
 
           val versions: Seq[String] = (jsonResponse \\ "version") map (_.as[String])
           val endpointNames: Seq[Seq[String]] = (jsonResponse \\ "endpoints").map(_ \\ "endpointName").map(_.map(_.as[String]))
@@ -108,14 +118,9 @@ class PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutur
       }
     }
 
-    "provide raml documentation" in new MicroserviceLocalRunSugar with Setup {
-      override val additionalConfiguration: Map[String, Any] = Map(
-        "microservice.services.service-locator.host" -> stubHost,
-        "microservice.services.service-locator.port" -> stubPort
-      )
+    "provide raml documentation" in new Setup {
       run {
         () => {
-
           val result = documentationController.raml("1.0", "application.raml")(request)
 
           status(result) shouldBe 200

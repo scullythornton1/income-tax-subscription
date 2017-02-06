@@ -23,7 +23,7 @@ private object AppDependencies {
   private val scalaTestVersion = "2.2.6"
   private val pegdownVersion = "1.6.0"
 
-  private val wireMockVersion = "1.57"
+  private val wireMockVersion = "2.5.0"
   private val scalaJVersion = "1.1.5"
   private val cucumberVersion = "1.2.4"
 

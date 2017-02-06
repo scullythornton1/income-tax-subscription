@@ -19,9 +19,11 @@ package controllers
 import javax.inject.Inject
 
 import akka.stream.Materializer
+import play.api.Application
 import play.api.mvc.{Action, AnyContent}
 
-class DocumentationController @Inject()(errorHandler: play.api.http.HttpErrorHandler,
+class DocumentationController @Inject()(application: Application,
+                                        errorHandler: play.api.http.HttpErrorHandler,
                                         implicit val mat: Materializer
                                        ) extends AssetsBuilder(errorHandler) {
 
