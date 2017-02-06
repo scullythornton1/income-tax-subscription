@@ -18,9 +18,13 @@ package models
 
 import play.api.libs.json.Json
 
-case class incomeSourcesModel(incomeSourceId: String)
-case class PropertySubscriptionResponseModel(safeId: String, mtditId: String, incomeSources: incomeSourcesModel)
+case class IncomeSourcesModel(incomeSourceId: String)
+case class PropertySubscriptionResponseModel(safeId: String, mtditId: String, incomeSources: IncomeSourcesModel)
 
+object IncomeSourcesModel {
+  implicit val formats = Json.format[IncomeSourcesModel]
+}
 object PropertySubscriptionResponseModel {
   implicit val formats = Json.format[PropertySubscriptionResponseModel]
 }
+
