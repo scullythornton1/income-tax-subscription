@@ -16,14 +16,21 @@
 
 package apiPlatformIntegration
 
+import akka.stream.Materializer
 import com.github.tomakehurst.wiremock.client.WireMock._
 import controllers.DocumentationController
-import utils.{MicroserviceLocalRunSugar, WiremockServiceLocatorSugar}
-import org.scalatest.BeforeAndAfter
+import org.scalatest.{BeforeAndAfter, TestData}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.{OneAppPerSuite, OneAppPerTest}
+import play.api.Application
+import play.api.http.HttpErrorHandler
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
+import utils.{MicroserviceLocalRunSugar, WiremockServiceLocatorSugar}
+
+import scala.concurrent.Future
 
 
 /**
@@ -35,88 +42,91 @@ import uk.gov.hmrc.play.test.UnitSpec
   *
   * 2a, To expose API's to Third Party Developers, the service needs to define the APIs in a definition.json and make it available under api/definition GET endpoint
   * 2b, For all of the endpoints defined in the definition.json a documentation.xml needs to be provided and be available under api/documentation/[version]/[endpoint name] GET endpoint
-  *     Example: api/documentation/1.0/Fetch-Some-Data
+  * Example: api/documentation/1.0/Fetch-Some-Data
   *
   * See: https://confluence.tools.tax.service.gov.uk/display/ApiPlatform/API+Platform+Architecture+with+Flows
   */
-class PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutures with WiremockServiceLocatorSugar with BeforeAndAfter {
+class PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutures with WiremockServiceLocatorSugar with BeforeAndAfter with OneAppPerTest {
 
-   before {
-     startMockServer()
-     stubRegisterEndpoint(204)
-   }
+  before {
+    startMockServer()
+    stubRegisterEndpoint(204)
+  }
 
-   after {
-     stopMockServer()
-   }
+  after {
+    stopMockServer()
+  }
 
-   trait Setup {
-     val documentationController = new DocumentationController {}
-     val request = FakeRequest()
-   }
+  val additionalConfiguration: Map[String, Any] = Map(
+    "microservice.services.service-locator.host" -> stubHost,
+    "microservice.services.service-locator.port" -> stubPort
+  )
 
-   "microservice" should {
+  implicit override def newAppForTest(testData: TestData): Application =
+    new GuiceApplicationBuilder().configure(additionalConfiguration).build()
 
-     "register itelf to service-locator" in new MicroserviceLocalRunSugar with Setup {
-       override val additionalConfiguration: Map[String, Any] = Map(
-         "microservice.services.service-locator.host" -> stubHost,
-         "microservice.services.service-locator.port" -> stubPort
-       )
-       run {
-         () => {
-           verify(1,postRequestedFor(urlMatching("/registration")).
-             withHeader("content-type", equalTo("application/json")).
-             withRequestBody(equalTo(regPayloadStringFor("income-tax-subscription", "http://income-tax-subscription.service"))))
-         }
-       }
-     }
+  trait Setup extends MicroserviceLocalRunSugar {
+    val request = FakeRequest()
 
-     "provide definition endpoint and documentation endpoint for each api" in new MicroserviceLocalRunSugar with Setup {
-       override val additionalConfiguration: Map[String, Any] = Map(
-         "microservice.services.service-locator.host" -> stubHost,
-         "microservice.services.service-locator.port" -> stubPort
-       )
-       run {
-         () => {
-           def normalizeEndpointName(endpointName: String): String = endpointName.replaceAll(" ", "-")
+    implicit lazy val mat = app.injector.instanceOf[Materializer]
+    lazy val httpErrorHandler = app.injector.instanceOf[HttpErrorHandler]
+    lazy val documentationController = new DocumentationController(app, httpErrorHandler, mat)
+  }
 
-           def verifyDocumentationPresent(version: String, endpointName: String) {
-             withClue(s"Getting documentation version '$version' of endpoint '$endpointName'") {
-               val documentationResult = documentationController.documentation(version, endpointName)(request)
-               status(documentationResult) shouldBe 200
-             }
-           }
+  "microservice" should {
 
-           val result = documentationController.definition()(request)
-           status(result) shouldBe 200
+    "register itelf to service-locator" in new Setup {
+      run {
+        () => {
+          // dirty hack to ensure the startup is finished
+          val wait = Future.successful(Thread.sleep(1000))
+          await(wait)
+          verify(1, postRequestedFor(urlMatching("/registration"))
+            .withHeader("Content-Type", equalTo("application/json"))
+            .withRequestBody(equalTo(regPayloadStringFor("income-tax-subscription", "http://income-tax-subscription.service")))
+          )
+        }
+      }
+    }
 
-           val jsonResponse = jsonBodyOf(result).futureValue
+    "provide definition endpoint and documentation endpoint for each api" in new Setup {
+      run {
+        () => {
+          def normalizeEndpointName(endpointName: String): String = endpointName.replaceAll(" ", "-")
 
-           val versions: Seq[String] = (jsonResponse \\ "version") map (_.as[String])
-           val endpointNames: Seq[Seq[String]] = (jsonResponse \\ "endpoints").map(_ \\ "endpointName").map(_.map(_.as[String]))
+          def verifyDocumentationPresent(version: String, endpointName: String) {
+            withClue(s"Getting documentation version '$version' of endpoint '$endpointName'") {
+              val documentationResult = documentationController.documentation(version, endpointName)(request)
+              status(documentationResult) shouldBe 200
+            }
+          }
 
-           versions.zip(endpointNames).flatMap { case (version, endpoint) => {
-             endpoint.map(endpointName => (version, endpointName))
-           }
-           }.foreach { case (version, endpointName) => verifyDocumentationPresent(version, endpointName) }
-         }
-       }
-     }
+          val result = documentationController.definition()(request)
+          status(result) shouldBe 200
+          val r = await(result)
 
-     "provide raml documentation" in new MicroserviceLocalRunSugar with Setup {
-       override val additionalConfiguration: Map[String, Any] = Map(
-         "microservice.services.service-locator.host" -> stubHost,
-         "microservice.services.service-locator.port" -> stubPort
-       )
-       run {
-         () => {
+          val jsonResponse = jsonBodyOf(result)(mat).futureValue
 
-           val result = documentationController.raml("1.0", "application.raml")(request)
+          val versions: Seq[String] = (jsonResponse \\ "version") map (_.as[String])
+          val endpointNames: Seq[Seq[String]] = (jsonResponse \\ "endpoints").map(_ \\ "endpointName").map(_.map(_.as[String]))
 
-           status(result) shouldBe 200
-           bodyOf(result).futureValue should startWith("#%RAML 1.0")
-         }
-       }
-     }
-   }
- }
+          versions.zip(endpointNames).flatMap { case (version, endpoint) => {
+            endpoint.map(endpointName => (version, endpointName))
+          }
+          }.foreach { case (version, endpointName) => verifyDocumentationPresent(version, endpointName) }
+        }
+      }
+    }
+
+    "provide raml documentation" in new Setup {
+      run {
+        () => {
+          val result = documentationController.raml("1.0", "application.raml")(request)
+
+          status(result) shouldBe 200
+          bodyOf(result).futureValue should startWith("#%RAML 1.0")
+        }
+      }
+    }
+  }
+}

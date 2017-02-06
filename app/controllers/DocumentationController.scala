@@ -16,10 +16,16 @@
 
 package controllers
 
-import play.api.mvc.Action
-import play.api.mvc.AnyContent
+import javax.inject.Inject
 
-trait DocumentationController extends AssetsBuilder {
+import akka.stream.Materializer
+import play.api.Application
+import play.api.mvc.{Action, AnyContent}
+
+class DocumentationController @Inject()(application: Application,
+                                        errorHandler: play.api.http.HttpErrorHandler,
+                                        implicit val mat: Materializer
+                                       ) extends AssetsBuilder(errorHandler) {
 
   def documentation(version: String, endpointName: String): Action[AnyContent] = {
     super.at(s"/public/api/documentation/$version", s"${endpointName.replaceAll(" ", "-")}.xml")
@@ -34,4 +40,3 @@ trait DocumentationController extends AssetsBuilder {
   }
 }
 
-object DocumentationController extends DocumentationController
