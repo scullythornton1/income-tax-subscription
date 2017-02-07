@@ -16,10 +16,52 @@
 
 package utils
 
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.domain.Generator
 
+import JsonUtil._
 
 object TestConstants {
   lazy val testNino = new Generator().nextNino.nino
+
+  object RegistrationResponse {
+    val successResponse: String => JsValue = (safeId: String) =>
+      s"""
+         | {
+         |  "safeId": "$safeId",
+         |  "agentReferenceNumber": "AARN1234567",
+         |  "isEditable": true,
+         |  "isAnAgent": false,
+         |  "isAnIndividual": true,
+         |  "individual": {
+         |    "firstName": "Stephen",
+         |    "lastName": "Wood",
+         |    "dateOfBirth": "1990-04-03"
+         |  },
+         |  "address": {
+         |    "addressLine1": "100 SuttonStreet",
+         |    "addressLine2": "Wokingham",
+         |    "addressLine3": "Surrey",
+         |    "addressLine4": "London",
+         |    "postalCode": "DH14EJ",
+         |    "countryCode": "GB"
+         |  },
+         |  "contactDetails": {
+         |    "primaryPhoneNumber": "01332752856",
+         |    "secondaryPhoneNumber": "07782565326",
+         |    "faxNumber": "01332754256",
+         |    "emailAddress": "stephen@manncorpone.co.uk"
+         |  }
+         | }
+         |
+      """.stripMargin
+
+    val failureResponse: String => JsValue = (reason: String) =>
+      s"""
+         |{
+         |    "reason":"$reason"
+         |}
+      """.stripMargin
+  }
 
 }

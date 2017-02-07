@@ -19,28 +19,30 @@ package connectors
 import javax.inject.Inject
 
 import audit.Logging
-import models.registration.{RegistrationFailureResponseModel, RegistrationRequestModel, RegistrationResponse, RegistrationSuccessResponseModel}
+import models.registration.{RegistrationRequestModel, RegistrationResponse}
 import play.api.Configuration
 import play.api.http.Status._
 import play.api.libs.json.Writes
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.Authorization
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
 import utils.JsonUtil._
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class RegistrationConnector @Inject()(config: Configuration,
                                       logging: Logging,
                                       http: HttpPost
-                                     ) extends RawResponseReads {
+                                     ) extends ServicesConfig with RawResponseReads {
 
   import RegistrationResponse._
 
   lazy val urlHeaderEnvironment: String = config.getString("microservice.services.registration.environment").fold("")(x => x)
   lazy val urlHeaderAuthorization: String = s"Bearer ${config.getString("microservice.services.registration.authorization-token").fold("")(x => x)}"
+  lazy val registrationServiceUrl: String = baseUrl("registration")
 
-  val registrationUrl: String => String = (nino: String) => s"/registration/individual/NINO/$nino"
+  val registrationUrl: String => String = (nino: String) => s"$registrationServiceUrl/registration/individual/NINO/$nino"
 
   def createHeaderCarrier(headerCarrier: HeaderCarrier): HeaderCarrier =
     headerCarrier.withExtraHeaders("Environment" -> urlHeaderEnvironment, "Content-Type" -> "application/json").copy(authorization = Some(Authorization(urlHeaderAuthorization)))

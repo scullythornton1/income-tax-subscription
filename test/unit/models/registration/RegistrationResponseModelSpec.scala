@@ -19,53 +19,20 @@ package unit.models.registration
 import models.registration._
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.JsonUtil._
+import utils.TestConstants.RegistrationResponse.{failureResponse, successResponse}
 
 class RegistrationResponseModelSpec extends UnitSpec {
 
   "RegistrationResponseModel" should {
     "Reads the safe id correctly from a successful registration response" in {
       val safeId = "XE0001234567890"
-      val response: JsValue =
-        s"""
-           |{
-           |  "safeId": "$safeId",
-           |  "agentReferenceNumber": "AARN1234567",
-           |  "isEditable": true,
-           |  "isAnAgent": false,
-           |  "isAnIndividual": true,
-           |  "individual": {
-           |    "firstName": "Stephen",
-           |    "lastName": "Wood",
-           |    "dateOfBirth": "1990-04-03"
-           |  },
-           |  "address": {
-           |    "addressLine1": "100 SuttonStreet",
-           |    "addressLine2": "Wokingham",
-           |    "addressLine3": "Surrey",
-           |    "addressLine4": "London",
-           |    "postalCode": "DH14EJ",
-           |    "countryCode": "GB"
-           |  },
-           |  "contactDetails": {
-           |    "primaryPhoneNumber": "01332752856",
-           |    "secondaryPhoneNumber": "07782565326",
-           |    "faxNumber": "01332754256",
-           |    "emailAddress": "stephen@manncorpone.co.uk"
-           |  }
-           |}
-       """.stripMargin
+      val response: JsValue = successResponse(safeId)
       Json.fromJson[RegistrationSuccessResponseModel](response).get shouldBe RegistrationSuccessResponseModel(safeId)
     }
 
     "Reads the error messages correctly from a failure registration response" in {
       val reason = "Service unavailable"
-      val response: JsValue =
-        s"""
-           {
-           |    "reason":"$reason"
-           |}
-       """.stripMargin
+      val response: JsValue = failureResponse(reason)
       Json.fromJson[RegistrationFailureResponseModel](response).get shouldBe RegistrationFailureResponseModel(reason)
     }
   }

@@ -18,19 +18,22 @@ package unit.connectors
 
 import audit.Logging
 import connectors.RegistrationConnector
-import models.registration.{IndividualModel, RegistrationRequestModel}
-import org.scalatest.mock.MockitoSugar
+import models.registration._
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Configuration
+import play.api.http.Status._
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost}
 import uk.gov.hmrc.play.test.UnitSpec
+import unit.connectors.mocks.MockHttp
+import utils.JsonUtil._
+import utils.TestConstants
 
-
-class RegistrationConnectorSpec extends UnitSpec with MockitoSugar with OneAppPerSuite {
+class RegistrationConnectorSpec extends UnitSpec with MockHttp with OneAppPerSuite {
 
   lazy val config: Configuration = app.injector.instanceOf[Configuration]
   lazy val logging: Logging = app.injector.instanceOf[Logging]
-  lazy val http: HttpPost = app.injector.instanceOf[HttpPost]
+  lazy val http: HttpPost = mockHttpPost
 
   object TestRegistrationConnector extends RegistrationConnector(config, logging, http)
 
@@ -38,45 +41,72 @@ class RegistrationConnectorSpec extends UnitSpec with MockitoSugar with OneAppPe
 
   val individual = IndividualModel("f", "l")
   val register = RegistrationRequestModel(isAnAgent = false, individual = individual)
-  val nino = "AA111111A"
+  val nino: String = TestConstants.testNino
 
   "RegistrationConnector.register" should {
     "Put in the correct headers" in {
       val rHc = TestRegistrationConnector.createHeaderCarrier(hc)
+      rHc.headers.contains("Authorization" -> s"Bearer ${config.getString("microservice.services.registration.authorization-token").get}") shouldBe true
       rHc.headers.contains("Content-Type" -> "application/json") shouldBe true
-      rHc.headers.contains("Content-Type" -> "application/json") shouldBe true
-      rHc.headers.contains("Content-Type" -> "application/json") shouldBe true
+      rHc.headers.contains("Environment" -> config.getString("microservice.services.registration.environment").get) shouldBe true
     }
 
-    "parse and return the success response correctly" in {
-      val req = TestRegistrationConnector.register(nino, register)
-      val r = await(req)
+    "Post to the correct url" in {
 
+    }
+
+    val safeId = "XE0001234567890"
+    import TestConstants.RegistrationResponse._
+
+    def call = await(TestRegistrationConnector.register(nino, register))
+
+    "parse and return the success response correctly" in {
+      setupMockHttpPost()(OK, successResponse(safeId))
+      val expected = RegistrationSuccessResponseModel(safeId)
+      val actual = call
+      actual shouldBe Right(expected)
     }
 
     "parse and return the Bad request response correctly" in {
-      val req = TestRegistrationConnector.register(nino, register)
-      val r = await(req)
+      val reason = "Your submission contains one or more errors. Failed Parameter(s) - [idType, idNumber, payload]"
+      setupMockHttpPost()(BAD_REQUEST, failureResponse(reason))
+      val expected = RegistrationFailureResponseModel(reason)
+      val actual = call
+      actual shouldBe Left(expected)
     }
 
     "parse and return the Resource not found response correctly" in {
-      val req = TestRegistrationConnector.register(nino, register)
-      val r = await(req)
+      val reason = "Resource not found"
+      setupMockHttpPost()(NOT_FOUND, failureResponse(reason))
+      val expected = RegistrationFailureResponseModel(reason)
+      val actual = call
+      actual shouldBe Left(expected)
     }
 
     "parse and return the Server error response correctly" in {
-      val req = TestRegistrationConnector.register(nino, register)
-      val r = await(req)
+      val reason = "Server Error"
+      setupMockHttpPost()(INTERNAL_SERVER_ERROR, failureResponse(reason))
+      val expected = RegistrationFailureResponseModel(reason)
+      val actual = call
+      actual shouldBe Left(expected)
+
     }
 
     "parse and return the Service unavailable response correctly" in {
-      val req = TestRegistrationConnector.register(nino, register)
-      val r = await(req)
+      val reason = "Service unavailable"
+      setupMockHttpPost()(SERVICE_UNAVAILABLE, failureResponse(reason))
+      val expected = RegistrationFailureResponseModel(reason)
+      val actual = call
+      actual shouldBe Left(expected)
+
     }
 
     "return parse error for corrupt response" in {
-      val req = TestRegistrationConnector.register(nino, register)
-      val r = await(req)
+      val corruptResponse: JsValue = """{"a": "not valid"}"""
+      setupMockHttpPost()(INTERNAL_SERVER_ERROR, corruptResponse)
+      val expected = RegistrationResponse.parseFailure(corruptResponse)
+      val actual = call
+      actual shouldBe Left(expected)
     }
   }
 
