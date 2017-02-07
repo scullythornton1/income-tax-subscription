@@ -18,9 +18,9 @@ package models.registration
 
 import play.api.libs.json.Json
 
-case class RegistrationRequestModel(requiresNameMatch: Boolean,
-                                    isAnAgent: Boolean,
-                                    individual: IndividualModel)
+case class RegistrationRequestModel(isAnAgent: Boolean,
+                                    individual: IndividualModel,
+                                    requiresNameMatch: Boolean = true)
 
 object RegistrationRequestModel {
   implicit val format = Json.format[RegistrationRequestModel]

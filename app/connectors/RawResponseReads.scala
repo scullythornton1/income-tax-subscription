@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package utils
+package connectors
 
-import play.api.libs.json.{JsValue, Json, Writes}
+import uk.gov.hmrc.play.http.{HttpReads, HttpResponse}
 
+trait RawResponseReads {
 
-trait JsonUtil {
-  implicit def toJsValue[T](data: T)(implicit writer: Writes[T]): JsValue = Json.toJson(data)
-
-  implicit def toJsValue(str: String): JsValue = Json.parse(str)
+  implicit val httpReads: HttpReads[HttpResponse] = new HttpReads[HttpResponse] {
+    override def read(method: String, url: String, response: HttpResponse) = response
+  }
 
 }
-
-object JsonUtil extends JsonUtil

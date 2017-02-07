@@ -55,7 +55,7 @@ class RegistrationResponseModelSpec extends UnitSpec {
            |  }
            |}
        """.stripMargin
-      Json.fromJson[RegistrationResponse](response).get shouldBe RegistrationSuccessResponseModel(safeId)
+      Json.fromJson[RegistrationSuccessResponseModel](response).get shouldBe RegistrationSuccessResponseModel(safeId)
     }
 
     "Reads the error messages correctly from a failure registration response" in {
@@ -66,7 +66,7 @@ class RegistrationResponseModelSpec extends UnitSpec {
            |    "reason":"$reason"
            |}
        """.stripMargin
-      Json.fromJson[RegistrationResponse](response).get shouldBe RegistrationFailureResponseModel(reason)
+      Json.fromJson[RegistrationFailureResponseModel](response).get shouldBe RegistrationFailureResponseModel(reason)
     }
   }
 

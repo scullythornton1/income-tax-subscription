@@ -17,14 +17,12 @@
 package models.registration
 
 import play.api.libs.json._
+import utils.Implicits
 
-import scala.util.Try
 
-sealed trait RegistrationResponse
+case class RegistrationSuccessResponseModel(safeId: String)
 
-case class RegistrationSuccessResponseModel(safeId: String) extends RegistrationResponse
-
-case class RegistrationFailureResponseModel(reason: String) extends RegistrationResponse
+case class RegistrationFailureResponseModel(reason: String)
 
 object RegistrationSuccessResponseModel {
   implicit val format = Json.format[RegistrationSuccessResponseModel]
@@ -34,16 +32,15 @@ object RegistrationFailureResponseModel {
   implicit val format = Json.format[RegistrationFailureResponseModel]
 }
 
-object RegistrationResponse {
+object RegistrationResponse extends Implicits {
 
-  lazy val parseFailure = (js: JsValue) => RegistrationFailureResponseModel(s"parse error: $js"):RegistrationResponse
+  type L = RegistrationFailureResponseModel
 
-  implicit val reader = new Reads[RegistrationResponse] {
+  type R = RegistrationSuccessResponseModel
 
-    def reads(js: JsValue): JsResult[RegistrationResponse] = {
-      lazy val successResponse = Try(js.asOpt[RegistrationSuccessResponseModel]).getOrElse(None)
-      lazy val failureResponse = Try(js.asOpt[RegistrationFailureResponseModel]).getOrElse(None)
-      JsSuccess(successResponse.fold(failureResponse.fold(parseFailure(js))(x=>x))(x=>x))
-    }
-  }
+  type RegistrationResponse = Either[L, R]
+
+  lazy val parseFailure: JsValue => L = (js: JsValue) => RegistrationFailureResponseModel(s"parse error: $js")
+
+
 }
