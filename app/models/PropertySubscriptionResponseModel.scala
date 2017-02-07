@@ -20,6 +20,7 @@ import play.api.libs.json.Json
 
 case class IncomeSourcesModel(incomeSourceId: String)
 case class PropertySubscriptionResponseModel(safeId: String, mtditId: String, incomeSources: IncomeSourcesModel)
+case class PropertySubscriptionFailureModel(code: String, reason: String)
 
 object IncomeSourcesModel {
   implicit val formats = Json.format[IncomeSourcesModel]
@@ -27,4 +28,6 @@ object IncomeSourcesModel {
 object PropertySubscriptionResponseModel {
   implicit val formats = Json.format[PropertySubscriptionResponseModel]
 }
-
+object PropertySubscriptionFailureModel {
+  implicit val formats = Json.format[PropertySubscriptionFailureModel]
+}

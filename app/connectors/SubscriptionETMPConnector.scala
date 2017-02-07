@@ -18,7 +18,7 @@ package connectors
 
 import com.google.inject.{Inject, Singleton}
 import config.AppConfig
-import models.PropertySubscriptionRequestModel
+import models.{PropertySubscriptionFailureModel, PropertySubscriptionRequestModel, PropertySubscriptionResponseModel}
 import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -42,11 +42,13 @@ class SubscriptionETMPConnectorImpl @Inject()(http: WSHttp, applicationConfig: A
     val desHeaders = hc.copy(authorization = Some(Authorization(s"Bearer $token"))).withExtraHeaders("Environment" -> environment)
     val request = http.POST[JsValue, HttpResponse](requestUrl, Json.toJson(subscribeRequest))(implicitly[Writes[JsValue]], HttpReads.readRaw, desHeaders)
     request.map {
+
       case response => response.status match {
-        case OK => {
-
-        }
-
+        case OK => {Json.fromJson[PropertySubscriptionResponseModel](response.json)}
+        case BAD_REQUEST => {Json.fromJson[PropertySubscriptionFailureModel](response.json)}
+        case NOT_FOUND => {Json.fromJson[PropertySubscriptionFailureModel](response.json)}
+        case INTERNAL_SERVER_ERROR => {Json.fromJson[PropertySubscriptionFailureModel](response.json)}
+        case SERVICE_UNAVAILABLE => {Json.fromJson[PropertySubscriptionFailureModel](response.json)}
       }
     }
   }
