@@ -16,11 +16,28 @@
 
 package unit.services.mocks
 
+import play.api.http.Status.{BAD_REQUEST, CONFLICT, OK}
 import services.RegistrationService
 import unit.connectors.mocks.MockRegistrationConnector
+import utils.TestConstants
 
 trait MockRegistrationService extends MockRegistrationConnector {
 
+  val nino = TestConstants.testNino
+  val isAgent = false
+  val safeId = TestConstants.testSafeId
+
   object TestRegistrationService extends RegistrationService(TestRegistrationConnector)
+
+  val setupRegister = (setupMockRegister(nino) _).tupled
+  val setupGetRegistration = (setupMockGetRegistration(nino) _).tupled
+
+  import TestConstants.{GetRegistrationResponse, NewRegistrationResponse}
+
+  val newRegSuccess = (OK, NewRegistrationResponse.successResponse(safeId))
+  val newRegBadRequest = (BAD_REQUEST, NewRegistrationResponse.failureResponse("INVALID_NINO", "Your submission contains one or more errors. Failed Parameter(s) - [idType, idNumber, payload]"))
+  val newRegConflict = (CONFLICT, NewRegistrationResponse.failureResponse("CONFLICT", "Duplicate submission"))
+  val getRegSuccess = (OK, GetRegistrationResponse.successResponse(safeId))
+  val getRegBadRequest = (BAD_REQUEST, GetRegistrationResponse.failureResponse("Your submission contains one or more errors. Failed Parameter(s) - [idType, idNumber, payload]"))
 
 }

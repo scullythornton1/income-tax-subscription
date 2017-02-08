@@ -24,7 +24,7 @@ import play.api.libs.json.JsValue
 import play.api.mvc.{AnyContentAsJson, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
-import unit.services.mocks.MockRegistrationService
+import unit.services.mocks.MockSubscriptionManagerService
 import utils.JsonUtils._
 import utils.TestConstants
 import utils.TestConstants.NewRegistrationResponse
@@ -32,19 +32,13 @@ import utils.TestConstants.NewRegistrationResponse
 import scala.concurrent.Future
 
 class SubscriptionControllerSpec extends UnitSpec
-  with MockRegistrationService {
+  with MockSubscriptionManagerService {
 
   val application = app.injector.instanceOf[Application]
 
-  object TestController extends SubscriptionController(application, TestRegistrationService)
+  object TestController extends SubscriptionController(application, TestSubscriptionManagerService)
 
   def call(request: Request[AnyContentAsJson]): Future[Result] = TestController.subscribe(request)
-
-  val nino = TestConstants.testNino
-  val safeId = TestConstants.testSafeId
-
-  val newRegSuccess = (OK, NewRegistrationResponse.successResponse(safeId))
-
 
   "SubscriptionController" should {
     "return the id when successful" in {

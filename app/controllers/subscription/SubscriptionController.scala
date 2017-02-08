@@ -22,7 +22,7 @@ import models.frontend.{FEFailureResponse, FERequest, FESuccessResponse}
 import play.api.Application
 import play.api.libs.json.{JsResult, JsValue}
 import play.api.mvc.{Action, AnyContent, Result}
-import services.RegistrationService
+import services.SubscriptionManagerService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import utils.JsonUtils._
 
@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SubscriptionController @Inject()(application: Application,
-                                       registrationService: RegistrationService) extends BaseController {
+                                       subManService: SubscriptionManagerService) extends BaseController {
 
   def subscribe: Action[AnyContent] = Action.async {
     implicit request =>
@@ -39,8 +39,8 @@ class SubscriptionController @Inject()(application: Application,
         val parsedJson: JsResult[FERequest] = parseUtil(x)(FERequest.format)
         parsedJson.fold(
           invalid => parseError,
-          valid => {
-            val response = registrationService.register(isAgent = valid.isAgent, nino = valid.nino)
+          feRequest => {
+            val response = subManService.subscribe(feRequest)
             response map {
               //TODO frontend response
               case Right(r) => Ok(FESuccessResponse("1234567"): JsValue)

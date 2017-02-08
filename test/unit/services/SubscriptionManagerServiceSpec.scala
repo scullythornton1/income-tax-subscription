@@ -18,15 +18,15 @@ package unit.services
 
 import play.api.http.Status._
 import uk.gov.hmrc.play.http.HeaderCarrier
-import unit.services.mocks.MockRegistrationService
+import unit.services.mocks.MockSubscriptionManagerService
 
-class RegistrationServiceSpec extends MockRegistrationService {
+class SubscriptionManagerServiceSpec extends MockSubscriptionManagerService {
 
   implicit val hc = HeaderCarrier()
 
-  def call = await(TestRegistrationService.register(isAgent = isAgent, nino))
+  def call = await(TestSubscriptionManagerService.subscribe(request = feRequest))
 
-  "RegistrationService" should {
+  "SubscriptionManagerService" should {
     "return the safeId when the registration is successful" in {
       setupRegister(newRegSuccess)
       val response = call
@@ -41,21 +41,6 @@ class RegistrationServiceSpec extends MockRegistrationService {
       response.left.get.status shouldBe BAD_REQUEST
     }
 
-    "return the safeId when the registration is conflict but lookup is successful" in {
-      setupRegister(newRegConflict)
-      setupGetRegistration(getRegSuccess)
-      val response = call
-      response.isRight shouldBe true
-      response.right.get.safeId shouldBe safeId
-    }
-
-    "return the error when both registration is conflict but lookup is unsuccessful" in {
-      setupRegister(newRegConflict)
-      setupGetRegistration(getRegBadRequest)
-      val response = call
-      response.isLeft shouldBe true
-      response.left.get.status shouldBe BAD_REQUEST
-    }
   }
 
 }
