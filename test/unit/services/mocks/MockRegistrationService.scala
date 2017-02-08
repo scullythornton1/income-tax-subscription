@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package utils
+package unit.services.mocks
 
-import scala.concurrent.Future
+import services.RegistrationService
+import unit.connectors.mocks.MockRegistrationConnector
 
+trait MockRegistrationService extends MockRegistrationConnector {
 
-trait Implicits {
-
-  implicit def OptionUtl[T, S <: T](data: S): Option[T] = Some(data)
-
-  implicit def FutureUtl[T, S <: T](fData: S): Future[T] = Future.successful(fData)
-
-  implicit def FutureUtl[T](err: Throwable): Future[T] = Future.failed(err)
-
-  implicit def EitherUtilLeft[T, R <: T, L](left: L): Either[L, R] = Left(left)
-
-  implicit def EitherUtilRight[T, R <: T, L](right: R): Either[L, R] = Right(right)
+  object TestRegistrationService extends RegistrationService(TestRegistrationConnector)
 
 }
-
-object Implicits extends Implicits

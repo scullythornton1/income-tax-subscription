@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-package utils
+package models.frontend
 
-import scala.concurrent.Future
+import play.api.libs.json.Json
 
 
-trait Implicits {
+case class FERequest(nino: String,
+                     isAgent: Boolean = false)
 
-  implicit def OptionUtl[T, S <: T](data: S): Option[T] = Some(data)
-
-  implicit def FutureUtl[T, S <: T](fData: S): Future[T] = Future.successful(fData)
-
-  implicit def FutureUtl[T](err: Throwable): Future[T] = Future.failed(err)
-
-  implicit def EitherUtilLeft[T, R <: T, L](left: L): Either[L, R] = Left(left)
-
-  implicit def EitherUtilRight[T, R <: T, L](right: R): Either[L, R] = Right(right)
-
+object FERequest {
+  implicit val format = Json.format[FERequest]
 }
-
-object Implicits extends Implicits

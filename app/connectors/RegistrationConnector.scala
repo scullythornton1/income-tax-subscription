@@ -61,13 +61,13 @@ class RegistrationConnector @Inject()(config: Configuration,
       implicitly[Writes[RegistrationRequestModel]], implicitly[HttpReads[HttpResponse]], createHeaderCarrierPost(hc)).map { response =>
       val status = response.status
       status match {
-        case OK => parseAsRight(response.body)
-        case BAD_REQUEST => parseAsLeft(BAD_REQUEST, response.body)
-        case NOT_FOUND => parseAsLeft(NOT_FOUND, response.body)
-        case CONFLICT => parseAsLeft(CONFLICT, response.body)
-        case INTERNAL_SERVER_ERROR => parseAsLeft(INTERNAL_SERVER_ERROR, response.body)
-        case SERVICE_UNAVAILABLE => parseAsLeft(SERVICE_UNAVAILABLE, response.body)
-        case x => parseAsLeft(x, response.body)
+        case OK => parseSuccess(response.body)
+        case BAD_REQUEST => parseFailure(BAD_REQUEST, response.body)
+        case NOT_FOUND => parseFailure(NOT_FOUND, response.body)
+        case CONFLICT => parseFailure(CONFLICT, response.body)
+        case INTERNAL_SERVER_ERROR => parseFailure(INTERNAL_SERVER_ERROR, response.body)
+        case SERVICE_UNAVAILABLE => parseFailure(SERVICE_UNAVAILABLE, response.body)
+        case x => parseFailure(x, response.body)
       }
     }
   }
@@ -77,12 +77,12 @@ class RegistrationConnector @Inject()(config: Configuration,
     httpGet.GET[HttpResponse](getRegistrationUrl(nino))(implicitly[HttpReads[HttpResponse]], createHeaderCarrierGet(hc)).map { response =>
       val status = response.status
       status match {
-        case OK => parseAsRight(response.body)
-        case BAD_REQUEST => parseAsLeft(BAD_REQUEST, response.body)
-        case NOT_FOUND => parseAsLeft(NOT_FOUND, response.body)
-        case INTERNAL_SERVER_ERROR => parseAsLeft(INTERNAL_SERVER_ERROR, response.body)
-        case SERVICE_UNAVAILABLE => parseAsLeft(SERVICE_UNAVAILABLE, response.body)
-        case x => parseAsLeft(x, response.body)
+        case OK => parseSuccess(response.body)
+        case BAD_REQUEST => parseFailure(BAD_REQUEST, response.body)
+        case NOT_FOUND => parseFailure(NOT_FOUND, response.body)
+        case INTERNAL_SERVER_ERROR => parseFailure(INTERNAL_SERVER_ERROR, response.body)
+        case SERVICE_UNAVAILABLE => parseFailure(SERVICE_UNAVAILABLE, response.body)
+        case x => parseFailure(x, response.body)
       }
     }
   }

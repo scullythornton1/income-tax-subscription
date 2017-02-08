@@ -62,7 +62,7 @@ object ErrorModel {
 
   def apply(status: Int, code: Option[String], message: String): ErrorModel = newErrorModel(status, code, message)
 
-  def unapply(error: ErrorModel): Option[(Int, Option[String], String)] = Some(error.status, error.code, error.reason)
+  def unapply(error: ErrorModel): Option[(Int, Option[String], String)] = Some((error.status, error.code, error.reason))
 
   lazy val parseFailure: JsValue => ErrorModel = (js: JsValue) => ErrorModel(500, "PARSE_ERROR", js.toString)
 

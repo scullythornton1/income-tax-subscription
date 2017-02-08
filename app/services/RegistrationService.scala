@@ -19,19 +19,32 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import connectors.RegistrationConnector
-import models.registration.{IndividualModel, RegistrationRequestModel}
+import models.ErrorModel
+import models.registration.{IndividualModel, RegistrationRequestModel, RegistrationSuccessResponseModel}
+import play.api.http.Status.CONFLICT
 import uk.gov.hmrc.play.http.HeaderCarrier
+import utils.Implicits._
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class RegistrationService @Inject()(registrationConnector: RegistrationConnector) {
 
-  def register(isAgent: Boolean, nino: String, firstName: String, lastName: String)(implicit hc: HeaderCarrier) = {
+  def register(isAgent: Boolean, nino: String)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, RegistrationSuccessResponseModel]] = {
+    // TODO remove first name and last name
+    // The first name and last name are currently set as dummies here, pending changes to the schema
     val registration: RegistrationRequestModel =
-      RegistrationRequestModel(
-        isAgent,
-        IndividualModel(firstName, lastName)
-      )
-    registrationConnector.register(nino, registration)
+    RegistrationRequestModel(
+      isAgent,
+      IndividualModel("firstName", "lastName")
+    )
+    registrationConnector.register(nino, registration).flatMap {
+      case Left(ErrorModel(CONFLICT, _, _)) => lookupRegister(nino)
+      case r => r
+    }
   }
+
+  @inline private[services] def lookupRegister(nino: String)(implicit hc: HeaderCarrier) = registrationConnector.getRegistration(nino)
 
 }
