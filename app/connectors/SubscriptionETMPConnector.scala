@@ -31,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import play.api.http.Status._
 
 @Singleton
-class SubscriptionETMPConnectorImpl @Inject()(http: WSHttp, applicationConfig: AppConfig)
+class SubscriptionETMPConnector @Inject()(http: HttpPost, applicationConfig: AppConfig)
   extends ServicesConfig with RawResponseReads {
 
   lazy val serviceUrl = applicationConfig.desURL
@@ -50,7 +50,7 @@ class SubscriptionETMPConnectorImpl @Inject()(http: WSHttp, applicationConfig: A
         lazy val defaultParseError = PropertySubscriptionResponse.parseFailure(jsValue)
 
         response.status match {
-        case OK => parse[L, R](jsValue, defaultParseError)
+        case OK => parseAsRight[L, R](jsValue, defaultParseError)
         case BAD_REQUEST => parseAsLeft[L, R](jsValue, defaultParseError)
         case NOT_FOUND => parseAsLeft[L, R](jsValue, defaultParseError)
         case INTERNAL_SERVER_ERROR => parseAsLeft[L, R](jsValue, defaultParseError)

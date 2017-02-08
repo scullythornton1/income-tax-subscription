@@ -22,10 +22,24 @@ import uk.gov.hmrc.play.test.UnitSpec
 class PropertySubscriptionResponseModelSpec extends UnitSpec {
   "Creating a model for a subscription request" should {
     val IncomeModel = IncomeSourcesModel(incomeSourceId = "sourceId0001")
-    val ResponseModel = PropertySubscriptionResponseModel(safeId = "XA0001234567890", mtditId = "mdtitId001", incomeSources = IncomeModel)
+    val ResponseModel = PropertySubscriptionResponseModel(safeId = "XA0001234567890", mtditId = "mdtitId001", incomeSource = IncomeModel)
 
     "safeId should be XA0001234567890, mtditId should be mdtitId001 and incomeSourcesId should be sourceId0001" in {
-      val expected = Json.parse("""{"safeId":"XA0001234567890","mtditId":"mdtitId001","incomeSources":{"incomeSourceId":"sourceId0001"}}""")
+      val expected = Json.parse("""{
+                                  |
+                                  |"safeId": "XA0001234567890",
+                                  |
+                                  |"mtditId": "mdtitId001",
+                                  |
+                                  |"incomeSource":
+                                  |
+                                  |{
+                                  |
+                                  |"incomeSourceId": "sourceId0001"
+                                  |
+                                  |}
+                                  |
+                                  |}""".stripMargin)
       val actual = Json.toJson(ResponseModel)
       actual shouldBe expected
     }

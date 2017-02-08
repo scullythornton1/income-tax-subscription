@@ -21,7 +21,7 @@ import play.api.libs.json.{JsResult, JsValue, Json, Reads}
 import play.api.mvc.MultipartFormData.ParseError
 
 case class IncomeSourcesModel(incomeSourceId: String)
-case class PropertySubscriptionResponseModel(safeId: String, mtditId: String, incomeSources: IncomeSourcesModel)
+case class PropertySubscriptionResponseModel(safeId: String, mtditId: String, incomeSource: IncomeSourcesModel)
 case class PropertySubscriptionFailureModel(code: String, reason: String)
 
 object IncomeSourcesModel {
@@ -52,10 +52,10 @@ object PropertySubscriptionResponse {
     )
   }
 
-  def parse[L, R](jsValue: JsValue, parseError: L)(implicit lReader: Reads[L], rReader: Reads[R]): Either[L, R] = {
+  def parseAsRight[L, R](jsValue: JsValue, parseError: L)(implicit lReader: Reads[L], rReader: Reads[R]): Either[L, R] = {
     val jsR : JsResult[R] = Json.fromJson[R](jsValue)
     jsR.fold(
-      invalid => parseAsLeft[L, R](jsValue, parseError),
+      invalid => Left(parseError),
       valid => Right(valid)
     )
   }
