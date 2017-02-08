@@ -19,6 +19,7 @@ package connectors
 import javax.inject.Inject
 
 import audit.Logging
+import connectors.utils.ConnectorUtils
 import models.registration._
 import play.api.Configuration
 import play.api.http.Status._
@@ -26,8 +27,6 @@ import play.api.libs.json.Writes
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.Authorization
-import _root_.utils.JsonUtils._
-import utils.ConnectorUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -61,15 +60,14 @@ class RegistrationConnector @Inject()(config: Configuration,
     httpPost.POST[RegistrationRequestModel, HttpResponse](newRegistrationUrl(nino), registration)(
       implicitly[Writes[RegistrationRequestModel]], implicitly[HttpReads[HttpResponse]], createHeaderCarrierPost(hc)).map { response =>
       val status = response.status
-      lazy val defaultParseError = parseFailure(response.body)
       status match {
-        case OK => parseAsRight(response.body, defaultParseError)
-        case BAD_REQUEST => parseAsLeft(BAD_REQUEST, response.body, defaultParseError)
-        case NOT_FOUND => parseAsLeft(NOT_FOUND, response.body, defaultParseError)
-        case CONFLICT => parseAsLeft(CONFLICT, response.body, defaultParseError)
-        case INTERNAL_SERVER_ERROR => parseAsLeft(INTERNAL_SERVER_ERROR, response.body, defaultParseError)
-        case SERVICE_UNAVAILABLE => parseAsLeft(SERVICE_UNAVAILABLE, response.body, defaultParseError)
-        case x => parseAsLeft(x, response.body, defaultParseError)
+        case OK => parseAsRight(response.body)
+        case BAD_REQUEST => parseAsLeft(BAD_REQUEST, response.body)
+        case NOT_FOUND => parseAsLeft(NOT_FOUND, response.body)
+        case CONFLICT => parseAsLeft(CONFLICT, response.body)
+        case INTERNAL_SERVER_ERROR => parseAsLeft(INTERNAL_SERVER_ERROR, response.body)
+        case SERVICE_UNAVAILABLE => parseAsLeft(SERVICE_UNAVAILABLE, response.body)
+        case x => parseAsLeft(x, response.body)
       }
     }
   }
@@ -78,14 +76,13 @@ class RegistrationConnector @Inject()(config: Configuration,
     import GetRegistrationUtil._
     httpGet.GET[HttpResponse](getRegistrationUrl(nino))(implicitly[HttpReads[HttpResponse]], createHeaderCarrierGet(hc)).map { response =>
       val status = response.status
-      lazy val defaultParseError = parseFailure(response.body)
       status match {
-        case OK => parseAsRight(response.body, defaultParseError)
-        case BAD_REQUEST => parseAsLeft(BAD_REQUEST, response.body, defaultParseError)
-        case NOT_FOUND => parseAsLeft(NOT_FOUND, response.body, defaultParseError)
-        case INTERNAL_SERVER_ERROR => parseAsLeft(INTERNAL_SERVER_ERROR, response.body, defaultParseError)
-        case SERVICE_UNAVAILABLE => parseAsLeft(SERVICE_UNAVAILABLE, response.body, defaultParseError)
-        case x => parseAsLeft(x, response.body, defaultParseError)
+        case OK => parseAsRight(response.body)
+        case BAD_REQUEST => parseAsLeft(BAD_REQUEST, response.body)
+        case NOT_FOUND => parseAsLeft(NOT_FOUND, response.body)
+        case INTERNAL_SERVER_ERROR => parseAsLeft(INTERNAL_SERVER_ERROR, response.body)
+        case SERVICE_UNAVAILABLE => parseAsLeft(SERVICE_UNAVAILABLE, response.body)
+        case x => parseAsLeft(x, response.body)
       }
     }
   }

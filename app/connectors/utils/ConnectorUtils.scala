@@ -27,18 +27,18 @@ trait ConnectorUtils[L <: ErrorResponsesModel, R] extends JsonUtils {
 
   lazy val parseFailure = ErrorModel.parseFailure
 
-  def parseAsLeft(status: Int, jsValue: JsValue, parseError: ErrorModel)(implicit lReader: Reads[L], rReader: Reads[R]): Either[ErrorModel, R] = {
+  def parseAsLeft(status: Int, jsValue: JsValue)(implicit lReader: Reads[L]): Response = {
     val jsL: JsResult[L] = parseUtil[L](jsValue)
     jsL.fold(
-      invalid => parseError,
+      invalid => parseFailure(jsValue),
       valid => ErrorModel(status, valid)
     )
   }
 
-  def parseAsRight(jsValue: JsValue, parseError: ErrorModel)(implicit lReader: Reads[L], rReader: Reads[R]): Either[ErrorModel, R] = {
+  def parseAsRight(jsValue: JsValue)(implicit rReader: Reads[R]): Response = {
     val jsR: JsResult[R] = parseUtil[R](jsValue)
     jsR.fold(
-      invalid => parseError,
+      invalid => parseFailure(jsValue),
       valid => valid
     )
   }
