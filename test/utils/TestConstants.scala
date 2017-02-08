@@ -19,12 +19,13 @@ package utils
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.domain.Generator
 
-import JsonUtil._
+import JsonUtils._
 
 object TestConstants {
   lazy val testNino = new Generator().nextNino.nino
+  lazy val testSafeId = "XE0001234567890"
 
-  object RegistrationResponse {
+  object NewRegistrationResponse {
     val successResponse: String => JsValue = (safeId: String) =>
       s"""
          | {
@@ -54,6 +55,52 @@ object TestConstants {
          |  }
          | }
          |
+      """.stripMargin
+
+    val failureResponse: (String, String) => JsValue = (code: String, reason: String) =>
+      s"""
+         |{
+         |    "code": "$code",
+         |    "reason":"$reason"
+         |}
+      """.stripMargin
+  }
+
+  object GetRegistrationResponse {
+    val successResponse: String => JsValue = (safeId: String) =>
+      s"""{
+         |"sapNumber": "1234567890",
+         |"safeId": "$safeId",
+         |"agentReferenceNumber": "AARN1234567",
+         |"nonUKIdentification":
+         |{
+         |"idNumber": "123456",
+         |"issuingInstitution": "France Institution",
+         |"issuingCountryCode": "FR"
+         |},
+         |"isEditable": true,
+         |"isAnAgent": false,
+         |"isAnIndividual": true,
+         |"individual": {
+         |"firstName": "Stephen",
+         |"lastName": "Wood",
+         |"dateOfBirth": "1990-04-03"
+         |},
+         |"addressDetails": {
+         |"addressLine1": "100 SuttonStreet",
+         |"addressLine2": "Wokingham",
+         |"addressLine3": "Surrey",
+         |"addressLine4": "London",
+         |"postalCode": "DH14EJ",
+         |"countryCode": "GB"
+         |},
+         |"contactDetails": {
+         |"phoneNumber": "01332752856",
+         |"mobileNumber": "07782565326",
+         |"faxNumber": "01332754256",
+         |"eMailAddress": "stephen@manncorpone.co.uk"
+         |}
+         |}
       """.stripMargin
 
     val failureResponse: String => JsValue = (reason: String) =>

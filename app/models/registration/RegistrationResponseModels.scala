@@ -16,31 +16,26 @@
 
 package models.registration
 
+import models.ErrorResponsesModel
 import play.api.libs.json._
-import utils.Implicits
 
 
 case class RegistrationSuccessResponseModel(safeId: String)
 
-case class RegistrationFailureResponseModel(reason: String)
+case class NewRegistrationFailureResponseModel(code: Option[String], reason: String) extends ErrorResponsesModel
+
+case class GetRegistrationFailureResponseModel(reason: String) extends ErrorResponsesModel {
+  override def code: Option[String] = None
+}
 
 object RegistrationSuccessResponseModel {
   implicit val format = Json.format[RegistrationSuccessResponseModel]
 }
 
-object RegistrationFailureResponseModel {
-  implicit val format = Json.format[RegistrationFailureResponseModel]
+object NewRegistrationFailureResponseModel {
+  implicit val format = Json.format[NewRegistrationFailureResponseModel]
 }
 
-object RegistrationResponse extends Implicits {
-
-  type L = RegistrationFailureResponseModel
-
-  type R = RegistrationSuccessResponseModel
-
-  type RegistrationResponse = Either[L, R]
-
-  lazy val parseFailure: JsValue => L = (js: JsValue) => RegistrationFailureResponseModel(s"parse error: $js")
-
-
+object GetRegistrationFailureResponseModel {
+  implicit val format = Json.format[GetRegistrationFailureResponseModel]
 }

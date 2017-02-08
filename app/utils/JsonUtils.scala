@@ -19,7 +19,7 @@ package utils
 import play.api.libs.json._
 import uk.gov.hmrc.play.http.HttpResponse
 
-trait JsonUtil extends Implicits {
+trait JsonUtils extends Implicits {
 
   implicit def toJsValue[T](data: T)(implicit writer: Writes[T]): JsValue = Json.toJson(data)
 
@@ -31,22 +31,6 @@ trait JsonUtil extends Implicits {
 
   implicit def parseUtil[T](response: HttpResponse)(implicit reader: Reads[T]): JsResult[T] = response.body
 
-  def parseAsLeft[L, R](jsValue: JsValue, parseError: L)(implicit lReader: Reads[L], rReader: Reads[R]): Either[L, R] = {
-    val jsL: JsResult[L] = parseUtil[L](jsValue)
-    jsL.fold(
-      invalid => parseError,
-      valid => valid
-    )
-  }
-
-  def parse[L, R](jsValue: JsValue, parseError: L)(implicit lReader: Reads[L], rReader: Reads[R]): Either[L, R] = {
-    val jsR: JsResult[R] = parseUtil[R](jsValue)
-    jsR.fold(
-      invalid => parseAsLeft[L, R](jsValue, parseError),
-      valid => valid
-    )
-  }
-
 }
 
-object JsonUtil extends JsonUtil
+object JsonUtils extends JsonUtils

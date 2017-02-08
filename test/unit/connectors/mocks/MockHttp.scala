@@ -18,16 +18,25 @@ package unit.connectors.mocks
 
 import org.mockito.Matchers
 import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.play.http.{HttpPost, HttpResponse}
+import uk.gov.hmrc.play.http.{HttpGet, HttpPost, HttpResponse}
+import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
 
-trait MockHttp extends MockitoSugar {
+trait MockHttp extends UnitSpec with MockitoSugar with BeforeAndAfterEach {
 
   val mockHttpPost = mock[HttpPost]
+  val mockHttpGet = mock[HttpGet]
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockHttpPost)
+    reset(mockHttpGet)
+  }
 
   def setupMockHttpPost[I](url: Option[String] = None, body: Option[I] = None)(status: Int, response: JsValue): Unit = {
     lazy val urlMatcher = url.fold(Matchers.any[String]())(x => Matchers.eq(x))
@@ -41,4 +50,15 @@ trait MockHttp extends MockitoSugar {
     when(mockHttpPost.POSTEmpty[HttpResponse](urlMatcher)(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(status, Some(response))))
   }
 
+  def setupMockHttpGet(url: Option[String] = None)(status: Int, response: JsValue): Unit = {
+    lazy val urlMatcher = url.fold(Matchers.any[String]())(x => Matchers.eq(x))
+
+    when(mockHttpGet.GET[HttpResponse](urlMatcher)(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(status, Some(response))))
+  }
+
+  def setupMockHttpGetWithParams(url: Option[String], params: Option[Seq[(String, String)]])(status: Int, response: JsValue): Unit = {
+    lazy val urlMatcher = url.fold(Matchers.any[String]())(x => Matchers.eq(x))
+    lazy val paramsMatcher = params.fold(Matchers.any[Seq[(String, String)]]())(x => Matchers.eq(x))
+    when(mockHttpGet.GET[HttpResponse](urlMatcher, paramsMatcher)(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(status, Some(response))))
+  }
 }

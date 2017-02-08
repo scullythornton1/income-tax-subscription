@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
-package unit.models.registration
+package services
 
+import javax.inject.{Inject, Singleton}
+
+import connectors.RegistrationConnector
 import models.registration.{IndividualModel, RegistrationRequestModel}
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.JsonUtils._
-import utils.Resources
+import uk.gov.hmrc.play.http.HeaderCarrier
 
-class RegistrationRequestModelSpec extends UnitSpec {
+@Singleton
+class RegistrationService @Inject()(registrationConnector: RegistrationConnector) {
 
-  val individual = IndividualModel(
-    firstName = "Test",
-    lastName = "Person"
-  )
-  val request = RegistrationRequestModel(
-    isAnAgent = false,
-    individual = individual
-  )
-
-  "RegistrationRequestModel" should {
-    "Be valid against the new registration schema" in {
-      Resources.validateJson(Resources.newRegistrationRequestSchema, request) shouldBe true
-    }
+  def register(isAgent: Boolean, nino: String, firstName: String, lastName: String)(implicit hc: HeaderCarrier) = {
+    val registration: RegistrationRequestModel =
+      RegistrationRequestModel(
+        isAgent,
+        IndividualModel(firstName, lastName)
+      )
+    registrationConnector.register(nino, registration)
   }
 
 }

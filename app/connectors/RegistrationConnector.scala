@@ -19,46 +19,80 @@ package connectors
 import javax.inject.Inject
 
 import audit.Logging
-import models.registration.{RegistrationRequestModel, RegistrationResponse}
+import models.registration._
 import play.api.Configuration
 import play.api.http.Status._
 import play.api.libs.json.Writes
 import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.Authorization
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
-import utils.JsonUtil._
+import _root_.utils.JsonUtils._
+import utils.ConnectorUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class RegistrationConnector @Inject()(config: Configuration,
                                       logging: Logging,
-                                      http: HttpPost
+                                      httpPost: HttpPost,
+                                      httpGet: HttpGet
                                      ) extends ServicesConfig with RawResponseReads {
 
-  import RegistrationResponse._
 
   lazy val urlHeaderEnvironment: String = config.getString("microservice.services.registration.environment").fold("")(x => x)
   lazy val urlHeaderAuthorization: String = s"Bearer ${config.getString("microservice.services.registration.authorization-token").fold("")(x => x)}"
   lazy val registrationServiceUrl: String = baseUrl("registration")
 
-  val registrationUrl: String => String = (nino: String) => s"$registrationServiceUrl/registration/individual/NINO/$nino"
+  val newRegistrationUrl: String => String = (nino: String) => s"$registrationServiceUrl/registration/individual/NINO/$nino"
 
-  def createHeaderCarrier(headerCarrier: HeaderCarrier): HeaderCarrier =
-    headerCarrier.withExtraHeaders("Environment" -> urlHeaderEnvironment, "Content-Type" -> "application/json").copy(authorization = Some(Authorization(urlHeaderAuthorization)))
+  val getRegistrationUrl: String => String = (nino: String) => s"$registrationServiceUrl/registration/details?nino=$nino"
 
-  def register(nino: String, registration: RegistrationRequestModel)(implicit hc: HeaderCarrier): Future[RegistrationResponse] =
-    http.POST[RegistrationRequestModel, HttpResponse](registrationUrl(nino), registration)(
-      implicitly[Writes[RegistrationRequestModel]], implicitly[HttpReads[HttpResponse]], createHeaderCarrier(hc)).map { response =>
-      lazy val defaultParseError = RegistrationResponse.parseFailure(response.body)
-      response.status match {
-        case OK => parse[L, R](response.body, defaultParseError)
-        case BAD_REQUEST => parseAsLeft[L, R](response.body, defaultParseError)
-        case NOT_FOUND => parseAsLeft[L, R](response.body, defaultParseError)
-        case INTERNAL_SERVER_ERROR => parseAsLeft[L, R](response.body, defaultParseError)
-        case SERVICE_UNAVAILABLE => parseAsLeft[L, R](response.body, defaultParseError)
-        case _ => parseAsLeft[L, R](response.body, defaultParseError)
+  def createHeaderCarrierPost(headerCarrier: HeaderCarrier): HeaderCarrier =
+    headerCarrier.withExtraHeaders("Environment" -> urlHeaderEnvironment, "Content-Type" -> "application/json")
+      .copy(authorization = Some(Authorization(urlHeaderAuthorization)))
+
+  def createHeaderCarrierGet(headerCarrier: HeaderCarrier): HeaderCarrier =
+    headerCarrier.withExtraHeaders("Environment" -> urlHeaderEnvironment)
+      .copy(authorization = Some(Authorization(urlHeaderAuthorization)))
+
+
+  def register(nino: String, registration: RegistrationRequestModel)(implicit hc: HeaderCarrier): Future[NewRegistrationUtil.Response] = {
+    import NewRegistrationUtil._
+    httpPost.POST[RegistrationRequestModel, HttpResponse](newRegistrationUrl(nino), registration)(
+      implicitly[Writes[RegistrationRequestModel]], implicitly[HttpReads[HttpResponse]], createHeaderCarrierPost(hc)).map { response =>
+      val status = response.status
+      lazy val defaultParseError = parseFailure(response.body)
+      status match {
+        case OK => parseAsRight(response.body, defaultParseError)
+        case BAD_REQUEST => parseAsLeft(BAD_REQUEST, response.body, defaultParseError)
+        case NOT_FOUND => parseAsLeft(NOT_FOUND, response.body, defaultParseError)
+        case CONFLICT => parseAsLeft(CONFLICT, response.body, defaultParseError)
+        case INTERNAL_SERVER_ERROR => parseAsLeft(INTERNAL_SERVER_ERROR, response.body, defaultParseError)
+        case SERVICE_UNAVAILABLE => parseAsLeft(SERVICE_UNAVAILABLE, response.body, defaultParseError)
+        case x => parseAsLeft(x, response.body, defaultParseError)
       }
     }
+  }
+
+  def getRegistration(nino: String)(implicit hc: HeaderCarrier): Future[GetRegistrationUtil.Response] = {
+    import GetRegistrationUtil._
+    httpGet.GET[HttpResponse](getRegistrationUrl(nino))(implicitly[HttpReads[HttpResponse]], createHeaderCarrierGet(hc)).map { response =>
+      val status = response.status
+      lazy val defaultParseError = parseFailure(response.body)
+      status match {
+        case OK => parseAsRight(response.body, defaultParseError)
+        case BAD_REQUEST => parseAsLeft(BAD_REQUEST, response.body, defaultParseError)
+        case NOT_FOUND => parseAsLeft(NOT_FOUND, response.body, defaultParseError)
+        case INTERNAL_SERVER_ERROR => parseAsLeft(INTERNAL_SERVER_ERROR, response.body, defaultParseError)
+        case SERVICE_UNAVAILABLE => parseAsLeft(SERVICE_UNAVAILABLE, response.body, defaultParseError)
+        case x => parseAsLeft(x, response.body, defaultParseError)
+      }
+    }
+  }
 
 }
+
+
+object NewRegistrationUtil extends ConnectorUtils[NewRegistrationFailureResponseModel, RegistrationSuccessResponseModel]
+
+object GetRegistrationUtil extends ConnectorUtils[GetRegistrationFailureResponseModel, RegistrationSuccessResponseModel]

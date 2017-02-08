@@ -19,11 +19,30 @@ package unit.models.registration
 import models.registration._
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.TestConstants.RegistrationResponse.{failureResponse, successResponse}
+import utils.Implicits
 
-class RegistrationResponseModelSpec extends UnitSpec {
+class RegistrationResponseModelSpec extends UnitSpec with Implicits {
 
-  "RegistrationResponseModel" should {
+  "NewRegistrationResponseModel" should {
+    import utils.TestConstants.NewRegistrationResponse.{failureResponse, successResponse}
+
+    "Reads the safe id correctly from a successful registration response" in {
+      val safeId = "XE0001234567890"
+      val response: JsValue = successResponse(safeId)
+      Json.fromJson[RegistrationSuccessResponseModel](response).get shouldBe RegistrationSuccessResponseModel(safeId)
+    }
+
+    "Reads the error messages correctly from a failure registration response" in {
+      val reason = "Service unavailable"
+      val code = "SERVICE_UNAVAILABLE"
+      val response: JsValue = failureResponse(code, reason)
+      Json.fromJson[NewRegistrationFailureResponseModel](response).get shouldBe NewRegistrationFailureResponseModel(code, reason)
+    }
+  }
+
+  "GetRegistrationResponseModel" should {
+    import utils.TestConstants.GetRegistrationResponse.{failureResponse, successResponse}
+
     "Reads the safe id correctly from a successful registration response" in {
       val safeId = "XE0001234567890"
       val response: JsValue = successResponse(safeId)
@@ -33,7 +52,7 @@ class RegistrationResponseModelSpec extends UnitSpec {
     "Reads the error messages correctly from a failure registration response" in {
       val reason = "Service unavailable"
       val response: JsValue = failureResponse(reason)
-      Json.fromJson[RegistrationFailureResponseModel](response).get shouldBe RegistrationFailureResponseModel(reason)
+      Json.fromJson[GetRegistrationFailureResponseModel](response).get shouldBe GetRegistrationFailureResponseModel(reason)
     }
   }
 

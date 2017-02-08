@@ -49,8 +49,10 @@ trait Resources {
 }
 
 object Resources extends Resources {
-  lazy val registrationRequestSchema = "/schemas/registration_request.schema"
-  lazy val registrationResponseSchema = "/schemas/registration_response.schema"
+  lazy val newRegistrationRequestSchema = "/schemas/new_registration_request.schema"
+  lazy val newRegistrationResponseSchema = "/schemas/new_registration_response.schema"
+  lazy val getRegistrationRequestSchema = "/schemas/get_registration_request.schema"
+  lazy val getRegistrationResponseSchema = "/schemas/get_registration_response.schema"
   lazy val countryCodeSchema = "/schemas/country_code"
 
 }
