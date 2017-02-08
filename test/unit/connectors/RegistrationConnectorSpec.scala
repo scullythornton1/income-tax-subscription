@@ -40,6 +40,8 @@ class RegistrationConnectorSpec extends UnitSpec with MockHttp with OneAppPerSui
   object TestRegistrationConnector extends RegistrationConnector(config, logging, httpPost, httpGet)
 
   implicit val hc = HeaderCarrier()
+  val env =  config.getString("microservice.services.des.environment").get
+  val authToken = config.getString("microservice.services.des.authorization-token").get
 
   val individual = IndividualModel("f", "l")
   val register = RegistrationRequestModel(isAnAgent = false, individual = individual)
@@ -49,9 +51,9 @@ class RegistrationConnectorSpec extends UnitSpec with MockHttp with OneAppPerSui
   "RegistrationConnector.register" should {
     "Put in the correct headers" in {
       val rHc = TestRegistrationConnector.createHeaderCarrierPost(hc)
-      rHc.headers.contains("Authorization" -> s"Bearer ${config.getString("microservice.services.registration.authorization-token").get}") shouldBe true
+      rHc.headers.contains("Authorization" -> s"Bearer $authToken") shouldBe true
       rHc.headers.contains("Content-Type" -> "application/json") shouldBe true
-      rHc.headers.contains("Environment" -> config.getString("microservice.services.registration.environment").get) shouldBe true
+      rHc.headers.contains("Environment" -> env) shouldBe true
     }
 
     "Post to the correct url" in {
@@ -128,8 +130,8 @@ class RegistrationConnectorSpec extends UnitSpec with MockHttp with OneAppPerSui
   "RegistrationConnector.getRegistration" should {
     "Put in the correct headers" in {
       val rHc = TestRegistrationConnector.createHeaderCarrierGet(hc)
-      rHc.headers.contains("Authorization" -> s"Bearer ${config.getString("microservice.services.registration.authorization-token").get}") shouldBe true
-      rHc.headers.contains("Environment" -> config.getString("microservice.services.registration.environment").get) shouldBe true
+      rHc.headers.contains("Authorization" -> s"Bearer $authToken") shouldBe true
+      rHc.headers.contains("Environment" -> env) shouldBe true
     }
 
     "Post to the correct url" in {

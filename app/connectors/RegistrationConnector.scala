@@ -39,9 +39,9 @@ class RegistrationConnector @Inject()(config: Configuration,
                                      ) extends ServicesConfig with RawResponseReads {
 
 
-  lazy val urlHeaderEnvironment: String = config.getString("microservice.services.registration.environment").fold("")(x => x)
-  lazy val urlHeaderAuthorization: String = s"Bearer ${config.getString("microservice.services.registration.authorization-token").fold("")(x => x)}"
-  lazy val registrationServiceUrl: String = baseUrl("registration")
+  lazy val urlHeaderEnvironment: String = config.getString("microservice.services.des.environment").fold("")(x => x)
+  lazy val urlHeaderAuthorization: String = s"Bearer ${config.getString("microservice.services.des.authorization-token").fold("")(x => x)}"
+  lazy val registrationServiceUrl: String = baseUrl("des")
 
   val newRegistrationUrl: String => String = (nino: String) => s"$registrationServiceUrl/registration/individual/NINO/$nino"
 
