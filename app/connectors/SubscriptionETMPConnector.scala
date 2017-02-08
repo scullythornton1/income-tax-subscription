@@ -45,7 +45,7 @@ class SubscriptionETMPConnector @Inject()(http: HttpPost, applicationConfig: App
     val request = http.POST[JsValue, HttpResponse](requestUrl, Json.toJson(subscribeRequest))(implicitly[Writes[JsValue]], HttpReads.readRaw, desHeaders)
     request.map {
 
-      case response =>
+      response =>
         lazy val jsValue = Json.parse(response.body)
         lazy val defaultParseError = PropertySubscriptionResponse.parseFailure(jsValue)
 

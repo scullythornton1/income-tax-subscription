@@ -93,11 +93,51 @@ class SubscriptionETMPConnectorSpec extends MockitoSugar with UnitSpec with OneA
       actual shouldBe Right(expected)
     }
 
-    "parse and return Bad request response" in {
+    "parse and return Invalid Payload response" in {
       val reason = "Submission has not passed validation. Invalid PAYLOAD."
       val code = "INVALID_PAYLOAD"
       val jsFailure = Json.parse(failureResponse(code, reason))
       setupMockHttpPost()(BAD_REQUEST, jsFailure)
+      val expected = PropertySubscriptionFailureModel(code, reason)
+      val actual = call
+      actual shouldBe Left(expected)
+    }
+
+    "parse and return Invalid Nino response" in {
+      val reason = "Submission has not passed validation. Invalid parameter NINO."
+      val code = "INVALID_NINO"
+      val jsFailure = Json.parse(failureResponse(code, reason))
+      setupMockHttpPost()(BAD_REQUEST, jsFailure)
+      val expected = PropertySubscriptionFailureModel(code, reason)
+      val actual = call
+      actual shouldBe Left(expected)
+    }
+
+    "parse and return not found response" in {
+      val reason = "The remote endpoint has indicated that no data can be found."
+      val code = "NOT_FOUND_NINO"
+      val jsFailure = Json.parse(failureResponse(code, reason))
+      setupMockHttpPost()(NOT_FOUND, jsFailure)
+      val expected = PropertySubscriptionFailureModel(code, reason)
+      val actual = call
+      actual shouldBe Left(expected)
+    }
+
+    "parse and return server error response" in {
+      val reason = "DES is currently experiencing problems that require live service intervention."
+      val code = "SERVER_ERROR"
+      val jsFailure = Json.parse(failureResponse(code, reason))
+      setupMockHttpPost()(INTERNAL_SERVER_ERROR, jsFailure)
+      val expected = PropertySubscriptionFailureModel(code, reason)
+      val actual = call
+      actual shouldBe Left(expected)
+    }
+
+    "parse and return service unavailable response" in {
+      val reason = "Dependent systems are currently not responding."
+      val code = "SERVICE_UNAVAILABLE"
+      val jsFailure = Json.parse(failureResponse(code, reason))
+      setupMockHttpPost()(SERVICE_UNAVAILABLE, jsFailure)
       val expected = PropertySubscriptionFailureModel(code, reason)
       val actual = call
       actual shouldBe Left(expected)
