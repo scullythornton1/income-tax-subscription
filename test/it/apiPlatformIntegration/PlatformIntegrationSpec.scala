@@ -32,6 +32,7 @@ import utils.{MicroserviceLocalRunSugar, WiremockServiceLocatorSugar}
 
 import scala.concurrent.Future
 
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Testcase to verify the capability of integration with the API platform.
@@ -77,15 +78,13 @@ class PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutur
 
     "register itelf to service-locator" in new Setup {
       run {
-        () => {
-          // dirty hack to ensure the startup is finished
-          val wait = Future.successful(Thread.sleep(1000))
-          await(wait)
-          verify(1, postRequestedFor(urlMatching("/registration"))
-            .withHeader("Content-Type", equalTo("application/json"))
-            .withRequestBody(equalTo(regPayloadStringFor("income-tax-subscription", "http://income-tax-subscription.service")))
-          )
-        }
+        () =>
+          app.flatMap { a =>
+            verify(1, postRequestedFor(urlMatching("/registration"))
+              .withHeader("Content-Type", equalTo("application/json"))
+              .withRequestBody(equalTo(regPayloadStringFor("income-tax-subscription", "http://income-tax-subscription.service")))
+            )
+          }
       }
     }
 
