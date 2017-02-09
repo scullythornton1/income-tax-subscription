@@ -38,11 +38,11 @@ class SubscriptionETMPConnector @Inject()(http: HttpPost, applicationConfig: App
   lazy val environment = applicationConfig.desEnvironment
   lazy val token = applicationConfig.desToken
 
-  def subscribePropertyEtmp(nino: String, subscribeRequest: PropertySubscriptionRequestModel)
+  def subscribePropertyEtmp(nino: String)
                            (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[L,R]] = {
     val requestUrl = s"$serviceUrl/income-tax-self-assessment/nino/$nino/properties"
     val desHeaders = hc.copy(authorization = Some(Authorization(s"Bearer $token"))).withExtraHeaders("Environment" -> environment)
-    val request = http.POST[JsValue, HttpResponse](requestUrl, Json.toJson(subscribeRequest))(implicitly[Writes[JsValue]], HttpReads.readRaw, desHeaders)
+    val request = http.POSTEmpty[HttpResponse](requestUrl)(HttpReads.readRaw, desHeaders)
     request.map {
 
       response =>
@@ -59,12 +59,3 @@ class SubscriptionETMPConnector @Inject()(http: HttpPost, applicationConfig: App
     }
   }
 }
-
-//trait SubscriptionETMPConnector {
-//  val serviceUrl: String
-//  val environment: String
-//  val token: String
-//
-//  def subscribePropertyEtmp(nino: String, subscribeRequest: PropertySubscriptionRequestModel)
-//                           (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[L, R]]
-//}

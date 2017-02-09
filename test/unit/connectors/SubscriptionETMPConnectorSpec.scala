@@ -40,18 +40,15 @@ class SubscriptionETMPConnectorSpec extends MockitoSugar with UnitSpec with OneA
 
   val mockHttpPost = mock[HttpPost]
 
-  def setupMockHttpPost[I](url: Option[String] = None, body: Option[I] = None)(status: Int, response: JsValue): Unit = {
+  def setupMockHttpPost(url: Option[String] = None)(status: Int, response: JsValue): Unit = {
     lazy val urlMatcher = url.fold(Matchers.any[String]())(x => Matchers.eq(x))
-    lazy val bodyMatcher = body.fold(Matchers.any[I]())(x => Matchers.eq(x))
-    when(mockHttpPost.POST[I, HttpResponse](urlMatcher, bodyMatcher, Matchers.any()
-    )(Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(status, Some(response))))
+    when(mockHttpPost.POSTEmpty[HttpResponse](urlMatcher
+    )(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(status, Some(response))))
   }
 
   object TestSubscriptionETMPConnector extends SubscriptionETMPConnector(http, config)
 
-  val request = PropertySubscriptionRequestModel("john@123.com")
-
-  def call = await(TestSubscriptionETMPConnector.subscribePropertyEtmp("AB12345678A", subscribeRequest = request))
+  def call = await(TestSubscriptionETMPConnector.subscribePropertyEtmp("AB12345678A"))
 
   val successResponse =
     """
