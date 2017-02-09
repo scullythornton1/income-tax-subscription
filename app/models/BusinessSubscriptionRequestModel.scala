@@ -18,8 +18,8 @@ package models
 
 import play.api.libs.json.Json
 
-case class PropertySubscriptionRequestModel(businessDetails: BusinessDetailsModel)
+case class BusinessSubscriptionRequestModel(businessDetails: BusinessDetailsModel)
 
-object PropertySubscriptionRequestModel{
-  implicit val format = Json.format[PropertySubscriptionRequestModel]
+object BusinessSubscriptionRequestModel{
+  implicit val format = Json.format[BusinessSubscriptionRequestModel]
 }

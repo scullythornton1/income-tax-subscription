@@ -29,7 +29,7 @@ class BusinessSubscriptionRequestModelSpec extends UnitSpec {
       contactDetails,
       cashOrAccruals = "cash"
     )
-    val model = PropertySubscriptionRequestModel(businessDetailsModel)
+    val model = BusinessSubscriptionRequestModel(businessDetailsModel)
 
     "Accounting Period Start Date should be '2017-04-01'" in {
       model.businessDetails.accountingPeriodStartDate shouldBe "2017-04-01"
