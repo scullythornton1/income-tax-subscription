@@ -16,10 +16,16 @@
 
 package models
 
-import play.api.libs.json.Json
+import uk.gov.hmrc.play.test.UnitSpec
 
-case class SubscriptionRequestModel (email: String, acceptsTermsAndConditions: Boolean)
+class ContactDetailsModelSpec extends UnitSpec {
 
-object SubscriptionRequestModel {
-  implicit val format = Json.format[SubscriptionRequestModel]
+  "Creating a model for a subscription request" should {
+    val contactDetails = ContactDetailsModel(emailAddress = "test@test.com")
+
+    "Email should be 'test@test.com'" in {
+      contactDetails.emailAddress shouldBe "test@test.com"
+    }
+  }
+
 }
