@@ -16,18 +16,15 @@
 
 package models
 
-import play.api.libs.json.Json
 import uk.gov.hmrc.play.test.UnitSpec
 
-class PropertySubscriptionRequestModelSpec extends UnitSpec {
+class ContactDetailsModelSpec extends UnitSpec {
 
   "Creating a model for a subscription request" should {
-    val model = PropertySubscriptionRequestModel(email = "john@123.com")
+    val contactDetails = ContactDetailsModel(emailAddress = "test@test.com")
 
-    "Email should be john@123.com" in {
-      val expected = Json.parse("""{"email":"john@123.com"}""")
-      val actual = Json.toJson(model)
-      actual shouldBe expected
+    "Email should be 'test@test.com'" in {
+      contactDetails.emailAddress shouldBe "test@test.com"
     }
   }
 
