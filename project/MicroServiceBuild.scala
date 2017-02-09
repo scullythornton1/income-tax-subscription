@@ -58,7 +58,8 @@ private object AppDependencies {
         "com.github.tomakehurst" % "wiremock" % wireMockVersion % scope,
         "info.cukes" %% "cucumber-scala" % cucumberVersion % scope,
         "info.cukes" % "cucumber-junit" % cucumberVersion % scope,
-        "org.mockito" % "mockito-core" % "1.9.5" % scope
+        "org.mockito" % "mockito-core" % "1.9.5" % scope,
+        "com.eclipsesource" %% "play-json-schema-validator" % "0.8.6" % scope
       )
     }.test
   }
@@ -79,7 +80,8 @@ private object AppDependencies {
         "com.github.tomakehurst" % "wiremock" % wireMockVersion % scope,
         "info.cukes" %% "cucumber-scala" % cucumberVersion % scope,
         "info.cukes" % "cucumber-junit" % cucumberVersion % scope,
-        "org.mockito" % "mockito-core" % "1.9.5" % scope
+        "org.mockito" % "mockito-core" % "1.9.5" % scope,
+        "com.eclipsesource" %% "play-json-schema-validator" % "0.8.6" % scope
       )
     }.test
   }

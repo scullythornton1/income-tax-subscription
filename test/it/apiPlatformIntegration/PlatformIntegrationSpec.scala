@@ -31,6 +31,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 import utils.{MicroserviceLocalRunSugar, WiremockServiceLocatorSugar}
 
 import scala.concurrent.Future
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
@@ -77,14 +78,13 @@ class PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutur
 
     "register itelf to service-locator" in new Setup {
       run {
-        () => {
-          app.map { _ =>
+        () =>
+          app.flatMap { a =>
             verify(1, postRequestedFor(urlMatching("/registration"))
               .withHeader("Content-Type", equalTo("application/json"))
               .withRequestBody(equalTo(regPayloadStringFor("income-tax-subscription", "http://income-tax-subscription.service")))
             )
           }
-        }
       }
     }
 
