@@ -56,4 +56,6 @@ object Resources extends Resources {
   lazy val countryCodeSchema = "/schemas/country_code"
   lazy val businessSubscriptionRequestSchema = "/schemas/business_subscription_request.schema"
   lazy val businessSubscriptionResponseSchema = "/schemas/business_subscription_response.schema"
+  lazy val propertySubscriptionRequestSchema = "/schemas/property_subscription_request.schema"
+  lazy val propertySubscriptionResponseSchema = "/schemas/property_subscription_response.schema"
 }
