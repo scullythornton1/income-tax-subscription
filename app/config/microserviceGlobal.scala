@@ -17,7 +17,6 @@
 package config
 
 import com.typesafe.config.Config
-import connectors.ServiceLocatorConnector
 import models.{ErrorGenericBadRequest, ErrorInternalServerError, ErrorNotFound, ErrorUnauthorized}
 import net.ceedubs.ficus.Ficus._
 import play.api._
@@ -35,21 +34,6 @@ import uk.gov.hmrc.play.microservice.bootstrap.DefaultMicroserviceGlobal
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
-trait ServiceLocatorRegistration extends GlobalSettings with RunMode {
-
-  val registrationEnabled: Boolean
-  val slConnector: ServiceLocatorConnector
-  implicit val hc: HeaderCarrier
-
-  override def onStart(app: Application): Unit = {
-    super.onStart(app)
-    registrationEnabled match {
-      case true => slConnector.register
-      case false => Logger.warn("Registration in Service Locator is disabled")
-    }
-  }
-}
 
 object ControllerConfiguration extends ControllerConfig {
   lazy val controllerConfigs = Play.current.configuration.underlying.as[Config]("controllers")
@@ -76,7 +60,7 @@ object MicroserviceAuthFilter extends AuthorisationFilter with MicroserviceFilte
   override def controllerNeedsAuth(controllerName: String): Boolean = ControllerConfiguration.paramsForController(controllerName).needsAuth
 }
 
-object MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode with ServiceLocatorRegistration {
+object MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode {
   override val auditConnector = MicroserviceAuditConnector
 
   override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig(s"$env.microservice.metrics")
@@ -86,12 +70,6 @@ object MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode with Se
   override val microserviceAuditFilter = MicroserviceAuditFilter
 
   override val authFilter = Some(MicroserviceAuthFilter)
-
-  override val slConnector: ServiceLocatorConnector = ServiceLocatorConnector
-
-  override implicit val hc: HeaderCarrier = HeaderCarrier()
-
-  override lazy val registrationEnabled = AppContext.registrationEnabled
 
   override def onError(request: RequestHeader, ex: Throwable): Future[Result] = {
     super.onError(request, ex) map (res => {

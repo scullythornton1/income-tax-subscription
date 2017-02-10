@@ -1,2 +1,0 @@
-### Subscription Controller Sandbox Routes
-POST        /subscription                        controllers.sandbox.SandboxSubscriptionController.subscribe
