@@ -52,7 +52,6 @@ private object AppDependencies {
         "org.scalatest" %% "scalatest" % scalaTestVersion % scope,
         "org.pegdown" % "pegdown" % pegdownVersion % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-
         "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % scope,
         "org.scalaj" %% "scalaj-http" % scalaJVersion % scope,
         "com.github.tomakehurst" % "wiremock" % wireMockVersion % scope,
@@ -74,14 +73,12 @@ private object AppDependencies {
         "org.scalatest" %% "scalatest" % scalaTestVersion % scope,
         "org.pegdown" % "pegdown" % pegdownVersion % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-
         "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % scope,
         "org.scalaj" %% "scalaj-http" % scalaJVersion % scope,
         "com.github.tomakehurst" % "wiremock" % wireMockVersion % scope,
         "info.cukes" %% "cucumber-scala" % cucumberVersion % scope,
         "info.cukes" % "cucumber-junit" % cucumberVersion % scope,
-        "org.mockito" % "mockito-core" % "1.9.5" % scope,
-        "com.eclipsesource" %% "play-json-schema-validator" % "0.8.6" % scope
+        "org.mockito" % "mockito-core" % "1.9.5" % scope
       )
     }.test
   }

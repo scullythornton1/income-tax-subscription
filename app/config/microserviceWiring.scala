@@ -50,7 +50,7 @@ object WSHttp extends WSHttp
 
 @Singleton
 class MicroserviceAuditConnector extends AuditConnector with RunMode {
-  override lazy val auditingConfig = LoadAuditingConfig(s"$env.auditing")
+  override lazy val auditingConfig = LoadAuditingConfig("auditing")
 }
 
 object MicroserviceAuditConnector extends MicroserviceAuditConnector
