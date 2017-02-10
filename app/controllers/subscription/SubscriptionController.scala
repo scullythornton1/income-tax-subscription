@@ -34,18 +34,14 @@ class SubscriptionController @Inject()(application: Application,
 
   def subscribe: Action[AnyContent] = Action.async {
     implicit request =>
-      lazy val parseError: Future[Result] = BadRequest(FEFailureResponse("Request is invalid"): JsValue)
+      lazy val parseError: Future[Result] = BadRequest(FEFailureResponse("Request is invalid"))
       request.body.asJson.fold(parseError) { x =>
-        val parsedJson: JsResult[FERequest] = parseUtil(x)(FERequest.format)
-        parsedJson.fold(
+        parseUtil(x)(FERequest.format).fold(
           invalid => parseError,
-          feRequest => {
-            val response = subManService.subscribe(feRequest)
-            response map {
-              //TODO frontend response
-              case Right(r) => Ok(FESuccessResponse("1234567"): JsValue)
-              case Left(l) => Status(l.status)(FEFailureResponse(l.reason): JsValue)
-            }
+          feRequest => subManService.subscribe(feRequest).map {
+            //TODO frontend response
+            case Right(r) => Ok(FESuccessResponse("1234567"): JsValue)
+            case Left(l) => Status(l.status)(FEFailureResponse(l.reason): JsValue)
           }
         )
       }

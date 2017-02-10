@@ -17,28 +17,23 @@
 package connectors.utils
 
 import models.{ErrorModel, ErrorResponsesModel}
-import play.api.libs.json.{JsResult, JsValue, Reads}
+import play.api.libs.json.{JsValue, Reads}
 import utils.JsonUtils
-
 
 trait ConnectorUtils[L <: ErrorResponsesModel, R] extends JsonUtils {
 
   type Response = Either[ErrorModel, R]
 
-  lazy val parseFailure = ErrorModel.parseFailure
-
   def parseFailure(status: Int, jsValue: JsValue)(implicit lReader: Reads[L]): Response = {
-    val jsL: JsResult[L] = parseUtil[L](jsValue)
-    jsL.fold(
-      invalid => parseFailure(jsValue),
+    parseUtil[L](jsValue).fold(
+      invalid => ErrorModel.parseFailure(jsValue),
       valid => ErrorModel(status, valid)
     )
   }
 
-  def parseSuccess(jsValue: JsValue)(implicit rReader: Reads[R]): Response = {
-    val jsR: JsResult[R] = parseUtil[R](jsValue)
-    jsR.fold(
-      invalid => parseFailure(jsValue),
+  def parseSuccess(jsValue: JsValue)(implicit rReader: Reads[R]): Response  = {
+    parseUtil[R](jsValue).fold(
+      invalid => ErrorModel.parseFailure(jsValue),
       valid => valid
     )
   }
