@@ -18,7 +18,7 @@ package unit.connectors
 
 import config.AppConfig
 import connectors.SubscriptionETMPConnector
-import models.{ErrorModel, IncomeSourcesModel, PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
+import models.{ErrorModel, IncomeSourcesModel, PropertySubscriptionResponseModel}
 import org.mockito.Mockito._
 import org.mockito.Matchers
 import org.scalatest.mock.MockitoSugar
