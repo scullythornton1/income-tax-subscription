@@ -17,7 +17,7 @@
 package unit.controllers.subscription
 
 import controllers.subscription.SubscriptionController
-import models.frontend.FERequest
+import models.frontend.{Both, FERequest}
 import play.api.Application
 import play.api.http.Status._
 import play.api.libs.json.JsValue
@@ -26,8 +26,6 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import unit.services.mocks.MockSubscriptionManagerService
 import utils.JsonUtils._
-import utils.TestConstants
-import utils.TestConstants.NewRegistrationResponse
 
 import scala.concurrent.Future
 
@@ -42,7 +40,7 @@ class SubscriptionControllerSpec extends UnitSpec
 
   "SubscriptionController" should {
     "return the id when successful" in {
-      val feRequest: JsValue = FERequest(nino)
+      val feRequest: JsValue = FERequest(nino, incomeSource = Both)
       val fakeRequest: FakeRequest[AnyContentAsJson] = FakeRequest().withJsonBody(feRequest)
       (setupMockRegister(nino) _).tupled(newRegSuccess)
 

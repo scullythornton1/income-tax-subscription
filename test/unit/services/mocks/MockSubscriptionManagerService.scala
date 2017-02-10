@@ -16,12 +16,12 @@
 
 package unit.services.mocks
 
-import models.frontend.FERequest
+import models.frontend.{Both, FERequest}
 import services.SubscriptionManagerService
 
 trait MockSubscriptionManagerService extends MockRegistrationService {
 
-  val feRequest = FERequest(isAgent = isAgent, nino = nino)
+  val feRequest = FERequest(isAgent = isAgent, nino = nino, incomeSource = Both)
 
   object TestSubscriptionManagerService extends SubscriptionManagerService(TestRegistrationService)
 

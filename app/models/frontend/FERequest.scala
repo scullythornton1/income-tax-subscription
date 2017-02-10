@@ -18,8 +18,8 @@ package models.frontend
 
 import play.api.libs.json.Json
 
-
 case class FERequest(nino: String,
+                     incomeSource: IncomeSourceType,
                      isAgent: Boolean = false)
 
 object FERequest {

@@ -21,7 +21,6 @@ import config.AppConfig
 import connectors.utils.ConnectorUtils
 import models.{PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
 import play.api.http.Status._
-import play.api.libs.json.Json
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.Authorization
@@ -43,13 +42,10 @@ class SubscriptionETMPConnector @Inject()(http: HttpPost, applicationConfig: App
     val desHeaders = hc.copy(authorization = Some(Authorization(s"Bearer $token"))).withExtraHeaders("Environment" -> environment)
     val request = http.POSTEmpty[HttpResponse](requestUrl)(HttpReads.readRaw, desHeaders)
     request.map {
-
       response =>
-        lazy val jsValue = Json.parse(response.body)
-
         response.status match {
-          case OK => parseSuccess(jsValue)
-          case x => parseFailure(x, jsValue)
+          case OK => parseSuccess(response.body)
+          case x => parseFailure(x, response.body)
         }
     }
   }
