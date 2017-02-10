@@ -18,6 +18,8 @@ package unit.models.subscription
 
 import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
 import uk.gov.hmrc.play.test.UnitSpec
+import utils.Resources
+import utils.JsonUtils._
 
 class BusinessSubscriptionRequestModelSpec extends UnitSpec {
 
@@ -28,23 +30,26 @@ class BusinessSubscriptionRequestModelSpec extends UnitSpec {
       tradingName = "Test Business",
       cashOrAccruals = "cash"
     )
-    val model = BusinessSubscriptionRequestModel(businessDetailsModel)
+    val model = BusinessSubscriptionRequestModel(List(businessDetailsModel))
 
     "Accounting Period Start Date should be '2017-04-01'" in {
-      model.businessDetails.accountingPeriodStartDate shouldBe "2017-04-01"
+      model.businessDetails.head.accountingPeriodStartDate shouldBe "2017-04-01"
     }
 
     "Accounting Period End Date should be '2018-03-30'" in {
-      model.businessDetails.accountingPeriodEndDate shouldBe "2018-03-30"
+      model.businessDetails.head.accountingPeriodEndDate shouldBe "2018-03-30"
     }
 
     "Trading Name should be 'Test Business'" in {
-      model.businessDetails.tradingName shouldBe "Test Business"
+      model.businessDetails.head.tradingName shouldBe "Test Business"
     }
 
     "Cash or Accruals should be 'cash'" in {
-      model.businessDetails.cashOrAccruals shouldBe "cash"
+      model.businessDetails.head.cashOrAccruals shouldBe "cash"
+    }
+
+    "Be valid against the new registration schema" in {
+      Resources.validateJson(Resources.businessSubscriptionRequestSchema, model) shouldBe true
     }
   }
-
 }

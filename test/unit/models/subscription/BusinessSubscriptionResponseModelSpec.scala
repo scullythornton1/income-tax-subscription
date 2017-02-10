@@ -19,25 +19,41 @@ package unit.models.subscription
 import models.subscription.business._
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.Implicits
+import utils.{Implicits, Resources}
+import utils.JsonUtils._
 import utils.TestConstants._
+import utils.TestConstants.BusinessSubscriptionResponse.{failureResponse, successResponse}
 
 class BusinessSubscriptionResponseModelSpec extends UnitSpec with Implicits {
 
-  "NewRegistrationResponseModel" should {
-    import utils.TestConstants.BusinessSubscriptionResponse.{failureResponse, successResponse}
+  "BusinessSubscriptionResponseModel" should {
 
-    "Reads the safe id, mtdId and Income Sources correctly from a successful registration response" in {
-      val response: JsValue = successResponse(testSafeId, testMtditId, testSourceId)
-      val expected = BusinessSubscriptionSuccessResponseModel(testSafeId, testMtditId, List(IncomeSourceModel(testSourceId)))
-      Json.fromJson[BusinessSubscriptionSuccessResponseModel](response).get shouldBe expected
+    val failedReason = "Service unavailable"
+    val failedCode = "SERVICE_UNAVAILABLE"
+    val testSuccessResponse = successResponse(testSafeId, testMtditId, testSourceId)
+    val testFailedResponse = failureResponse(failedCode, failedReason)
+
+    "for a successful response" should {
+      "Read the safe id, mtdId and Income Sources correctly from a successful business subscription response" in {
+        val expected = BusinessSubscriptionSuccessResponseModel(testSafeId, testMtditId, List(IncomeSourceModel(testSourceId)))
+        Json.fromJson[BusinessSubscriptionSuccessResponseModel](testSuccessResponse).get shouldBe expected
+      }
+
+      "Be valid against the schema" in {
+        Resources.validateJson(Resources.businessSubscriptionResponseSchema, testSuccessResponse) shouldBe true
+      }
     }
 
-    "Reads the error messages correctly from a failure registration response" in {
-      val reason = "Service unavailable"
-      val code = "SERVICE_UNAVAILABLE"
-      val response: JsValue = failureResponse(code, reason)
-      Json.fromJson[BusinessSubscriptionErrorResponseModel](response).get shouldBe BusinessSubscriptionErrorResponseModel(code, reason)
+    "for a failed response" should {
+
+      "Read the error messages correctly from a failed business subscription response" in {
+        val expected = BusinessSubscriptionErrorResponseModel(failedCode, failedReason)
+        Json.fromJson[BusinessSubscriptionErrorResponseModel](testFailedResponse).get shouldBe expected
+      }
+
+      "Be valid against the schema" in {
+        Resources.validateJson(Resources.businessSubscriptionResponseSchema, testFailedResponse) shouldBe true
+      }
     }
   }
 }

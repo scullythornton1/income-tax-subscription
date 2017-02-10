@@ -33,12 +33,12 @@ class BusinessSubscriptionConnectorSpec extends MockBusinessSubscriptionConnecto
   val authToken = config.getString("microservice.services.des.authorization-token").get
 
   val payload = BusinessSubscriptionRequestModel(
-    BusinessDetailsModel(
+    List(BusinessDetailsModel(
       accountingPeriodStartDate = "2017-05-01",
       accountingPeriodEndDate = "2018-04-30",
       tradingName = "Test Business",
       cashOrAccruals = "cash"
-    )
+    ))
   )
 
   "BusinessSubscriptionConnector.businessSubscribe" should {
