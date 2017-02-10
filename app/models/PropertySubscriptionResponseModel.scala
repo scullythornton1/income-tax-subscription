@@ -16,13 +16,11 @@
 
 package models
 
-import models.PropertySubscriptionResponse.{L, R}
 import play.api.libs.json.{JsResult, JsValue, Json, Reads}
-import play.api.mvc.MultipartFormData.ParseError
 
 case class IncomeSourcesModel(incomeSourceId: String)
 case class PropertySubscriptionResponseModel(safeId: String, mtditId: String, incomeSource: IncomeSourcesModel)
-case class PropertySubscriptionFailureModel(code: String, reason: String)
+case class PropertySubscriptionFailureModel(code: Option[String], reason: String) extends ErrorResponsesModel
 
 object IncomeSourcesModel {
   implicit val formats = Json.format[IncomeSourcesModel]
@@ -34,29 +32,3 @@ object PropertySubscriptionFailureModel {
   implicit val formats = Json.format[PropertySubscriptionFailureModel]
 }
 
-object PropertySubscriptionResponse {
-
-  type L = PropertySubscriptionFailureModel
-
-  type R = PropertySubscriptionResponseModel
-
-  type PropertySubscriptionResponse = Either[L, R]
-
-  lazy val parseFailure: JsValue => L = (js: JsValue) => PropertySubscriptionFailureModel(code = "SERVER_ERROR", reason = s"parse error: $js")
-
-  def parseAsLeft[L,R](jsValue: JsValue, parseError: L)(implicit lReader: Reads[L]): Either[L, R] = {
-    val jsL : JsResult[L] = Json.fromJson[L](jsValue)
-    jsL.fold(
-      invalid => Left(parseError),
-      valid => Left(valid)
-    )
-  }
-
-  def parseAsRight[L, R](jsValue: JsValue, parseError: L)(implicit lReader: Reads[L], rReader: Reads[R]): Either[L, R] = {
-    val jsR : JsResult[R] = Json.fromJson[R](jsValue)
-    jsR.fold(
-      invalid => Left(parseError),
-      valid => Right(valid)
-    )
-  }
-}

@@ -18,7 +18,7 @@ package unit.connectors
 
 import config.AppConfig
 import connectors.SubscriptionETMPConnector
-import models.{IncomeSourcesModel, PropertySubscriptionFailureModel, PropertySubscriptionRequestModel, PropertySubscriptionResponseModel}
+import models.{IncomeSourcesModel, PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
 import org.mockito.Mockito._
 import org.mockito.Matchers
 import org.scalatest.mock.MockitoSugar
@@ -27,6 +27,7 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpResponse}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.test.UnitSpec
 import play.api.http.Status._
+import utils.Implicits._
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
