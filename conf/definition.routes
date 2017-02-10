@@ -1,3 +1,0 @@
-GET        /definition                                       @controllers.DocumentationController.definition()
-GET        /documentation/:version/:endpointName             @controllers.DocumentationController.documentation(version: String,endpointName: String)
-GET        /conf/:version/*file                              @controllers.DocumentationController.raml(version, file)
