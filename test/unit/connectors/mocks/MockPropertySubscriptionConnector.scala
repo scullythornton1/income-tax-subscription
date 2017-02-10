@@ -14,20 +14,8 @@
  * limitations under the License.
  */
 
-package services
+package unit.connectors.mocks
 
-import javax.inject.Inject
+class MockPropertySubscriptionConnector {
 
-import connectors.SubscriptionETMPConnector
-import models.{ErrorModel, PropertySubscriptionResponseModel}
-import uk.gov.hmrc.play.http.HeaderCarrier
-import scala.concurrent.ExecutionContext.Implicits.global
-
-import scala.concurrent.Future
-
-class PropertySubscriptionService @Inject()(propertySubscriptionConnector: SubscriptionETMPConnector) {
-
-  def subscribe(nino: String)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, PropertySubscriptionResponseModel]] = {
-    propertySubscriptionConnector.subscribePropertyEtmp(nino)
-  }
 }

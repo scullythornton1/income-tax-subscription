@@ -27,7 +27,6 @@ import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.Authorization
 
 import scala.concurrent.{ExecutionContext, Future}
-import _root_.utils.JsonUtils._
 
 @Singleton
 class SubscriptionETMPConnector @Inject()(http: HttpPost, applicationConfig: AppConfig)
