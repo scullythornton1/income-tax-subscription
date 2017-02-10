@@ -62,11 +62,6 @@ class RegistrationConnector @Inject()(config: Configuration,
       val status = response.status
       status match {
         case OK => parseSuccess(response.body)
-        case BAD_REQUEST => parseFailure(BAD_REQUEST, response.body)
-        case NOT_FOUND => parseFailure(NOT_FOUND, response.body)
-        case CONFLICT => parseFailure(CONFLICT, response.body)
-        case INTERNAL_SERVER_ERROR => parseFailure(INTERNAL_SERVER_ERROR, response.body)
-        case SERVICE_UNAVAILABLE => parseFailure(SERVICE_UNAVAILABLE, response.body)
         case x => parseFailure(x, response.body)
       }
     }
@@ -78,10 +73,6 @@ class RegistrationConnector @Inject()(config: Configuration,
       val status = response.status
       status match {
         case OK => parseSuccess(response.body)
-        case BAD_REQUEST => parseFailure(BAD_REQUEST, response.body)
-        case NOT_FOUND => parseFailure(NOT_FOUND, response.body)
-        case INTERNAL_SERVER_ERROR => parseFailure(INTERNAL_SERVER_ERROR, response.body)
-        case SERVICE_UNAVAILABLE => parseFailure(SERVICE_UNAVAILABLE, response.body)
         case x => parseFailure(x, response.body)
       }
     }
