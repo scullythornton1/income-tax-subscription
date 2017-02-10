@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package models
+package unit.models.subscription
 
+import models.subscription.business.BusinessDetailsModel
 import uk.gov.hmrc.play.test.UnitSpec
 
 class BusinessDetailsModelSpec extends UnitSpec {
 
   "Creating a model for a subscription request" should {
-    val contactDetails = ContactDetailsModel(emailAddress = "test@test.com")
     val businessDetails = BusinessDetailsModel(
       accountingPeriodStartDate = "2017-04-01",
       accountingPeriodEndDate = "2018-03-30",
       tradingName = "Test Business",
-      contactDetails,
       cashOrAccruals = "cash"
     )
 
@@ -40,10 +39,6 @@ class BusinessDetailsModelSpec extends UnitSpec {
 
     "Trading Name should be 'Test Business'" in {
       businessDetails.tradingName shouldBe "Test Business"
-    }
-
-    "Email should be 'test@test.com'" in {
-      businessDetails.contactDetails.emailAddress shouldBe "test@test.com"
     }
 
     "Cash or Accruals should be 'cash'" in {

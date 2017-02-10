@@ -14,42 +14,42 @@
  * limitations under the License.
  */
 
-package models
+package unit.models.subscription
 
+import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
 import uk.gov.hmrc.play.test.UnitSpec
+import utils.Resources
+import utils.JsonUtils._
 
 class BusinessSubscriptionRequestModelSpec extends UnitSpec {
 
   "Creating a model for a subscription request" should {
-    val contactDetails = ContactDetailsModel(emailAddress = "test@test.com")
     val businessDetailsModel = BusinessDetailsModel(
       accountingPeriodStartDate = "2017-04-01",
       accountingPeriodEndDate = "2018-03-30",
       tradingName = "Test Business",
-      contactDetails,
       cashOrAccruals = "cash"
     )
-    val model = BusinessSubscriptionRequestModel(businessDetailsModel)
+    val model = BusinessSubscriptionRequestModel(List(businessDetailsModel))
 
     "Accounting Period Start Date should be '2017-04-01'" in {
-      model.businessDetails.accountingPeriodStartDate shouldBe "2017-04-01"
+      model.businessDetails.head.accountingPeriodStartDate shouldBe "2017-04-01"
     }
 
     "Accounting Period End Date should be '2018-03-30'" in {
-      model.businessDetails.accountingPeriodEndDate shouldBe "2018-03-30"
+      model.businessDetails.head.accountingPeriodEndDate shouldBe "2018-03-30"
     }
 
     "Trading Name should be 'Test Business'" in {
-      model.businessDetails.tradingName shouldBe "Test Business"
+      model.businessDetails.head.tradingName shouldBe "Test Business"
     }
 
-    "Email should be 'test@test.com'" in {
-      model.businessDetails.contactDetails.emailAddress shouldBe "test@test.com"
+    "Cash or Accruals should be 'cash'" in {
+      model.businessDetails.head.cashOrAccruals shouldBe "cash"
     }
 
-    "Email should be 'cash'" in {
-      model.businessDetails.cashOrAccruals shouldBe "cash"
+    "Be valid against the new registration schema" in {
+      Resources.validateJson(Resources.businessSubscriptionRequestSchema, model) shouldBe true
     }
   }
-
 }
