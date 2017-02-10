@@ -28,6 +28,36 @@ object TestConstants {
   lazy val testSourceId = "sourceId0001"
   lazy val testErrorReason = "Error Reason"
 
+  val propertySubscriptionSuccessResponse =
+    """
+      |{
+      |
+      |"safeId": "XA0001234567890",
+      |
+      |"mtditId": "mdtitId001",
+      |
+      |"incomeSource":
+      |
+      |{
+      |
+      |"incomeSourceId": "sourceId0001"
+      |
+      |}
+      |
+      |}
+    """.stripMargin
+
+  val propertySubscriptionFailureResponse: (String, String) => String = (code: String, reason: String) =>
+    s"""
+       |{
+       |
+         |"code": "$code",
+       |
+         |"reason": "$reason"
+       |
+       |}
+    """.stripMargin
+
   object NewRegistrationResponse {
     val successResponse: String => JsValue = (safeId: String) =>
       s"""
