@@ -18,7 +18,7 @@ package unit.connectors
 
 import config.AppConfig
 import connectors.SubscriptionETMPConnector
-import models.{IncomeSourcesModel, PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
+import models.{ErrorModel, IncomeSourcesModel, PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
 import org.mockito.Mockito._
 import org.mockito.Matchers
 import org.scalatest.mock.MockitoSugar
@@ -86,7 +86,8 @@ class SubscriptionETMPConnectorSpec extends MockitoSugar with UnitSpec with OneA
     "parse and return success response" in {
 
       setupMockHttpPost()(OK, jsSuccess)
-      val expected = PropertySubscriptionResponseModel(safeId = "XA0001234567890", mtditId = "mdtitId001", incomeSource = IncomeSourcesModel(incomeSourceId = "sourceId0001"))
+      val expected = PropertySubscriptionResponseModel(
+        safeId = "XA0001234567890", mtditId = "mdtitId001", incomeSource = IncomeSourcesModel(incomeSourceId = "sourceId0001"))
       val actual = call
       actual shouldBe Right(expected)
     }
@@ -96,7 +97,7 @@ class SubscriptionETMPConnectorSpec extends MockitoSugar with UnitSpec with OneA
       val code = "INVALID_PAYLOAD"
       val jsFailure = Json.parse(failureResponse(code, reason))
       setupMockHttpPost()(BAD_REQUEST, jsFailure)
-      val expected = PropertySubscriptionFailureModel(code, reason)
+      val expected = ErrorModel(BAD_REQUEST, code, reason)
       val actual = call
       actual shouldBe Left(expected)
     }
@@ -106,7 +107,7 @@ class SubscriptionETMPConnectorSpec extends MockitoSugar with UnitSpec with OneA
       val code = "INVALID_NINO"
       val jsFailure = Json.parse(failureResponse(code, reason))
       setupMockHttpPost()(BAD_REQUEST, jsFailure)
-      val expected = PropertySubscriptionFailureModel(code, reason)
+      val expected = ErrorModel(BAD_REQUEST, code, reason)
       val actual = call
       actual shouldBe Left(expected)
     }
@@ -116,7 +117,7 @@ class SubscriptionETMPConnectorSpec extends MockitoSugar with UnitSpec with OneA
       val code = "NOT_FOUND_NINO"
       val jsFailure = Json.parse(failureResponse(code, reason))
       setupMockHttpPost()(NOT_FOUND, jsFailure)
-      val expected = PropertySubscriptionFailureModel(code, reason)
+      val expected = ErrorModel(NOT_FOUND, code, reason)
       val actual = call
       actual shouldBe Left(expected)
     }
@@ -126,7 +127,7 @@ class SubscriptionETMPConnectorSpec extends MockitoSugar with UnitSpec with OneA
       val code = "SERVER_ERROR"
       val jsFailure = Json.parse(failureResponse(code, reason))
       setupMockHttpPost()(INTERNAL_SERVER_ERROR, jsFailure)
-      val expected = PropertySubscriptionFailureModel(code, reason)
+      val expected = ErrorModel(INTERNAL_SERVER_ERROR, code, reason)
       val actual = call
       actual shouldBe Left(expected)
     }
@@ -136,7 +137,7 @@ class SubscriptionETMPConnectorSpec extends MockitoSugar with UnitSpec with OneA
       val code = "SERVICE_UNAVAILABLE"
       val jsFailure = Json.parse(failureResponse(code, reason))
       setupMockHttpPost()(SERVICE_UNAVAILABLE, jsFailure)
-      val expected = PropertySubscriptionFailureModel(code, reason)
+      val expected = ErrorModel(SERVICE_UNAVAILABLE, code, reason)
       val actual = call
       actual shouldBe Left(expected)
     }

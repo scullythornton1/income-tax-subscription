@@ -33,5 +33,5 @@ class MicroserviceAppConfig @Inject()(configuration: Configuration) extends AppC
   override lazy val authURL = baseUrl("auth")
   override lazy val desURL = baseUrl("des")
   override lazy val desEnvironment = loadConfig("microservice.services.des.environment")
-  override lazy val desToken = loadConfig("microservice.services.des.token")
+  override lazy val desToken = loadConfig("microservice.services.des.authorization-token")
 }

@@ -50,10 +50,7 @@ class SubscriptionETMPConnector @Inject()(http: HttpPost, applicationConfig: App
 
         response.status match {
           case OK => parseSuccess(jsValue)
-          case BAD_REQUEST => parseFailure(BAD_REQUEST, jsValue)
-          case NOT_FOUND => parseFailure(NOT_FOUND, jsValue)
-          case INTERNAL_SERVER_ERROR => parseFailure(INTERNAL_SERVER_ERROR, jsValue)
-          case SERVICE_UNAVAILABLE => parseFailure(SERVICE_UNAVAILABLE, jsValue)
+          case x => parseFailure(x, jsValue)
         }
     }
   }
