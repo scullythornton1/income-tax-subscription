@@ -16,25 +16,27 @@
 
 package unit.connectors.mocks
 
-import audit.Logging
-import connectors.{BusinessSubscriptionConnector, RegistrationConnector}
+import config.AppConfig
+import connectors.SubscriptionConnector
 import models.subscription.business.BusinessSubscriptionRequestModel
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Configuration
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.play.http.{HttpGet, HttpPost}
+import uk.gov.hmrc.play.http.HttpPost
 import utils.Implicits._
 
-trait MockBusinessSubscriptionConnector extends MockHttp with OneAppPerSuite {
+trait MockSubscriptionConnector extends MockHttp with OneAppPerSuite {
 
   lazy val config: Configuration = app.injector.instanceOf[Configuration]
-  lazy val logging: Logging = app.injector.instanceOf[Logging]
+  lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val httpPost: HttpPost = mockHttpPost
-  lazy val httpGet: HttpGet = mockHttpGet
 
-  object TestBusinessSubsscriptionConnector extends BusinessSubscriptionConnector(config, logging, httpPost, httpGet)
+  object TestSubsscriptionConnector extends SubscriptionConnector(config, httpPost, appConfig)
 
   def setupMockBusinessSubscribe(nino: String, payload: BusinessSubscriptionRequestModel)(status: Int, response: JsValue): Unit =
-    setupMockHttpPost(url = TestBusinessSubsscriptionConnector.businessSubscribeUrl(nino), payload)(status, response)
+    setupMockHttpPost(url = TestSubsscriptionConnector.businessSubscribeUrl(nino), payload)(status, response)
+
+  def setupMockPropertySubscribe(nino: String)(status: Int, response: JsValue): Unit =
+    setupMockHttpPostEmpty(url = TestSubsscriptionConnector.propertySubscribeUrl(nino))(status, response)
 
 }

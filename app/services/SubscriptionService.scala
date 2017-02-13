@@ -17,17 +17,21 @@
 package services
 
 import javax.inject.Inject
-
-import connectors.SubscriptionETMPConnector
+import connectors.SubscriptionConnector
+import models.subscription.business.{BusinessSubscriptionRequestModel, BusinessSubscriptionSuccessResponseModel}
 import models.{ErrorModel, PropertySubscriptionResponseModel}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
-
 import scala.concurrent.Future
 
-class PropertySubscriptionService @Inject()(propertySubscriptionConnector: SubscriptionETMPConnector) {
+class SubscriptionService @Inject() (subscriptionConnector: SubscriptionConnector){
 
-  def subscribe(nino: String)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, PropertySubscriptionResponseModel]] = {
-    propertySubscriptionConnector.subscribePropertyEtmp(nino)
+  def propertySubscribe(nino: String)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, PropertySubscriptionResponseModel]] = {
+    subscriptionConnector.propertySubscribe(nino)
+  }
+
+  def businessSubscribe(nino: String, businssDetails: BusinessSubscriptionRequestModel)
+                       (implicit hc: HeaderCarrier): Future[Either[ErrorModel, BusinessSubscriptionSuccessResponseModel]] = {
+    subscriptionConnector.businessSubscribe(nino, businssDetails)
   }
 }
