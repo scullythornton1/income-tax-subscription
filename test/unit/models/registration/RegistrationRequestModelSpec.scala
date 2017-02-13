@@ -16,20 +16,14 @@
 
 package unit.models.registration
 
-import models.registration.{IndividualModel, RegistrationRequestModel}
+import models.registration.RegistrationRequestModel
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.JsonUtils._
 import utils.Resources
 
 class RegistrationRequestModelSpec extends UnitSpec {
-
-  val individual = IndividualModel(
-    firstName = "Test",
-    lastName = "Person"
-  )
   val request = RegistrationRequestModel(
-    isAnAgent = false,
-    individual = individual
+    isAnAgent = false
   )
 
   "RegistrationRequestModel" should {

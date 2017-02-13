@@ -19,11 +19,6 @@
           "type": "string",
           "pattern": "^[A-Z]{3,10}$"
         },
-        "utr": {
-          "description": "Unique taxpayer reference number",
-          "type": "string",
-          "pattern": "^[0-9]{10}$"
-        },
         "requiresNameMatch": {
           "description": "Boolean value to indicate whether or not matching by name is required",
           "type": "boolean",
@@ -65,11 +60,6 @@
     "noIndividualOrOrganisation": {
       "type": "object",
       "properties": {
-        "utr": {
-          "description": "Unique taxpayer reference number",
-          "type": "string",
-          "pattern": "^[0-9]{10}$"
-        },
         "requiresNameMatch": {
           "description": "Boolean value to indicate whether or not matching by name is required",
           "type": "boolean",
@@ -83,7 +73,6 @@
         }
       },
       "required": [
-        "utr",
         "requiresNameMatch",
         "isAnAgent"
       ],

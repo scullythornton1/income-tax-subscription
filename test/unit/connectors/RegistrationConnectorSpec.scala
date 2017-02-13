@@ -31,8 +31,7 @@ class RegistrationConnectorSpec extends MockRegistrationConnector {
   val env = config.getString("microservice.services.des.environment").get
   val authToken = config.getString("microservice.services.des.authorization-token").get
 
-  val individual = IndividualModel("f", "l")
-  val register = RegistrationRequestModel(isAnAgent = false, individual = individual)
+  val register = RegistrationRequestModel(isAnAgent = false)
   val nino: String = TestConstants.testNino
   val safeId: String = TestConstants.testSafeId
 
