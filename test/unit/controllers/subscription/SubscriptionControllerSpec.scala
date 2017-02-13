@@ -26,6 +26,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import unit.services.mocks.MockSubscriptionManagerService
 import utils.JsonUtils._
+import utils.TestConstants
 
 import scala.concurrent.Future
 
@@ -36,7 +37,7 @@ class SubscriptionControllerSpec extends UnitSpec
 
   object TestController extends SubscriptionController(application, TestSubscriptionManagerService)
 
-  def call(request: Request[AnyContentAsJson]): Future[Result] = TestController.subscribe(request)
+  def call(request: Request[AnyContentAsJson]): Future[Result] = TestController.subscribe(TestConstants.testNino)(request)
 
   "SubscriptionController" should {
     "return the id when successful" in {

@@ -1,1 +1,1 @@
-POST        /subscription        @controllers.subscription.SubscriptionController.subscribe
+POST        /subscription/:nino        @controllers.subscription.SubscriptionController.subscribe(nino: String)
