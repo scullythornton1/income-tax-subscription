@@ -26,8 +26,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 @Singleton
-class SubscriptionManagerService @Inject()(registrationService: RegistrationService
-                                          ) {
+class SubscriptionManagerService @Inject()(registrationService: RegistrationService) {
 
   //TODO add the calls and routing to the other services
   def subscribe(request: FERequest)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, RegistrationSuccessResponseModel]] = {

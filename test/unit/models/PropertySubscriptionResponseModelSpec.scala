@@ -16,6 +16,7 @@
 
 package models
 
+import models.subscription.property.{IncomeSourcesModel, PropertySubscriptionResponseModel}
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Resources

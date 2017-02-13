@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package models
+package models.subscription.property
 
-import play.api.libs.json.{JsResult, JsValue, Json, Reads}
+import models.ErrorResponsesModel
+import play.api.libs.json.Json
 
 case class IncomeSourcesModel(incomeSourceId: String)
 case class PropertySubscriptionResponseModel(safeId: String, mtditId: String, incomeSource: IncomeSourcesModel)

@@ -17,10 +17,13 @@
 package services
 
 import javax.inject.Inject
+
 import connectors.SubscriptionConnector
 import models.subscription.business.{BusinessSubscriptionRequestModel, BusinessSubscriptionSuccessResponseModel}
-import models.{ErrorModel, PropertySubscriptionResponseModel}
+import models.ErrorModel
+import models.subscription.property.PropertySubscriptionResponseModel
 import uk.gov.hmrc.play.http.HeaderCarrier
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

@@ -16,11 +16,19 @@
 
 package models.frontend
 
+import models.DateModel
 import play.api.libs.json.Json
 
-case class FERequest(nino: String,
-                     incomeSource: IncomeSourceType,
-                     isAgent: Boolean = false)
+case class FERequest
+(
+  nino: String,
+  incomeSource: IncomeSourceType,
+  isAgent: Boolean = false,
+  accountingPeriodStartDate: Option[DateModel] = None,
+  accountingPeriodEndDate: Option[DateModel] = None,
+  cashOrAccruals: Option[String] = None,
+  tradingName: Option[String] = None
+)
 
 object FERequest {
   implicit val format = Json.format[FERequest]

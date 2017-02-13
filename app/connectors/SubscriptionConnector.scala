@@ -21,14 +21,16 @@ import javax.inject.Inject
 import audit.Logging
 import config.AppConfig
 import connectors.utils.ConnectorUtils
-import models.{PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
+import models.PropertySubscriptionFailureModel
 import models.subscription.business._
+import models.subscription.property.{PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
 import play.api.Configuration
 import play.api.http.Status._
 import play.api.libs.json.Writes
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.Authorization
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class SubscriptionConnector @Inject()

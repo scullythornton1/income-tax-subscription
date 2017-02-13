@@ -16,7 +16,7 @@
 
 package unit.connectors
 
-import models.{ErrorModel, IncomeSourcesModel, PropertySubscriptionResponseModel}
+import models.ErrorModel
 import models.subscription.business._
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
@@ -25,6 +25,8 @@ import unit.connectors.mocks.MockSubscriptionConnector
 import utils.JsonUtils._
 import utils.TestConstants._
 import BusinessSubscriptionResponse._
+import models.subscription.property.{IncomeSourcesModel, PropertySubscriptionResponseModel}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SubscriptionConnectorSpec extends MockSubscriptionConnector {

@@ -18,7 +18,8 @@ package unit.services
 
 import config.AppConfig
 import connectors.SubscriptionConnector
-import models.{ErrorModel, IncomeSourcesModel, PropertySubscriptionResponseModel}
+import models.subscription.property.{IncomeSourcesModel, PropertySubscriptionResponseModel}
+import models.ErrorModel
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Configuration
 import play.api.libs.json.{JsValue, Json}

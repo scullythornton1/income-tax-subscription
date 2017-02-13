@@ -40,7 +40,7 @@ class SubscriptionController @Inject()(application: Application,
           invalid => parseError,
           feRequest => subManService.subscribe(feRequest).map {
             //TODO frontend response
-            case Right(r) => Ok(FESuccessResponse("1234567"): JsValue)
+            case Right(r) => Ok(FESuccessResponse(r.safeId): JsValue)
             case Left(l) => Status(l.status)(FEFailureResponse(l.reason): JsValue)
           }
         )
