@@ -24,10 +24,10 @@ case class FERequest
   nino: String,
   incomeSource: IncomeSourceType,
   isAgent: Boolean = false,
-  accountingPeriodStartDate: Option[DateModel] = None,
-  accountingPeriodEndDate: Option[DateModel] = None,
-  cashOrAccruals: Option[String] = None,
-  tradingName: Option[String] = None
+  accountingPeriodStart: Option[DateModel] = None,
+  accountingPeriodEnd: Option[DateModel] = None,
+  tradingName: Option[String] = None,
+  cashOrAccruals: Option[String] = None
 )
 
 object FERequest {

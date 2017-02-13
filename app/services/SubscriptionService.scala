@@ -19,8 +19,9 @@ package services
 import javax.inject.Inject
 
 import connectors.SubscriptionConnector
-import models.subscription.business.{BusinessSubscriptionRequestModel, BusinessSubscriptionSuccessResponseModel}
+import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel, BusinessSubscriptionSuccessResponseModel}
 import models.ErrorModel
+import models.frontend.FERequest
 import models.subscription.property.PropertySubscriptionResponseModel
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -29,12 +30,18 @@ import scala.concurrent.Future
 
 class SubscriptionService @Inject() (subscriptionConnector: SubscriptionConnector){
 
-  def propertySubscribe(nino: String)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, PropertySubscriptionResponseModel]] = {
-    subscriptionConnector.propertySubscribe(nino)
-  }
+  def propertySubscribe(request: FERequest)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, PropertySubscriptionResponseModel]] =
+    subscriptionConnector.propertySubscribe(request.nino)
 
-  def businessSubscribe(nino: String, businssDetails: BusinessSubscriptionRequestModel)
-                       (implicit hc: HeaderCarrier): Future[Either[ErrorModel, BusinessSubscriptionSuccessResponseModel]] = {
-    subscriptionConnector.businessSubscribe(nino, businssDetails)
+  def businessSubscribe(request: FERequest)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, BusinessSubscriptionSuccessResponseModel]] = {
+
+    val businessDetails = BusinessDetailsModel(
+      accountingPeriodStartDate = request.accountingPeriodStart.get.toDesDateFormat,
+      accountingPeriodEndDate = request.accountingPeriodEnd.get.toDesDateFormat,
+      cashOrAccruals = request.cashOrAccruals.get,
+      tradingName = request.tradingName.get
+    )
+
+    subscriptionConnector.businessSubscribe(request.nino, BusinessSubscriptionRequestModel(List(businessDetails)))
   }
 }

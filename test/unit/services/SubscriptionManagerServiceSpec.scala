@@ -24,7 +24,7 @@ class SubscriptionManagerServiceSpec extends MockSubscriptionManagerService {
 
   implicit val hc = HeaderCarrier()
 
-  def call = await(TestSubscriptionManagerService.subscribe(request = feRequest))
+  def call = await(TestSubscriptionManagerService.orchestrateSubscription(request = feRequest))
 
   "SubscriptionManagerService" should {
     "return the safeId when the registration is successful" in {
