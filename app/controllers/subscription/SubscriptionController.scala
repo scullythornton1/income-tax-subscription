@@ -34,7 +34,7 @@ class SubscriptionController @Inject()(application: Application,
 
   def subscribe(nino: String): Action[AnyContent] = Action.async {
     implicit request =>
-      lazy val parseError: Future[Result] = BadRequest(FEFailureResponse("Request is invalid"))
+      lazy val parseError: Future[Result] = BadRequest(FEFailureResponse("Request is invalid"): JsValue)
       request.body.asJson.fold(parseError) { x =>
         parseUtil(x)(FERequest.format).fold(
           invalid => parseError,
