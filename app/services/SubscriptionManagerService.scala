@@ -34,7 +34,6 @@ class SubscriptionManagerService @Inject()
   subscriptionService: SubscriptionService
 ) {
 
-  //TODO add the calls and routing to the other services
   def orchestrateSubscription(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, FESuccessResponse]] = {
 
     registrationService.register(request.isAgent, request.nino) flatMap {
@@ -49,20 +48,7 @@ class SubscriptionManagerService @Inject()
           case (_, Some(Right(x))) => FESuccessResponse(x.mtditId)
         }
       }
-      case Left(failure) => {
-        println("")
-        println("")
-        println("")
-        println("")
-        println("")
-        println(s"!!!!!! failed Registration call !!!!!!!!!!!!!")
-        println("")
-        println("")
-        println("")
-        println("")
-        println("")
-        Future.successful(failure)
-      }
+      case Left(failure) => Future.successful(failure)
     }
 
   }
