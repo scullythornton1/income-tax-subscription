@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package models
+package models.subscription.property
 
-import play.api.libs.json.{JsResult, JsValue, Json, Reads}
+import models.ErrorResponsesModel
+import play.api.libs.json.Json
+import models.subscription.IncomeSourceModel
 
-case class IncomeSourcesModel(incomeSourceId: String)
-case class PropertySubscriptionResponseModel(safeId: String, mtditId: String, incomeSource: IncomeSourcesModel)
+case class PropertySubscriptionResponseModel(safeId: String, mtditId: String, incomeSource: IncomeSourceModel)
 case class PropertySubscriptionFailureModel(code: Option[String], reason: String) extends ErrorResponsesModel
 
-object IncomeSourcesModel {
-  implicit val formats = Json.format[IncomeSourcesModel]
-}
 object PropertySubscriptionResponseModel {
   implicit val formats = Json.format[PropertySubscriptionResponseModel]
 }

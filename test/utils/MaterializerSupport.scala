@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package models.frontend
+package utils
 
-import models.DateModel
-import play.api.libs.json.Json
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 
-case class FERequest
-(
-  nino: String,
-  incomeSource: IncomeSourceType,
-  isAgent: Boolean = false,
-  accountingPeriodStart: Option[DateModel] = None,
-  accountingPeriodEnd: Option[DateModel] = None,
-  tradingName: Option[String] = None,
-  cashOrAccruals: Option[String] = None
-)
-
-object FERequest {
-  implicit val format = Json.format[FERequest]
+trait MaterializerSupport {
+  implicit val system = ActorSystem("Sys")
+  implicit val materializer = ActorMaterializer()
 }

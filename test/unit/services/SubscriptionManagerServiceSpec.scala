@@ -16,29 +16,71 @@
 
 package unit.services
 
+import models.frontend.FERequest
 import play.api.http.Status._
 import uk.gov.hmrc.play.http.HeaderCarrier
 import unit.services.mocks.MockSubscriptionManagerService
+import utils.TestConstants._
+
+import scala.concurrent.ExecutionContext
 
 class SubscriptionManagerServiceSpec extends MockSubscriptionManagerService {
 
   implicit val hc = HeaderCarrier()
+  implicit val ec = ExecutionContext.Implicits.global
 
-  def call = await(TestSubscriptionManagerService.subscribe(request = feRequest))
+  "The SubscriptionManagerService.orchestrateSubscription action" should {
 
-  "SubscriptionManagerService" should {
-    "return the safeId when the registration is successful" in {
-      setupRegister(newRegSuccess)
-      val response = call
-      response.isRight shouldBe true
-      response.right.get.safeId shouldBe safeId
+    def call(request: FERequest) = await(TestSubscriptionManagerService.orchestrateSubscription(request))
+
+    "return the mtditID when registration and subscription for property is successful" in {
+      mockRegister(registerRequestPayload)(regSuccess)
+      mockPropertySubscribe(propertySubscribeSuccess)
+      call(fePropertyRequest).right.get.mtditId shouldBe testMtditId
+    }
+
+    "return the mtditID when registration and subscription for business is successful" in {
+      mockRegister(registerRequestPayload)(regSuccess)
+      mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
+      call(feBusinessRequest).right.get.mtditId shouldBe testMtditId
+    }
+
+    "return the mtditID when registration and subscription for both Property and Business is successful" in {
+      mockRegister(registerRequestPayload)(regSuccess)
+      mockPropertySubscribe(propertySubscribeSuccess)
+      mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
+      call(feBothRequest).right.get.mtditId shouldBe testMtditId
     }
 
     "return the error if registration fails" in {
-      setupRegister(newRegBadRequest)
-      val response = call
-      response.isLeft shouldBe true
-      response.left.get.status shouldBe BAD_REQUEST
+      mockRegister(registerRequestPayload)(INVALID_NINO)
+      call(fePropertyRequest).left.get.status shouldBe BAD_REQUEST
+    }
+
+    "return the error if registration successful but property subscription fails" in {
+      mockRegister(registerRequestPayload)(regSuccess)
+      mockPropertySubscribe(INVALID_NINO)
+      call(fePropertyRequest).left.get.status shouldBe BAD_REQUEST
+    }
+
+    "return the error if registration successful but business subscription fails" in {
+      mockRegister(registerRequestPayload)(regSuccess)
+      mockBusinessSubscribe(businessSubscriptionRequestPayload)(INVALID_NINO)
+      call(feBusinessRequest).left.get.status shouldBe BAD_REQUEST
+    }
+
+    "return the error if registration and property successful, but business subscription fails" in {
+      mockRegister(registerRequestPayload)(regSuccess)
+      mockPropertySubscribe(propertySubscribeSuccess)
+      mockBusinessSubscribe(businessSubscriptionRequestPayload)(INVALID_NINO)
+      call(feBothRequest).left.get.status shouldBe BAD_REQUEST
+    }
+
+    "return the error if registration and business successful, but property subscription fails" in {
+      mockRegister(registerRequestPayload)(regSuccess)
+      mockPropertySubscribe(INVALID_NINO)
+      mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
+      call(feBothRequest).left.get.status shouldBe BAD_REQUEST
     }
 
   }

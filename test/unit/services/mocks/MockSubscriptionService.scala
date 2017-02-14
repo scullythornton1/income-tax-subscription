@@ -16,18 +16,11 @@
 
 package unit.services.mocks
 
-import config.AppConfig
-import play.api.Configuration
-import services.SubscriptionManagerService
-import uk.gov.hmrc.play.http.HttpGet
+import services.SubscriptionService
+import unit.connectors.mocks.MockSubscriptionConnector
 
-trait MockSubscriptionManagerService extends MockRegistrationService with MockSubscriptionService {
+trait MockSubscriptionService extends MockSubscriptionConnector {
 
-  override lazy val config = app.injector.instanceOf[Configuration]
-  override lazy val appConfig = app.injector.instanceOf[AppConfig]
-  override lazy val httpPost = mockHttpPost
-  override lazy val httpGet: HttpGet = mockHttpGet
-
-  object TestSubscriptionManagerService extends SubscriptionManagerService(logging, TestRegistrationService, TestSubscriptionService)
+  object TestSubscriptionService extends SubscriptionService(TestSubscriptionConnector)
 
 }

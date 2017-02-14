@@ -45,11 +45,10 @@ class SubscriptionController @Inject()(logging: Logging,
             logging.err(s"Request is invalid:\n${invalid.toString}\n${request.body.toString}")
             parseError
           },
-          feRequest => subManService.subscribe(feRequest).map {
+          feRequest => subManService.orchestrateSubscription(feRequest).map {
             case Right(r) =>
-              val response: JsValue = FESuccessResponse("1234567")
-              logging.debug(s"Subscription successful, responding with\n$response")
-              Ok(response)
+              logging.debug(s"Subscription successful, responding with\n$r")
+              Ok(r: JsValue)
             case Left(l) =>
               logging.warn(s"Subscription failed, responding with\nstatus=${l.status}\nreason=${l.reason}")
               Status(l.status)(FEFailureResponse(l.reason): JsValue)

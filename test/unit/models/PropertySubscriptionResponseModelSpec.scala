@@ -16,13 +16,15 @@
 
 package models
 
+import models.subscription.property.PropertySubscriptionResponseModel
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.Resources
+import models.subscription.IncomeSourceModel
 
 class PropertySubscriptionResponseModelSpec extends UnitSpec {
   "Creating a model for a subscription request" should {
-    val IncomeModel = IncomeSourcesModel(incomeSourceId = "sourceId0001")
+    val IncomeModel = IncomeSourceModel(incomeSourceId = "sourceId0001")
     val ResponseModel = PropertySubscriptionResponseModel(safeId = "XA0001234567890", mtditId = "mdtitId001", incomeSource = IncomeModel)
     val expectedResponse = Json.parse("""{
                                         |  "safeId": "XA0001234567890",

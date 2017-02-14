@@ -18,17 +18,17 @@ package connectors
 
 import javax.inject.Inject
 
-import audit.Logging$
 import config.AppConfig
 import connectors.utils.ConnectorUtils
-import models.{PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
 import models.subscription.business._
+import models.subscription.property.{PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
 import play.api.Configuration
 import play.api.http.Status._
 import play.api.libs.json.Writes
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.Authorization
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class SubscriptionConnector @Inject()
@@ -49,6 +49,10 @@ class SubscriptionConnector @Inject()
     hc.copy(authorization = Some(Authorization(s"Bearer $urlHeaderAuthorization")))
       .withExtraHeaders("Environment" -> urlHeaderEnvironment, "Content-Type" -> "application/json")
 
+  def createHeaderCarrierPostEmpty(headerCarrier: HeaderCarrier): HeaderCarrier =
+    headerCarrier.copy(authorization = Some(Authorization(s"Bearer $urlHeaderAuthorization")))
+      .withExtraHeaders("Environment" -> urlHeaderEnvironment)
+
   def businessSubscribe(nino: String, businessSubscriptionPayload: BusinessSubscriptionRequestModel)
                        (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[BusinessConnectorUtil.Response] = {
     import BusinessConnectorUtil._
@@ -64,7 +68,7 @@ class SubscriptionConnector @Inject()
 
   def propertySubscribe(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[PropertyConnectorUtil.Response] = {
     import PropertyConnectorUtil._
-    httpPost.POSTEmpty[HttpResponse](propertySubscribeUrl(nino))(HttpReads.readRaw, createHeaderCarrierPost(hc)).map {
+    httpPost.POSTEmpty[HttpResponse](propertySubscribeUrl(nino))(HttpReads.readRaw, createHeaderCarrierPostEmpty(hc)).map {
       response => response.status match {
         case OK => parseSuccess(response.body)
         case x => parseFailure(x, response.body)

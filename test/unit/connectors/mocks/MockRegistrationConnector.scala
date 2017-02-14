@@ -18,11 +18,14 @@ package unit.connectors.mocks
 
 import audit.Logging
 import connectors.RegistrationConnector
+import models.registration.RegistrationRequestModel
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Configuration
+import play.api.http.Status._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.{HttpGet, HttpPost}
 import utils.Implicits._
+import utils.TestConstants.{GetRegistrationResponse, NewRegistrationResponse, _}
 
 trait MockRegistrationConnector extends MockHttp with OneAppPerSuite {
 
@@ -31,10 +34,16 @@ trait MockRegistrationConnector extends MockHttp with OneAppPerSuite {
   lazy val httpPost: HttpPost = mockHttpPost
   lazy val httpGet: HttpGet = mockHttpGet
 
+  def mockRegister(payload: RegistrationRequestModel) = (setupMockRegister(testNino, payload) _).tupled
+  val mockGetRegistration = (setupMockGetRegistration(testNino) _).tupled
+
   object TestRegistrationConnector extends RegistrationConnector(config, logging, httpPost, httpGet)
 
-  def setupMockRegister(nino: String)(status: Int, response: JsValue): Unit =
-    setupMockHttpPost(url = TestRegistrationConnector.newRegistrationUrl(nino))(status, response)
+  val regSuccess = (OK, NewRegistrationResponse.successResponse(testSafeId))
+  val getRegSuccess = (OK, GetRegistrationResponse.successResponse(testSafeId))
+
+  def setupMockRegister(nino: String, payload: RegistrationRequestModel)(status: Int, response: JsValue): Unit =
+    setupMockHttpPost(url = TestRegistrationConnector.newRegistrationUrl(nino), payload)(status, response)
 
   def setupMockGetRegistration(nino: String)(status: Int, response: JsValue): Unit =
     setupMockHttpGet(url = TestRegistrationConnector.getRegistrationUrl(nino))(status, response)

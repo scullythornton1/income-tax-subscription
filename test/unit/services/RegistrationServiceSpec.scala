@@ -19,42 +19,36 @@ package unit.services
 import play.api.http.Status._
 import uk.gov.hmrc.play.http.HeaderCarrier
 import unit.services.mocks.MockRegistrationService
+import utils.TestConstants._
 
 class RegistrationServiceSpec extends MockRegistrationService {
 
   implicit val hc = HeaderCarrier()
 
-  def call = await(TestRegistrationService.register(isAgent = isAgent, nino))
+  def call = await(TestRegistrationService.register(isAgent = false, testNino))
 
   "RegistrationService" should {
+
     "return the safeId when the registration is successful" in {
-      setupRegister(newRegSuccess)
-      val response = call
-      response.isRight shouldBe true
-      response.right.get.safeId shouldBe safeId
+      mockRegister(registerRequestPayload)(regSuccess)
+      call.right.get.safeId shouldBe testSafeId
     }
 
     "return the error if registration fails" in {
-      setupRegister(newRegBadRequest)
-      val response = call
-      response.isLeft shouldBe true
-      response.left.get.status shouldBe BAD_REQUEST
+      mockRegister(registerRequestPayload)(INVALID_NINO)
+      call.left.get.status shouldBe BAD_REQUEST
     }
 
     "return the safeId when the registration is conflict but lookup is successful" in {
-      setupRegister(newRegConflict)
-      setupGetRegistration(getRegSuccess)
-      val response = call
-      response.isRight shouldBe true
-      response.right.get.safeId shouldBe safeId
+      mockRegister(registerRequestPayload)(CONFLICT_ERROR)
+      mockGetRegistration(getRegSuccess)
+      call.right.get.safeId shouldBe testSafeId
     }
 
     "return the error when both registration is conflict but lookup is unsuccessful" in {
-      setupRegister(newRegConflict)
-      setupGetRegistration(getRegBadRequest)
-      val response = call
-      response.isLeft shouldBe true
-      response.left.get.status shouldBe BAD_REQUEST
+      mockRegister(registerRequestPayload)(CONFLICT_ERROR)
+      mockGetRegistration(INVALID_NINO)
+      call.left.get.status shouldBe BAD_REQUEST
     }
   }
 
