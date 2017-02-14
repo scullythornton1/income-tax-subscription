@@ -18,45 +18,74 @@ package utils
 
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.domain.Generator
-
 import JsonUtils._
+import models.{DateModel, ErrorModel}
+import models.frontend.{Both, Business, FERequest, Property}
+import models.registration.RegistrationRequestModel
+import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
+import play.api.http.Status._
 
 object TestConstants {
+
   lazy val testNino = new Generator().nextNino.nino
   lazy val testSafeId = "XE0001234567890"
   lazy val testMtditId = "mtditId001"
   lazy val testSourceId = "sourceId0001"
   lazy val testErrorReason = "Error Reason"
 
-  val propertySubscriptionSuccessResponse =
-    """
-      |{
-      |
-      |"safeId": "XA0001234567890",
-      |
-      |"mtditId": "mdtitId001",
-      |
-      |"incomeSource":
-      |
-      |{
-      |
-      |"incomeSourceId": "sourceId0001"
-      |
-      |}
-      |
-      |}
-    """.stripMargin
+  val INVALID_NINO_MODEL = ErrorModel(BAD_REQUEST, "INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO.")
+  val INVALID_PAYLOAD_MODEL = ErrorModel(BAD_REQUEST, "INVALID_PAYLOAD", "Submission has not passed validation. Invalid PAYLOAD.")
+  val MALFORMED_PAYLOAD_MODEL = ErrorModel(BAD_REQUEST, "MALFORMED_PAYLOAD", "Invalid JSON message received.")
+  val NOT_FOUND_NINO_MODEL = ErrorModel(NOT_FOUND, "NOT_FOUND_NINO", "The remote endpoint has indicated that no data can be found")
+  val SERVER_ERROR_MODEL = ErrorModel(INTERNAL_SERVER_ERROR, "SERVER_ERROR", "DES is currently experiencing problems that require live service intervention.")
+  val UNAVAILABLE_MODEL = ErrorModel(SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", "Dependent systems are currently not responding.")
+  val CONFLICT_ERROR_MODEL = ErrorModel(CONFLICT, "CONFLICT", "Duplicated trading name.")
 
-  val propertySubscriptionFailureResponse: (String, String) => String = (code: String, reason: String) =>
-    s"""
-       |{
-       |
-         |"code": "$code",
-       |
-         |"reason": "$reason"
-       |
-       |}
-    """.stripMargin
+  val INVALID_NINO = (BAD_REQUEST, failureResponse(INVALID_NINO_MODEL.code.get, INVALID_NINO_MODEL.reason))
+  val INVALID_PAYLOAD = (BAD_REQUEST, failureResponse(INVALID_PAYLOAD_MODEL.code.get, INVALID_PAYLOAD_MODEL.reason))
+  val MALFORMED_PAYLOAD = (BAD_REQUEST, failureResponse(MALFORMED_PAYLOAD_MODEL.code.get, MALFORMED_PAYLOAD_MODEL.reason))
+  val NOT_FOUND_NINO = (NOT_FOUND, failureResponse(NOT_FOUND_NINO_MODEL.code.get, NOT_FOUND_NINO_MODEL.reason))
+  val SERVER_ERROR = (INTERNAL_SERVER_ERROR, failureResponse(SERVER_ERROR_MODEL.code.get, SERVER_ERROR_MODEL.reason))
+  val UNAVAILABLE = (SERVICE_UNAVAILABLE, failureResponse(UNAVAILABLE_MODEL.code.get, UNAVAILABLE_MODEL.reason))
+  val CONFLICT_ERROR = (CONFLICT, failureResponse(CONFLICT_ERROR_MODEL.code.get, CONFLICT_ERROR_MODEL.reason))
+
+  val fePropertyRequest = FERequest(
+    nino = testNino,
+    incomeSource = Property,
+    isAgent = false
+  )
+
+  val feBusinessRequest = FERequest(
+    nino = testNino,
+    incomeSource = Business,
+    isAgent = false,
+    accountingPeriodStart = DateModel("01","05","2017"),
+    accountingPeriodEnd = DateModel("30","04","2018"),
+    tradingName = "Test Business",
+    cashOrAccruals = "cash"
+  )
+
+  val feBothRequest = FERequest(
+    nino = testNino,
+    incomeSource = Both,
+    isAgent = false,
+    accountingPeriodStart = DateModel("01","05","2017"),
+    accountingPeriodEnd = DateModel("30","04","2018"),
+    tradingName = "Test Business",
+    cashOrAccruals = "cash"
+  )
+
+  val businessSubscriptionRequestPayload = BusinessSubscriptionRequestModel(
+    List(BusinessDetailsModel(
+      accountingPeriodStartDate = "2017-05-01",
+      accountingPeriodEndDate = "2018-04-30",
+      tradingName = "Test Business",
+      cashOrAccruals = "cash"
+    ))
+  )
+
+  val registerRequestPayload = RegistrationRequestModel(isAnAgent = false)
+
 
   object NewRegistrationResponse {
     val successResponse: String => JsValue = (safeId: String) =>
@@ -154,14 +183,28 @@ object TestConstants {
        |  }]
        |}
       """.stripMargin
-
-    def failureResponse(code: String, reason: String): JsValue =
-      s"""
-         |{
-         |  "code":"$code",
-         |  "reason":"$reason"
-         |}
-      """.stripMargin
   }
 
+  object PropertySubscriptionResponse {
+    def successResponse(safeId: String, mtditId: String, sourceId: String): JsValue =
+      s"""
+        |{
+        | "safeId": "$safeId",
+        | "mtditId": "$mtditId",
+        | "incomeSource":
+        | {
+        |   "incomeSourceId": "$sourceId"
+        | }
+        |}
+    """.stripMargin
+  }
+
+
+  def failureResponse(code: String, reason: String): JsValue =
+    s"""
+       |{
+       |  "code":"$code",
+       |  "reason":"$reason"
+       |}
+    """.stripMargin
 }

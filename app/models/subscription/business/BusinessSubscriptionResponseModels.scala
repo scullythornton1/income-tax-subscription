@@ -17,18 +17,13 @@
 package models.subscription.business
 
 import models.ErrorResponsesModel
+import models.subscription.IncomeSourceModel
 import play.api.libs.json._
 
-
-case class IncomeSourceModel(incomeSourceId: String)
 
 case class BusinessSubscriptionSuccessResponseModel(safeId: String, mtditId: String, incomeSources: List[IncomeSourceModel])
 
 case class BusinessSubscriptionErrorResponseModel(code: Option[String], reason: String) extends ErrorResponsesModel
-
-object IncomeSourceModel {
-  implicit val format = Json.format[IncomeSourceModel]
-}
 
 object BusinessSubscriptionSuccessResponseModel {
   implicit val format = Json.format[BusinessSubscriptionSuccessResponseModel]

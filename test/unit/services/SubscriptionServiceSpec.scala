@@ -16,56 +16,35 @@
 
 package unit.services
 
-import config.AppConfig
-import connectors.SubscriptionConnector
-import models.subscription.property.{IncomeSourcesModel, PropertySubscriptionResponseModel}
-import models.ErrorModel
+import models.subscription.property.PropertySubscriptionResponseModel
+import models.subscription.IncomeSourceModel
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.Configuration
-import play.api.libs.json.{JsValue, Json}
-import services.SubscriptionService
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost}
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
-import unit.connectors.mocks.MockHttp
-import play.api.http.Status._
-import utils.{JsonUtils, TestConstants}
+import utils.JsonUtils
+import utils.TestConstants._
+import unit.services.mocks.MockSubscriptionService
 
 import scala.util.Right
 
-class SubscriptionServiceSpec extends UnitSpec with OneAppPerSuite with MockHttp with JsonUtils {
+class SubscriptionServiceSpec extends UnitSpec with OneAppPerSuite with JsonUtils with MockSubscriptionService {
 
   implicit val hc = HeaderCarrier()
 
-  lazy val config: Configuration = app.injector.instanceOf[Configuration]
-  lazy val httpPost: HttpPost = mockHttpPost
-  lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
-
-  lazy val serviceUrl = appConfig.desURL
-
-  object MockSubscriptionConnector extends SubscriptionConnector(config, httpPost, appConfig)
-  object TestSubscription extends SubscriptionService(MockSubscriptionConnector)
-
   "SubscriptionService" should {
 
-    def setupMockPropertySubscription(nino: String)(status: Int, response: JsValue): Unit =
-      setupMockHttpPostEmpty(url = Some(s"$serviceUrl/income-tax-self-assessment/nino/$nino/properties"))(status, response)
-
-    def propertySubscribeCall = await(TestSubscription.propertySubscribe(nino = "AB12345678A"))
+    def propertySubscribeCall = await(TestSubscriptionService.propertySubscribe(fePropertyRequest))
 
     "return success if the subscription succeeds" in {
 
-      setupMockPropertySubscription("AB12345678A")(OK, TestConstants.propertySubscriptionSuccessResponse)
-      val expected = PropertySubscriptionResponseModel(
-        safeId = "XA0001234567890", mtditId = "mdtitId001", incomeSource = IncomeSourcesModel(incomeSourceId = "sourceId0001"))
+      mockPropertySubscribe(propertySubscribeSuccess)
+      val expected = PropertySubscriptionResponseModel(testSafeId, testMtditId, IncomeSourceModel(testSourceId))
       propertySubscribeCall shouldBe Right(expected)
     }
 
     "return not found response" in {
-      val reason = "The remote endpoint has indicated that no data can be found."
-      val code = "NOT_FOUND_NINO"
-      setupMockPropertySubscription("AB12345678A")(NOT_FOUND, TestConstants.propertySubscriptionFailureResponse(code, reason))
-      val expected = ErrorModel(NOT_FOUND, Some(code), reason)
-      propertySubscribeCall shouldBe Left(expected)
+      mockPropertySubscribe(NOT_FOUND_NINO)
+      propertySubscribeCall shouldBe Left(NOT_FOUND_NINO_MODEL)
     }
   }
 

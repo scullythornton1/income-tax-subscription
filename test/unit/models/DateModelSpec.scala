@@ -40,5 +40,10 @@ class DateModelSpec extends UnitSpec with Matchers {
     "correctly format a date to DES format uuuu-MM-dd" in {
       date.toDesDateFormat shouldBe "2017-02-01"
     }
+
+    "correctly determine the difference in months between two dates" in {
+      val date1 = DateModel("01","03","2017")
+      date.diffInMonth(date1) shouldBe 1
+    }
   }
 }

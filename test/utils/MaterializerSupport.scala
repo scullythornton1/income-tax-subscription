@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package unit.services.mocks
+package utils
 
-import services.RegistrationService
-import unit.connectors.mocks.MockRegistrationConnector
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 
-trait MockRegistrationService extends MockRegistrationConnector {
-
-  object TestRegistrationService extends RegistrationService(TestRegistrationConnector)
-
+trait MaterializerSupport {
+  implicit val system = ActorSystem("Sys")
+  implicit val materializer = ActorMaterializer()
 }

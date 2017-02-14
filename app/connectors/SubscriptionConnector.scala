@@ -50,8 +50,8 @@ class SubscriptionConnector @Inject()
       .withExtraHeaders("Environment" -> urlHeaderEnvironment, "Content-Type" -> "application/json")
 
   def createHeaderCarrierPostEmpty(headerCarrier: HeaderCarrier): HeaderCarrier =
-    headerCarrier.withExtraHeaders("Environment" -> urlHeaderEnvironment)
-      .copy(authorization = Some(Authorization(urlHeaderAuthorization)))
+    headerCarrier.copy(authorization = Some(Authorization(s"Bearer $urlHeaderAuthorization")))
+      .withExtraHeaders("Environment" -> urlHeaderEnvironment)
 
   def businessSubscribe(nino: String, businessSubscriptionPayload: BusinessSubscriptionRequestModel)
                        (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[BusinessConnectorUtil.Response] = {

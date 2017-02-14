@@ -24,6 +24,7 @@ import models.subscription.business.BusinessSubscriptionSuccessResponseModel
 import models.subscription.property.PropertySubscriptionResponseModel
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.Implicits._
+import play.api.http.Status._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -44,8 +45,9 @@ class SubscriptionManagerService @Inject()
         } yield (businessResult, propertyResult) match {
           case (Some(Left(err)), _) => err
           case (_, Some(Left(err))) => err
-          case (Some(Right(x)), _) => FESuccessResponse(x.mtditId)
-          case (_, Some(Right(x))) => FESuccessResponse(x.mtditId)
+          case (Some(Right(x)), _) => FESuccessResponse(x.mtditId) // As long as there's no error reported then
+          case (_, Some(Right(x))) => FESuccessResponse(x.mtditId) // We only need the response of one of the calls
+          case (_,_) => ErrorModel(INTERNAL_SERVER_ERROR, "Unexpected Error") // this error is impossible but included for exhaustive match
         }
       }
       case Left(failure) => Future.successful(failure)

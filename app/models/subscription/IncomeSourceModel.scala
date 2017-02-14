@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package unit.services.mocks
+package models.subscription
 
-import services.RegistrationService
-import unit.connectors.mocks.MockRegistrationConnector
+import play.api.libs.json.Json
 
-trait MockRegistrationService extends MockRegistrationConnector {
+case class IncomeSourceModel(incomeSourceId: String)
 
-  object TestRegistrationService extends RegistrationService(TestRegistrationConnector)
-
+object IncomeSourceModel {
+  implicit val format = Json.format[IncomeSourceModel]
 }

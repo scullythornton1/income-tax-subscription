@@ -23,100 +23,68 @@ import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.HeaderCarrier
 import unit.connectors.mocks.MockRegistrationConnector
 import utils.JsonUtils._
-import utils.TestConstants
+import utils.TestConstants._
 
 class RegistrationConnectorSpec extends MockRegistrationConnector {
 
   implicit val hc = HeaderCarrier()
+
   val env = config.getString("microservice.services.des.environment").get
   val authToken = config.getString("microservice.services.des.authorization-token").get
-
-  val register = RegistrationRequestModel(isAnAgent = false)
-  val nino: String = TestConstants.testNino
-  val safeId: String = TestConstants.testSafeId
 
   "RegistrationConnector.register" should {
     "Put in the correct headers" in {
       val rHc = TestRegistrationConnector.createHeaderCarrierPost(hc)
-
       rHc.headers.contains("Authorization" -> s"Bearer $authToken") shouldBe true
       rHc.headers.contains("Content-Type" -> "application/json") shouldBe true
       rHc.headers.contains("Environment" -> env) shouldBe true
     }
 
     "Post to the correct url" in {
-      TestRegistrationConnector.newRegistrationUrl(nino) should endWith(s"/registration/individual/NINO/$nino")
+      TestRegistrationConnector.newRegistrationUrl(testNino) should endWith(s"/registration/individual/NINO/$testNino")
     }
 
-    import TestConstants.NewRegistrationResponse._
-
-    def call = await(TestRegistrationConnector.register(nino, register))
-
-    def setupMockRegister(status: Int, response: JsValue): Unit =
-      super.setupMockRegister(nino)(status, response)
+    def result = await(TestRegistrationConnector.register(testNino, registerRequestPayload))
 
     "parse and return the success response correctly" in {
-      setupMockRegister(OK, successResponse(safeId))
-      val expected = RegistrationSuccessResponseModel(safeId)
-      val actual = call
-      actual shouldBe Right(expected)
+      mockRegister(registerRequestPayload)(regSuccess)
+      result shouldBe Right(RegistrationSuccessResponseModel(testSafeId))
     }
 
     "parse and return the Bad request response correctly" in {
-      val reason = "Your submission contains one or more errors. Failed Parameter(s) - [idType, idNumber, payload]"
-      val code = "INVALID_NINO"
-      setupMockRegister(BAD_REQUEST, failureResponse(code, reason))
-      val expected = ErrorModel(BAD_REQUEST, NewRegistrationFailureResponseModel(code, reason))
-      val actual = call
-      actual shouldBe Left(expected)
+      mockRegister(registerRequestPayload)(INVALID_NINO)
+      result shouldBe Left(INVALID_NINO_MODEL)
     }
 
     "parse and return the Resource not found response correctly" in {
-      val reason = "Resource not found"
-      val code = "NOT_FOUND"
-      setupMockRegister(NOT_FOUND, failureResponse("NOT_FOUND", reason))
-      val expected = ErrorModel(NOT_FOUND, NewRegistrationFailureResponseModel(code, reason))
-      val actual = call
-      actual shouldBe Left(expected)
+      mockRegister(registerRequestPayload)(NOT_FOUND_NINO)
+      result shouldBe Left(NOT_FOUND_NINO_MODEL)
     }
 
     "parse and return the Conflict error response correctly" in {
-      val reason = "Duplicate submission"
-      val code = "CONFLICT"
-      setupMockRegister(CONFLICT, failureResponse(code, reason))
-      val expected = ErrorModel(CONFLICT, NewRegistrationFailureResponseModel(code, reason))
-      val actual = call
-      actual shouldBe Left(expected)
+      mockRegister(registerRequestPayload)(CONFLICT_ERROR)
+      result shouldBe Left(CONFLICT_ERROR_MODEL)
     }
 
     "parse and return the Server error response correctly" in {
-      val reason = "Server Error"
-      val code = "SERVER_ERROR"
-      setupMockRegister(INTERNAL_SERVER_ERROR, failureResponse(code, reason))
-      val expected = ErrorModel(INTERNAL_SERVER_ERROR, NewRegistrationFailureResponseModel(code, reason))
-      val actual = call
-      actual shouldBe Left(expected)
+      mockRegister(registerRequestPayload)(SERVER_ERROR)
+      result shouldBe Left(SERVER_ERROR_MODEL)
     }
 
     "parse and return the Service unavailable response correctly" in {
-      val reason = "Service unavailable"
-      val code = "SERVICE_UNAVAILABLE"
-      setupMockRegister(SERVICE_UNAVAILABLE, failureResponse(code, reason))
-      val expected = ErrorModel(SERVICE_UNAVAILABLE, NewRegistrationFailureResponseModel(code, reason))
-      val actual = call
-      actual shouldBe Left(expected)
+      mockRegister(registerRequestPayload)(UNAVAILABLE)
+      result shouldBe Left(UNAVAILABLE_MODEL)
     }
 
     "return parse error for corrupt response" in {
       val corruptResponse: JsValue = """{"a": "not valid"}"""
-      setupMockRegister(INTERNAL_SERVER_ERROR, corruptResponse)
-      val expected = ErrorModel(INTERNAL_SERVER_ERROR, ErrorModel.parseFailure(corruptResponse))
-      val actual = call
-      actual shouldBe Left(expected)
+      mockRegister(registerRequestPayload)((BAD_REQUEST, corruptResponse))
+      result shouldBe Left(ErrorModel(INTERNAL_SERVER_ERROR, ErrorModel.parseFailure(corruptResponse)))
     }
   }
 
   "RegistrationConnector.getRegistration" should {
+
     "Put in the correct headers" in {
       val rHc = TestRegistrationConnector.createHeaderCarrierGet(hc)
       rHc.headers.contains("Authorization" -> s"Bearer $authToken") shouldBe true
@@ -124,60 +92,40 @@ class RegistrationConnectorSpec extends MockRegistrationConnector {
     }
 
     "Post to the correct url" in {
-      TestRegistrationConnector.getRegistrationUrl(nino) should endWith(s"/registration/details?nino=$nino")
+      TestRegistrationConnector.getRegistrationUrl(testNino) should endWith(s"/registration/details?nino=$testNino")
     }
-    import TestConstants.GetRegistrationResponse._
 
-    def call = await(TestRegistrationConnector.getRegistration(nino))
-
-    def setupMockGetRegistration(status: Int, response: JsValue): Unit =
-      super.setupMockGetRegistration(nino)(status, response)
+    def result = await(TestRegistrationConnector.getRegistration(testNino))
 
     "parse and return the success response correctly" in {
-      setupMockGetRegistration(OK, successResponse(safeId))
-      val expected = RegistrationSuccessResponseModel(safeId)
-      val actual = call
-      actual shouldBe Right(expected)
+      mockGetRegistration(regSuccess)
+      result shouldBe Right(RegistrationSuccessResponseModel(testSafeId))
     }
 
     "parse and return the Bad request response correctly" in {
-      val reason = "Your submission contains one or more errors. Failed Parameter(s) - [idType, idNumber, payload]"
-      setupMockGetRegistration(BAD_REQUEST, failureResponse(reason))
-      val expected = ErrorModel(BAD_REQUEST, GetRegistrationFailureResponseModel(reason))
-      val actual = call
-      actual shouldBe Left(expected)
+      mockGetRegistration(INVALID_NINO)
+      result shouldBe Left(ErrorModel(BAD_REQUEST, INVALID_NINO_MODEL.reason))
     }
 
     "parse and return the Resource not found response correctly" in {
-      val reason = "Resource not found"
-      setupMockGetRegistration(NOT_FOUND, failureResponse(reason))
-      val expected = ErrorModel(NOT_FOUND, GetRegistrationFailureResponseModel(reason))
-      val actual = call
-      actual shouldBe Left(expected)
+      mockGetRegistration(NOT_FOUND_NINO)
+      result shouldBe Left(ErrorModel(NOT_FOUND, NOT_FOUND_NINO_MODEL.reason))
     }
 
     "parse and return the Server error response correctly" in {
-      val reason = "Server Error"
-      setupMockGetRegistration(INTERNAL_SERVER_ERROR, failureResponse(reason))
-      val expected = ErrorModel(INTERNAL_SERVER_ERROR, GetRegistrationFailureResponseModel(reason))
-      val actual = call
-      actual shouldBe Left(expected)
+      mockGetRegistration(SERVER_ERROR)
+      result shouldBe Left(ErrorModel(INTERNAL_SERVER_ERROR, SERVER_ERROR_MODEL.reason))
     }
 
     "parse and return the Service unavailable response correctly" in {
-      val reason = "Service unavailable"
-      setupMockGetRegistration(SERVICE_UNAVAILABLE, failureResponse(reason))
-      val expected = ErrorModel(SERVICE_UNAVAILABLE, GetRegistrationFailureResponseModel(reason))
-      val actual = call
-      actual shouldBe Left(expected)
+      mockGetRegistration(UNAVAILABLE)
+      result shouldBe Left(ErrorModel(SERVICE_UNAVAILABLE, UNAVAILABLE_MODEL.reason))
     }
 
     "return parse error for corrupt response" in {
       val corruptResponse: JsValue = """{"a": "not valid"}"""
-      setupMockGetRegistration(INTERNAL_SERVER_ERROR, corruptResponse)
-      val expected = ErrorModel(INTERNAL_SERVER_ERROR, ErrorModel.parseFailure(corruptResponse))
-      val actual = call
-      actual shouldBe Left(expected)
+      mockGetRegistration((BAD_REQUEST, corruptResponse))
+      result shouldBe Left(ErrorModel(INTERNAL_SERVER_ERROR, ErrorModel.parseFailure(corruptResponse)))
     }
   }
 

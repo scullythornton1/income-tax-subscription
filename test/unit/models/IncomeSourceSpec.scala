@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package unit.models.frontend
+package unit.models
 
 import models.frontend.{Both, Business, IncomeSourceType, Property}
 import play.api.libs.json.{JsString, JsValue, Json}

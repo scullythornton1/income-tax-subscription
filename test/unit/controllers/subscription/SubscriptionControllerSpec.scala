@@ -16,8 +16,10 @@
 
 package unit.controllers.subscription
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import controllers.subscription.SubscriptionController
-import models.frontend.{Both, FERequest}
+import models.frontend.{Both, FERequest, FESuccessResponse, Property}
 import play.api.Application
 import play.api.http.Status._
 import play.api.libs.json.JsValue
@@ -26,33 +28,31 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
 import unit.services.mocks.MockSubscriptionManagerService
 import utils.JsonUtils._
-import utils.TestConstants
+import utils.MaterializerSupport
+import utils.TestConstants._
 
 import scala.concurrent.Future
 
-class SubscriptionControllerSpec extends UnitSpec
-  with MockSubscriptionManagerService {
+class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerService with MaterializerSupport {
 
   val application = app.injector.instanceOf[Application]
 
   object TestController extends SubscriptionController(application, TestSubscriptionManagerService)
 
-  def call(request: Request[AnyContentAsJson]): Future[Result] = TestController.subscribe(TestConstants.testNino)(request)
+  def call(request: Request[AnyContentAsJson]): Future[Result] = TestController.subscribe(testNino)(request)
 
   "SubscriptionController" should {
     "return the id when successful" in {
-      val feRequest: JsValue = FERequest(nino, incomeSource = Both)
+      val feRequest: JsValue = FERequest(testNino, incomeSource = Property)
       val fakeRequest: FakeRequest[AnyContentAsJson] = FakeRequest().withJsonBody(feRequest)
-      (setupMockRegister(nino) _).tupled(newRegSuccess)
-
+      mockRegister(registerRequestPayload)(regSuccess)
+      mockPropertySubscribe(propertySubscribeSuccess)
       val result = call(fakeRequest)
-      status(result) shouldBe OK
+      jsonBodyOf(result).as[FESuccessResponse].mtditId shouldBe testMtditId
     }
 
     "return failure when it's unsuccessful" in {
       val fakeRequest: FakeRequest[AnyContentAsJson] = FakeRequest().withJsonBody("{}")
-      (setupMockRegister(nino) _).tupled(newRegSuccess)
-
       val result = call(fakeRequest)
       status(result) shouldBe BAD_REQUEST
     }
