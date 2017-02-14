@@ -18,6 +18,7 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
+import audit.Logging
 import models.ErrorModel
 import models.frontend.FERequest
 import models.registration.RegistrationSuccessResponseModel
@@ -26,11 +27,13 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 @Singleton
-class SubscriptionManagerService @Inject()(registrationService: RegistrationService
+class SubscriptionManagerService @Inject()(logging: Logging,
+                                           registrationService: RegistrationService
                                           ) {
 
   //TODO add the calls and routing to the other services
   def subscribe(request: FERequest)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, RegistrationSuccessResponseModel]] = {
+    // The logging level for these should be set to debug since they will be logged as warn in the connectors
     registrationService.register(request.isAgent, request.nino)
   }
 }

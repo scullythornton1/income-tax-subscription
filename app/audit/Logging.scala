@@ -18,14 +18,26 @@ package audit
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.{Configuration, Logger}
+import play.api.libs.json.JsValue
+import play.api.{Application, Configuration, Logger}
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
+case class LoggingConfig(heading: String)
+
+object LoggingConfig {
+
+  implicit class LoggingConfigUtil(config: Option[LoggingConfig]) {
+    def addHeading(message: String): String = config.fold(message)(x => x.heading + ": " + message)
+  }
+
+}
+
 @Singleton
-class Logging @Inject()(configuration: Configuration,
+class Logging @Inject()(application: Application,
+                        configuration: Configuration,
                         auditConnector: AuditConnector) {
 
 
@@ -60,27 +72,29 @@ class Logging @Inject()(configuration: Configuration,
     )
   }
 
-  def audit(transactionName: String, detail: Map[String, String], eventType: String)(implicit hc: HeaderCarrier) = splunkFunction(transactionName, detail, eventType)
+  def audit(transactionName: String, detail: Map[String, String], eventType: String)(implicit hc: HeaderCarrier): Unit = splunkFunction(transactionName, detail, eventType)
 
-  @inline def trace(msg: String) = Logger.trace(msg)
+  def auditFor(auditName: String)(implicit hc: HeaderCarrier): (Map[String, String], String) => Unit = audit(auditName, _, _)(hc)
 
-  @inline def trace(transactionName: String, detail: Map[String, String], eventType: String = ""): Unit = trace(splunkToLogger(transactionName, detail, eventType))
+  @inline def trace(msg: String)(implicit config: Option[LoggingConfig] = None): Unit = Logger.trace(config.addHeading(msg))
 
-  @inline def debug(msg: String) = Logger.debug(msg)
+  @inline def trace(transactionName: String, detail: Map[String, String], eventType: String): Unit = trace(splunkToLogger(transactionName, detail, eventType))
 
-  @inline def debug(transactionName: String, detail: Map[String, String], eventType: String = ""): Unit = debug(splunkToLogger(transactionName, detail, eventType))
+  @inline def debug(msg: String)(implicit config: Option[LoggingConfig] = None): Unit = Logger.debug(config.addHeading(msg))
 
-  @inline def info(msg: String) = Logger.info(msg)
+  @inline def debug(transactionName: String, detail: Map[String, String], eventType: String): Unit = debug(splunkToLogger(transactionName, detail, eventType))
 
-  @inline def info(transactionName: String, detail: Map[String, String], eventType: String = ""): Unit = info(splunkToLogger(transactionName, detail, eventType))
+  @inline def info(msg: String)(implicit config: Option[LoggingConfig] = None): Unit = Logger.info(config.addHeading(msg))
 
-  @inline def warn(msg: String) = Logger.warn(msg)
+  @inline def info(transactionName: String, detail: Map[String, String], eventType: String): Unit = info(splunkToLogger(transactionName, detail, eventType))
 
-  @inline def warn(transactionName: String, detail: Map[String, String], eventType: String = ""): Unit = warn(splunkToLogger(transactionName, detail, eventType))
+  @inline def warn(msg: String)(implicit config: Option[LoggingConfig] = None): Unit = Logger.warn(config.addHeading(msg))
 
-  @inline def err(msg: String) = Logger.error(msg)
+  @inline def warn(transactionName: String, detail: Map[String, String], eventType: String): Unit = warn(splunkToLogger(transactionName, detail, eventType))
 
-  @inline def err(transactionName: String, detail: Map[String, String], eventType: String = ""): Unit = err(splunkToLogger(transactionName, detail, eventType))
+  @inline def err(msg: String)(implicit config: Option[LoggingConfig] = None): Unit = Logger.error(config.addHeading(msg))
+
+  @inline def err(transactionName: String, detail: Map[String, String], eventType: String): Unit = err(splunkToLogger(transactionName, detail, eventType))
 
 }
 
@@ -90,4 +104,13 @@ object Logging {
 
   val splunkString = "SPLUNK AUDIT:\n"
 
+  final val eventTypeSuccess: String = "Success"
+  final val eventTypeFailure: String = "Failure"
+  final val eventTypeBadRequest: String = "BadRequest"
+  final val eventTypeConflict: String = "Conflict"
+  final val eventTypeNotFound: String = "NotFound"
+  final val eventTypeInternalServerError: String = "InternalServerError"
+  final val eventTypeServerUnavailable: String = "ServerUnavailable"
+  final val eventTypeUnexpectedError: String = "UnexpectedError"
 }
+

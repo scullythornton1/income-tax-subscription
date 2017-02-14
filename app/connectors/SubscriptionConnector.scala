@@ -18,7 +18,7 @@ package connectors
 
 import javax.inject.Inject
 
-import audit.Logging
+import audit.Logging$
 import config.AppConfig
 import connectors.utils.ConnectorUtils
 import models.{PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
