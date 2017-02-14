@@ -72,29 +72,22 @@ class Logging @Inject()(application: Application,
     )
   }
 
-  def audit(transactionName: String, detail: Map[String, String], eventType: String)(implicit hc: HeaderCarrier): Unit = splunkFunction(transactionName, detail, eventType)
+  def audit(transactionName: String, detail: Map[String, String], eventType: String)(implicit hc: HeaderCarrier): Unit =
+    splunkFunction(transactionName, detail, eventType)
 
   def auditFor(auditName: String)(implicit hc: HeaderCarrier): (Map[String, String], String) => Unit = audit(auditName, _, _)(hc)
 
-  @inline def trace(msg: String)(implicit config: Option[LoggingConfig] = None): Unit = Logger.trace(config.addHeading(msg))
+  def auditFor(auditName: String, detail: Map[String, String])(implicit hc: HeaderCarrier): String => Unit = audit(auditName, detail, _)(hc)
 
-  @inline def trace(transactionName: String, detail: Map[String, String], eventType: String): Unit = trace(splunkToLogger(transactionName, detail, eventType))
+  @inline def trace(msg: String)(implicit config: Option[LoggingConfig] = None): Unit = Logger.trace(config.addHeading(msg))
 
   @inline def debug(msg: String)(implicit config: Option[LoggingConfig] = None): Unit = Logger.debug(config.addHeading(msg))
 
-  @inline def debug(transactionName: String, detail: Map[String, String], eventType: String): Unit = debug(splunkToLogger(transactionName, detail, eventType))
-
   @inline def info(msg: String)(implicit config: Option[LoggingConfig] = None): Unit = Logger.info(config.addHeading(msg))
-
-  @inline def info(transactionName: String, detail: Map[String, String], eventType: String): Unit = info(splunkToLogger(transactionName, detail, eventType))
 
   @inline def warn(msg: String)(implicit config: Option[LoggingConfig] = None): Unit = Logger.warn(config.addHeading(msg))
 
-  @inline def warn(transactionName: String, detail: Map[String, String], eventType: String): Unit = warn(splunkToLogger(transactionName, detail, eventType))
-
   @inline def err(msg: String)(implicit config: Option[LoggingConfig] = None): Unit = Logger.error(config.addHeading(msg))
-
-  @inline def err(transactionName: String, detail: Map[String, String], eventType: String): Unit = err(splunkToLogger(transactionName, detail, eventType))
 
 }
 

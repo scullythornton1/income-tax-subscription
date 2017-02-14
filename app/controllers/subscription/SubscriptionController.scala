@@ -35,7 +35,7 @@ class SubscriptionController @Inject()(logging: Logging,
   def subscribe(nino: String): Action[AnyContent] = Action.async {
     implicit request =>
       implicit val loggingConfig = SubscriptionController.subscribeLoggingConfig
-      logging.info(s"Request received for $nino")
+      logging.debug(s"Request received for $nino")
       lazy val parseError: Future[Result] = BadRequest(FEFailureResponse("Request is invalid"): JsValue)
       request.body.asJson.fold(parseError) { x =>
         parseUtil(x)(FERequest.format).fold(
@@ -48,10 +48,10 @@ class SubscriptionController @Inject()(logging: Logging,
           feRequest => subManService.subscribe(feRequest).map {
             case Right(r) =>
               val response: JsValue = FESuccessResponse("1234567")
-              logging.info(s"Responded with $response")
+              logging.debug(s"Subscription successful, responding with\n$response")
               Ok(response)
             case Left(l) =>
-              logging.debug(s"Responding with\nstatus=${l.status}\nreason=${l.reason}")
+              logging.warn(s"Subscription failed, responding with\nstatus=${l.status}\nreason=${l.reason}")
               Status(l.status)(FEFailureResponse(l.reason): JsValue)
           }
         )
