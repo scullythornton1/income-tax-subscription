@@ -33,9 +33,7 @@ import scala.concurrent.Future
 class SubscriptionControllerSpec extends UnitSpec
   with MockSubscriptionManagerService {
 
-  val application = app.injector.instanceOf[Application]
-
-  object TestController extends SubscriptionController(application, TestSubscriptionManagerService)
+  object TestController extends SubscriptionController(logging, TestSubscriptionManagerService)
 
   def call(request: Request[AnyContentAsJson]): Future[Result] = TestController.subscribe(TestConstants.testNino)(request)
 

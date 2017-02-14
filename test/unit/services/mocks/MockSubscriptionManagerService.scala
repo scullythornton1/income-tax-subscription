@@ -23,6 +23,6 @@ trait MockSubscriptionManagerService extends MockRegistrationService {
 
   val feRequest = FERequest(isAgent = isAgent, nino = nino, incomeSource = Both)
 
-  object TestSubscriptionManagerService extends SubscriptionManagerService(TestRegistrationService)
+  object TestSubscriptionManagerService extends SubscriptionManagerService(logging, TestRegistrationService)
 
 }
