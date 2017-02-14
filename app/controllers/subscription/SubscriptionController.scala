@@ -18,9 +18,9 @@ package controllers.subscription
 
 import javax.inject.Inject
 
+import audit.{LoggingConfig, Logging}
 import models.frontend.{FEFailureResponse, FERequest, FESuccessResponse}
-import play.api.Application
-import play.api.libs.json.{JsResult, JsValue}
+import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent, Result}
 import services.SubscriptionManagerService
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -29,21 +29,36 @@ import utils.JsonUtils._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SubscriptionController @Inject()(application: Application,
+class SubscriptionController @Inject()(logging: Logging,
                                        subManService: SubscriptionManagerService) extends BaseController {
 
   def subscribe(nino: String): Action[AnyContent] = Action.async {
     implicit request =>
+      implicit val loggingConfig = SubscriptionController.subscribeLoggingConfig
+      logging.debug(s"Request received for $nino")
       lazy val parseError: Future[Result] = BadRequest(FEFailureResponse("Request is invalid"): JsValue)
       request.body.asJson.fold(parseError) { x =>
         parseUtil(x)(FERequest.format).fold(
-          invalid => parseError,
+          invalid => {
+            // This has been set to err because it should never happen as it would imply our frontend is not configured
+            // to talk to this service in the correct manner
+            logging.err(s"Request is invalid:\n${invalid.toString}\n${request.body.toString}")
+            parseError
+          },
           feRequest => subManService.orchestrateSubscription(feRequest).map {
-            case Right(r) => Ok(r: JsValue)
-            case Left(l) => Status(l.status)(FEFailureResponse(l.reason): JsValue)
+            case Right(r) =>
+              logging.debug(s"Subscription successful, responding with\n$r")
+              Ok(r: JsValue)
+            case Left(l) =>
+              logging.warn(s"Subscription failed, responding with\nstatus=${l.status}\nreason=${l.reason}")
+              Status(l.status)(FEFailureResponse(l.reason): JsValue)
           }
         )
       }
   }
 
+}
+
+object SubscriptionController {
+  val subscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionController.subscribe")
 }

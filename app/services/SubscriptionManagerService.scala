@@ -18,6 +18,7 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
+import audit.Logging
 import models.ErrorModel
 import models.frontend.{Both, Business, FERequest, FESuccessResponse, Property}
 import models.subscription.business.BusinessSubscriptionSuccessResponseModel
@@ -31,10 +32,12 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class SubscriptionManagerService @Inject()
 (
+  logging: Logging,
   registrationService: RegistrationService,
   subscriptionService: SubscriptionService
 ) {
 
+  //TODO add logging
   def orchestrateSubscription(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, FESuccessResponse]] = {
 
     registrationService.register(request.isAgent, request.nino) flatMap {

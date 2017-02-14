@@ -28,6 +28,6 @@ trait MockSubscriptionManagerService extends MockRegistrationService with MockSu
   override lazy val httpPost = mockHttpPost
   override lazy val httpGet: HttpGet = mockHttpGet
 
-  object TestSubscriptionManagerService extends SubscriptionManagerService(TestRegistrationService, TestSubscriptionService)
+  object TestSubscriptionManagerService extends SubscriptionManagerService(logging, TestRegistrationService, TestSubscriptionService)
 
 }
