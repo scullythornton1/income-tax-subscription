@@ -56,7 +56,7 @@ trait MicroService {
     .settings(publishingSettings: _*)
     .settings(defaultSettings(): _*)
     .settings(
-      resolvers += "emueller-bintray" at "http://dl.bintray.com/emueller/maven",
+      externalResolvers += "emueller-bintray" at "http://dl.bintray.com/emueller/maven",
       resolvers += Resolver.bintrayRepo("hmrc", "releases"),
       resolvers += Resolver.jcenterRepo,
       libraryDependencies ++= appDependencies,
