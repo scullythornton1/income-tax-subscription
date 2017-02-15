@@ -16,16 +16,51 @@
 
 package models.subscription.business
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json._
+
+
+sealed trait CashOrAccruals {
+  def cashOrAccruals: String
+}
+
+case object Cash extends CashOrAccruals {
+  override val cashOrAccruals = "cash"
+}
+
+case object Accruals extends CashOrAccruals {
+  override val cashOrAccruals = "accruals"
+}
+
+object CashOrAccruals {
+  val feCash = "Cash"
+  val feAccruals = "Accruals"
+
+  private val reader: Reads[CashOrAccruals] = __.read[String].map {
+    case `feCash` | Cash.cashOrAccruals => Cash
+    case `feAccruals` | Accruals.cashOrAccruals => Accruals
+  }
+
+  private val writer: Writes[CashOrAccruals] = Writes[CashOrAccruals](cashOrAccruals =>
+    JsString(cashOrAccruals.cashOrAccruals)
+  )
+
+  implicit val format: Format[CashOrAccruals] = Format(reader, writer)
+
+  implicit def convert(str: String): CashOrAccruals = str match {
+    case `feCash` | Cash.cashOrAccruals => Cash
+    case `feAccruals` | Accruals.cashOrAccruals => Accruals
+  }
+}
 
 case class BusinessDetailsModel
 (
   accountingPeriodStartDate: String,
   accountingPeriodEndDate: String,
   tradingName: String,
-  cashOrAccruals: String
+  cashOrAccruals: CashOrAccruals
 )
 
 object BusinessDetailsModel {
   implicit val format: Format[BusinessDetailsModel] = Json.format[BusinessDetailsModel]
 }
+
