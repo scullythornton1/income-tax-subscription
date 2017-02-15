@@ -16,10 +16,10 @@
 
 package unit.models.subscription
 
-import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
+import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel, Cash, CashOrAccruals}
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.Resources
 import utils.JsonUtils._
+import utils.Resources
 
 class BusinessSubscriptionRequestModelSpec extends UnitSpec {
 
@@ -28,7 +28,7 @@ class BusinessSubscriptionRequestModelSpec extends UnitSpec {
       accountingPeriodStartDate = "2017-04-01",
       accountingPeriodEndDate = "2018-03-30",
       tradingName = "Test Business",
-      cashOrAccruals = "cash"
+      cashOrAccruals = CashOrAccruals.feCash
     )
     val model = BusinessSubscriptionRequestModel(List(businessDetailsModel))
 
@@ -44,8 +44,8 @@ class BusinessSubscriptionRequestModelSpec extends UnitSpec {
       model.businessDetails.head.tradingName shouldBe "Test Business"
     }
 
-    "Cash or Accruals should be 'cash'" in {
-      model.businessDetails.head.cashOrAccruals shouldBe "cash"
+    "Cash or Accruals should be Cash" in {
+      model.businessDetails.head.cashOrAccruals shouldBe Cash
     }
 
     "Be valid against the new registration schema" in {
