@@ -16,36 +16,25 @@
 
 package unit.models.gg
 
-import models.gg.{KnownFactsRequest, TypeValuePair}
+import models.gg.TypeValuePair
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.JsonUtils._
 import utils.TestConstants.GG.TypeValuePairExamples
 
-class KnownFactsRequestSpec extends UnitSpec {
+class TypeValuePairSpec extends UnitSpec {
 
   import TypeValuePairExamples._
 
-  "KnownFactsRequest" should {
-    "Provide the correct writer for KnownFactsRequest" in {
-      val knownFact1 = TypeValuePair(
+  "TypeValuePair" should {
+    "Provide the correct writer for TypeValuePair" in {
+      val knownFact = TypeValuePair(
         `type` = testType1,
         value = testValue1
       )
-      val knownFact2 = TypeValuePair(
-        `type` = testType2,
-        value = testValue2
-      )
-      val knownFactsRequest = KnownFactsRequest(List(knownFact1, knownFact2))
 
-      val request: JsValue = Json.toJson(knownFactsRequest)
-      val expected = Json.fromJson[KnownFactsRequest](
-        s"""{
-           | "facts": [
-           |        ${jsonTypeValuePair(testType1, testValue1).get},
-           |        ${jsonTypeValuePair(testType2, testValue2).get}]
-           | }""".stripMargin).get
-      val actual = Json.fromJson[KnownFactsRequest](request).get
+      val request: JsValue = Json.toJson(knownFact)
+      val expected = Json.fromJson[TypeValuePair](jsonTypeValuePair(testType1,testValue1)).get
+      val actual = Json.fromJson[TypeValuePair](request).get
 
       actual shouldBe expected
     }

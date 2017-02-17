@@ -19,8 +19,11 @@ package models.gg
 import play.api.libs.json.Json
 
 
-case class KnownFactsRequest(facts: List[TypeValuePair])
+case class EnrolResponse(serviceName: String,
+                         state: String,
+                         friendlyName: String,
+                         identifiers: List[TypeValuePair])
 
-object KnownFactsRequest {
-  implicit val formats = Json.format[KnownFactsRequest]
+object EnrolResponse {
+  implicit val format = Json.format[EnrolResponse]
 }

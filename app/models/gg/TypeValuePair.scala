@@ -18,9 +18,8 @@ package models.gg
 
 import play.api.libs.json.Json
 
+case class TypeValuePair(`type`: String, value: String)
 
-case class KnownFactsRequest(facts: List[TypeValuePair])
-
-object KnownFactsRequest {
-  implicit val formats = Json.format[KnownFactsRequest]
+object TypeValuePair {
+  implicit val format = Json.format[TypeValuePair]
 }
