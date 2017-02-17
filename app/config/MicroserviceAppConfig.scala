@@ -22,6 +22,7 @@ import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
   val authURL: String
+  val ggAdminURL: String
   val desURL: String
   val desEnvironment: String
   val desToken: String
@@ -32,6 +33,7 @@ class MicroserviceAppConfig @Inject()(configuration: Configuration) extends AppC
   private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
   override lazy val authURL = baseUrl("auth")
   override lazy val desURL = baseUrl("des")
+  override lazy val ggAdminURL = baseUrl("ggAdmin")
   override lazy val desEnvironment = loadConfig("microservice.services.des.environment")
   override lazy val desToken = loadConfig("microservice.services.des.authorization-token")
 }
