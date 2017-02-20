@@ -211,10 +211,12 @@ object TestConstants {
 
   object GG {
 
-    val knowFactsRequest = KnownFactsRequest(
+    import services.EnrolmentService.{MTDITID, NINO}
+
+    lazy val knowFactsRequest = KnownFactsRequest(
       List(
-        TypeValuePair(TypeValuePairExamples.testType1, TypeValuePairExamples.testValue1),
-        TypeValuePair(TypeValuePairExamples.testType2, TypeValuePairExamples.testValue2)
+        TypeValuePair(MTDITID, testMtditId),
+        TypeValuePair(NINO, testNino)
       )
     )
 
@@ -236,7 +238,7 @@ object TestConstants {
       val GATEWAY_ERROR_MODEL = ErrorModel(INTERNAL_SERVER_ERROR, "Authentication successful, but error accessing user information with Gateway token")
 
       val SERVICE_DOES_NOT_EXISTS = (BAD_REQUEST, failureResponse(BAD_REQUEST, SERVICE_DOES_NOT_EXISTS_MODEL.reason))
-      val GATEWAY_ERROR= (INTERNAL_SERVER_ERROR, failureResponse(INTERNAL_SERVER_ERROR, GATEWAY_ERROR_MODEL.reason))
+      val GATEWAY_ERROR = (INTERNAL_SERVER_ERROR, failureResponse(INTERNAL_SERVER_ERROR, GATEWAY_ERROR_MODEL.reason))
 
     }
 
