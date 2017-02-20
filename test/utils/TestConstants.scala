@@ -16,14 +16,15 @@
 
 package utils
 
-import play.api.libs.json.JsValue
-import uk.gov.hmrc.domain.Generator
-import JsonUtils._
-import models.{DateModel, ErrorModel}
 import models.frontend.{Both, Business, FERequest, Property}
+import models.gg.TypeValuePair
 import models.registration.RegistrationRequestModel
 import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
+import models.{DateModel, ErrorModel}
 import play.api.http.Status._
+import play.api.libs.json.JsValue
+import uk.gov.hmrc.domain.Generator
+import utils.JsonUtils._
 
 object TestConstants {
 
@@ -59,8 +60,8 @@ object TestConstants {
     nino = testNino,
     incomeSource = Business,
     isAgent = false,
-    accountingPeriodStart = DateModel("01","05","2017"),
-    accountingPeriodEnd = DateModel("30","04","2018"),
+    accountingPeriodStart = DateModel("01", "05", "2017"),
+    accountingPeriodEnd = DateModel("30", "04", "2018"),
     tradingName = "Test Business",
     cashOrAccruals = "cash"
   )
@@ -69,8 +70,8 @@ object TestConstants {
     nino = testNino,
     incomeSource = Both,
     isAgent = false,
-    accountingPeriodStart = DateModel("01","05","2017"),
-    accountingPeriodEnd = DateModel("30","04","2018"),
+    accountingPeriodStart = DateModel("01", "05", "2017"),
+    accountingPeriodEnd = DateModel("30", "04", "2018"),
     tradingName = "Test Business",
     cashOrAccruals = "cash"
   )
@@ -176,26 +177,26 @@ object TestConstants {
   object BusinessSubscriptionResponse {
     def successResponse(safeId: String, mtditId: String, sourceId: String): JsValue =
       s"""{
-       |  "safeId": "$safeId",
-       |  "mtditId": "$mtditId",
-       |  "incomeSources": [{
-       |    "incomeSourceId": "$sourceId"
-       |  }]
-       |}
+         |  "safeId": "$safeId",
+         |  "mtditId": "$mtditId",
+         |  "incomeSources": [{
+         |    "incomeSourceId": "$sourceId"
+         |  }]
+         |}
       """.stripMargin
   }
 
   object PropertySubscriptionResponse {
     def successResponse(safeId: String, mtditId: String, sourceId: String): JsValue =
       s"""
-        |{
-        | "safeId": "$safeId",
-        | "mtditId": "$mtditId",
-        | "incomeSource":
-        | {
-        |   "incomeSourceId": "$sourceId"
-        | }
-        |}
+         |{
+         | "safeId": "$safeId",
+         | "mtditId": "$mtditId",
+         | "incomeSource":
+         | {
+         |   "incomeSourceId": "$sourceId"
+         | }
+         |}
     """.stripMargin
   }
 
@@ -207,4 +208,59 @@ object TestConstants {
        |  "reason":"$reason"
        |}
     """.stripMargin
+
+  object GG {
+
+    object TypeValuePairExamples {
+      val testType1 = "MOSW2Number"
+      val testValue1 = "10"
+      val testType2 = "MOSW2ID"
+      val testValue2 = "A"
+
+      def jsonTypeValuePair(testType: String, testValue: String): JsValue =
+        s"""{"type" : "$testType",
+           | "value" : "$testValue"
+           | }""".stripMargin
+    }
+
+    object EnrolRequestExamples {
+      val portalId = "MOSW"
+      val serviceName = "MOSW5"
+      val friendlyName = "Main Enrolment"
+      val knownFact1 = "DV200L"
+      val knownFact2 = "13 66GH"
+
+      def jsonEnrolRequest(portalId: String, serviceName: String, friendlyName: String, knownFacts: List[String]): JsValue =
+        s"""{
+           |     "portalId": "$portalId",
+           |     "serviceName": "$serviceName",
+           |     "friendlyName": "$friendlyName",
+           |     "knownFacts": [
+           |        ${knownFacts.map(x =>s""" "$x" """).mkString(",")}
+           |      ]
+           |}""".stripMargin
+    }
+
+    object EnrolResponseExamples {
+      val serviceName = "MOSW5"
+      val state = "NotYetActivated"
+      val friendlyName = ""
+      val testType1 = "MOSW5PostCode"
+      val testValue1 = "13 9DF"
+      val testType2 = "MOSW5Reference"
+      val testValue2 = "DV200L"
+
+      def jsonEnrolResponse(serviceName: String, state: String, friendlyName: String, identifier: List[TypeValuePair]): JsValue =
+        s"""{
+           |     "serviceName": "$serviceName",
+           |     "state": "$state",
+           |     "friendlyName": "$friendlyName",
+           |     "identifiers": [
+           |        ${identifier.map(x => s"""{ "type" : "${x.`type`}", "value" : "${x.value}"}""").mkString(",")}
+           |      ]
+           |}""".stripMargin
+    }
+
+  }
+
 }
