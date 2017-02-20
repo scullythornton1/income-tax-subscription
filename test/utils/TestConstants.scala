@@ -17,7 +17,7 @@
 package utils
 
 import models.frontend.{Both, Business, FERequest, Property}
-import models.gg.{KnownFactsFailureResponseModel, KnownFactsRequest, TypeValuePair}
+import models.gg.{KnownFactsRequest, TypeValuePair}
 import models.registration.RegistrationRequestModel
 import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
 import models.{DateModel, ErrorModel}
@@ -227,14 +227,16 @@ object TestConstants {
 
       def failureResponse(statusCode: Int, message: String): JsValue =
         s"""{
-           | "statusCode" : $statusCode
-           | "message" : $message
+           | "statusCode" : $statusCode,
+           | "message" : "$message"
            | }""".stripMargin
 
 
-      val SERVICE_DOES_NOT_EXISTS_MODEL = KnownFactsFailureResponseModel(BAD_REQUEST, "The service specified does not exist")
+      val SERVICE_DOES_NOT_EXISTS_MODEL = ErrorModel(BAD_REQUEST, "The service specified does not exist")
+      val GATEWAY_ERROR_MODEL = ErrorModel(INTERNAL_SERVER_ERROR, "Authentication successful, but error accessing user information with Gateway token")
 
-      val SERVICE_DOES_NOT_EXISTS = (BAD_REQUEST, failureResponse(BAD_REQUEST, SERVICE_DOES_NOT_EXISTS_MODEL.message))
+      val SERVICE_DOES_NOT_EXISTS = (BAD_REQUEST, failureResponse(BAD_REQUEST, SERVICE_DOES_NOT_EXISTS_MODEL.reason))
+      val GATEWAY_ERROR= (INTERNAL_SERVER_ERROR, failureResponse(INTERNAL_SERVER_ERROR, GATEWAY_ERROR_MODEL.reason))
 
     }
 

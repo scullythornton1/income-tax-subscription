@@ -20,9 +20,9 @@ import play.api.libs.json.Json
 
 
 case class EnrolRequest(portalId: String,
-                   serviceName: String,
-                   friendlyName: String,
-                   knownFacts: List[String])
+                        serviceName: String,
+                        friendlyName: String,
+                        knownFacts: List[String])
 
 object EnrolRequest {
   implicit val format = Json.format[EnrolRequest]

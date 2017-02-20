@@ -16,26 +16,20 @@
 
 package unit.connectors
 
-import models.ErrorModel
 import models.gg.KnownFactsSuccessResponseModel
-import models.registration._
-import play.api.http.Status._
-import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.HeaderCarrier
 import unit.connectors.mocks.MockGGAdminConnector
-import utils.JsonUtils._
+import utils.TestConstants.GG.KnownFactsResponse._
 import utils.TestConstants.GG._
-import KnownFactsResponse._
-import org.scalatest.Matchers._
 
-class GGAdminConnectorSpec extends MockGGAdminConnector{
+class GGAdminConnectorSpec extends MockGGAdminConnector {
 
   implicit val hc = HeaderCarrier()
 
   "GGAdminConnector.addKnownFacts" should {
 
     "Post to the correct url" in {
-      TestGGAdminConnector.ggAdminUrl should endWith("service/ITSA/known-facts")
+      TestGGAdminConnector.addKnownFactsUrl should endWith("service/ITSA/known-facts")
     }
 
     def result = await(TestGGAdminConnector.addKnownFacts(knowFactsRequest))
@@ -48,6 +42,11 @@ class GGAdminConnectorSpec extends MockGGAdminConnector{
     "parse and return the Bad request response correctly" in {
       mockAddKnownFacts(knowFactsRequest)(SERVICE_DOES_NOT_EXISTS)
       result shouldBe Left(SERVICE_DOES_NOT_EXISTS_MODEL)
+    }
+
+    "parse and return the Internal server error response correctly" in {
+      mockAddKnownFacts(knowFactsRequest)(GATEWAY_ERROR)
+      result shouldBe Left(GATEWAY_ERROR_MODEL)
     }
 
   }

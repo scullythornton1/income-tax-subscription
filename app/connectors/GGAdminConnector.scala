@@ -20,12 +20,15 @@ import javax.inject.Inject
 
 import audit.Logging
 import config.AppConfig
-import models.gg.KnownFactsRequest
+import connectors.utils.ConnectorUtils
+import models.gg.{KnownFactsFailureResponseModel, KnownFactsRequest, KnownFactsSuccessResponseModel}
 import play.api.Configuration
+import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.HttpPost
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpResponse}
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class GGAdminConnector @Inject()(config: Configuration,
@@ -34,11 +37,28 @@ class GGAdminConnector @Inject()(config: Configuration,
                                  httpPost: HttpPost
                                 ) extends ServicesConfig with RawResponseReads {
 
-  lazy val ggAdminUrl: String = applicationConfig.ggAdminURL
-  lazy val serviceName: String = "ITSA"
+  private lazy val ggAdminUrl: String = applicationConfig.ggAdminURL
+  private lazy val serviceName: String = "ITSA"
 
   val addKnownFactsUrl: String = s"$ggAdminUrl/service/$serviceName/known-facts"
 
-  def addKnownFacts(knownFacts: KnownFactsRequest): Future[Boolean] = ???
+  def addKnownFacts(knownFacts: KnownFactsRequest)(implicit hc: HeaderCarrier): Future[AddKnownFactsUtil.Response] = {
+    import AddKnownFactsUtil._
+    httpPost.POST[KnownFactsRequest, HttpResponse](addKnownFactsUrl, knownFacts).map { response =>
+      val status = response.status
+      status match {
+        case OK => parseSuccess(response.body)
+        case BAD_REQUEST =>
+          parseFailure(BAD_REQUEST, response.body)
+        case INTERNAL_SERVER_ERROR =>
+          parseFailure(INTERNAL_SERVER_ERROR, response.body)
+        case x =>
+          parseFailure(x, response.body)
+
+      }
+    }
+  }
 
 }
+
+object AddKnownFactsUtil extends ConnectorUtils[KnownFactsFailureResponseModel, KnownFactsSuccessResponseModel]
