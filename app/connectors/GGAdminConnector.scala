@@ -18,17 +18,19 @@ package connectors
 
 import javax.inject.Inject
 
-import audit.Logging
+import audit.{Logging, LoggingConfig}
+import audit.Logging.{eventTypeBadRequest, eventTypeInternalServerError, eventTypeUnexpectedError}
 import config.AppConfig
 import connectors.utils.ConnectorUtils
 import models.gg.{KnownFactsFailureResponseModel, KnownFactsRequest, KnownFactsSuccessResponseModel}
 import play.api.Configuration
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK}
+import play.api.libs.json.Writes
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpResponse}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 
 class GGAdminConnector @Inject()(config: Configuration,
@@ -42,22 +44,50 @@ class GGAdminConnector @Inject()(config: Configuration,
 
   val addKnownFactsUrl: String = s"$ggAdminUrl/service/$serviceName/known-facts"
 
+  def createHeaderCarrierPost(headerCarrier: HeaderCarrier): HeaderCarrier =
+    headerCarrier.withExtraHeaders("Content-Type" -> "application/json")
+
   def addKnownFacts(knownFacts: KnownFactsRequest)(implicit hc: HeaderCarrier): Future[AddKnownFactsUtil.Response] = {
     import AddKnownFactsUtil._
-    httpPost.POST[KnownFactsRequest, HttpResponse](addKnownFactsUrl, knownFacts).map { response =>
+    import GGAdminConnector.{auditAddKnownFactsName, addKnownFactsLoggingConfig}
+
+    implicit lazy val loggingConfig = addKnownFactsLoggingConfig
+    lazy val requestDetails: Map[String, String] = Map("knownFacts" -> knownFacts.toString)
+    val updatedHc = createHeaderCarrierPost(hc)
+
+    httpPost.POST[KnownFactsRequest, HttpResponse](addKnownFactsUrl, knownFacts)(
+      implicitly[Writes[KnownFactsRequest]], implicitly[HttpReads[HttpResponse]], updatedHc).map { response =>
+
+      lazy val audit = logging.auditFor(auditAddKnownFactsName, requestDetails + ("response" -> response.body))(updatedHc)
       val status = response.status
       status match {
         case OK => parseSuccess(response.body)
         case BAD_REQUEST =>
+          logging.warn("GG admin responded with a bad request")
+          audit(eventTypeBadRequest)
           parseFailure(BAD_REQUEST, response.body)
         case INTERNAL_SERVER_ERROR =>
+          logging.warn("GG admin responded with an internal server error")
+          audit(eventTypeInternalServerError)
           parseFailure(INTERNAL_SERVER_ERROR, response.body)
         case x =>
+          logging.warn(s"GG admin responded with an unexpected status code ($x)")
+          audit(eventTypeUnexpectedError)
           parseFailure(x, response.body)
-
       }
     }
   }
+
+}
+
+object GGAdminConnector {
+
+  val auditAddKnownFactsName = "GGAdmin"
+
+  import _root_.utils.Implicits.OptionUtl
+
+  val addKnownFactsLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "GGAdminConnector.addKnownFacts")
+
 
 }
 
