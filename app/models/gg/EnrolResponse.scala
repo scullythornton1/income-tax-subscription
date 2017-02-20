@@ -16,6 +16,7 @@
 
 package models.gg
 
+import models.ErrorResponsesModel
 import play.api.libs.json.Json
 
 
@@ -23,7 +24,18 @@ case class EnrolResponse(serviceName: String,
                          state: String,
                          friendlyName: String,
                          identifiers: List[TypeValuePair])
+case class EnrolFailureResponse(code: Option[String], reason: String) extends ErrorResponsesModel
+
 
 object EnrolResponse {
   implicit val format = Json.format[EnrolResponse]
 }
+object EnrolFailureResponse {
+  implicit val format = Json.format[EnrolResponse]
+}
+
+sealed trait EnrolResult
+
+case object EnrolSuccess extends EnrolResult
+
+case object EnrolFailure extends EnrolResult
