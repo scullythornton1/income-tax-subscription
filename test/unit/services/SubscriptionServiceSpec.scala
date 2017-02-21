@@ -36,7 +36,6 @@ class SubscriptionServiceSpec extends UnitSpec with OneAppPerSuite with JsonUtil
     def propertySubscribeCall = await(TestSubscriptionService.propertySubscribe(fePropertyRequest))
 
     "return success if the subscription succeeds" in {
-
       mockPropertySubscribe(propertySubscribeSuccess)
       val expected = PropertySubscriptionResponseModel(testSafeId, testMtditId, IncomeSourceModel(testSourceId))
       propertySubscribeCall shouldBe Right(expected)

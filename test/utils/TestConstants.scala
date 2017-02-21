@@ -263,4 +263,10 @@ object TestConstants {
 
   }
 
+  object Authenticator {
+
+    val refreshFailure: (Int, Option[JsValue]) = (BAD_REQUEST, """{ "reason" : "Bearer token missing or invalid, or GG-token has expired" }""": JsValue)
+
+  }
+
 }

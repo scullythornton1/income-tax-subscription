@@ -45,9 +45,9 @@ trait MockHttp extends UnitSpec with MockitoSugar with BeforeAndAfterEach {
     )(Matchers.any(), Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(status, Some(response))))
   }
 
-  def setupMockHttpPostEmpty(url: Option[String] = None)(status: Int, response: JsValue): Unit = {
+  def setupMockHttpPostEmpty(url: Option[String] = None)(status: Int, response: Option[JsValue]): Unit = {
     lazy val urlMatcher = url.fold(Matchers.any[String]())(x => Matchers.eq(x))
-    when(mockHttpPost.POSTEmpty[HttpResponse](urlMatcher)(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(status, Some(response))))
+    when(mockHttpPost.POSTEmpty[HttpResponse](urlMatcher)(Matchers.any(), Matchers.any())).thenReturn(Future.successful(HttpResponse(status, response)))
   }
 
   def setupMockHttpGet(url: Option[String] = None)(status: Int, response: JsValue): Unit = {
