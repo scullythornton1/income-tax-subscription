@@ -29,7 +29,6 @@ private object AppDependencies {
 
 
   val compile = Seq(
-
     ws,
     "uk.gov.hmrc" %% "microservice-bootstrap" % microserviceBootstrapVersion,
     "uk.gov.hmrc" %% "play-authorisation" % playAuthVersion,
@@ -58,7 +57,7 @@ private object AppDependencies {
         "info.cukes" %% "cucumber-scala" % cucumberVersion % scope,
         "info.cukes" % "cucumber-junit" % cucumberVersion % scope,
         "org.mockito" % "mockito-core" % "1.9.5" % scope,
-        "com.eclipsesource" %% "play-json-schema-validator" % "0.8.6" % scope
+        "com.github.fge" % "json-schema-validator" % "2.2.6" % scope
       )
     }.test
   }
