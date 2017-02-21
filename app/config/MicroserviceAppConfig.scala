@@ -23,7 +23,6 @@ import uk.gov.hmrc.play.config.ServicesConfig
 trait AppConfig {
   val authURL: String
   val desURL: String
-  val authenticatorURL: String
   val desEnvironment: String
   val desToken: String
   val ggURL: String
