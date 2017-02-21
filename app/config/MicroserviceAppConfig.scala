@@ -24,9 +24,9 @@ trait AppConfig {
   val authURL: String
   val desURL: String
   val authenticatorURL: String
-  val ggURL : String
   val desEnvironment: String
   val desToken: String
+  val ggURL: String
 }
 
 @Singleton
