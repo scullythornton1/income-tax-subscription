@@ -18,7 +18,7 @@ package unit.connectors.mocks
 
 import audit.Logging
 import config.AppConfig
-import connectors.GovernmentGatewayEnrolConnector
+import connectors.GGConnector
 import models.gg.EnrolRequest
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Configuration
@@ -26,14 +26,14 @@ import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.HttpPost
 import utils.Implicits._
 
-trait MockGovernmentGatewayEnrolConnector extends MockHttp with OneAppPerSuite {
+trait MockGGConnector extends MockHttp with OneAppPerSuite {
 
   lazy val config: Configuration = app.injector.instanceOf[Configuration]
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val httpPost: HttpPost = mockHttpPost
   lazy val logging: Logging = app.injector.instanceOf[Logging]
 
-  object TestGovernmentGatewayEnrolConnector extends GovernmentGatewayEnrolConnector(config, httpPost, appConfig, logging)
+  object TestGovernmentGatewayEnrolConnector extends GGConnector(config, httpPost, appConfig, logging)
 
   def mockGovernmentGatewayEnrol(payload: EnrolRequest) = (setupMockGovernmentGatewayEnrol(payload) _).tupled
 

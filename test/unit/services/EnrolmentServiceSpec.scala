@@ -17,8 +17,9 @@
 package unit.services
 
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, _}
+import play.api.libs.json.Json
 import uk.gov.hmrc.play.http.HeaderCarrier
-import unit.services.mocks.MockEnrolmentService
+import unit.services.mocks.{MockEnrolmentService, MockGGEnrolmentService}
 import utils.TestConstants._
 import utils.TestConstants.GG._
 import utils.TestConstants.GG.KnownFactsResponse._
@@ -45,6 +46,32 @@ class EnrolmentServiceSpec extends MockEnrolmentService {
       mockAddKnownFacts(knowFactsRequest)(GATEWAY_ERROR)
       call.left.get.status shouldBe INTERNAL_SERVER_ERROR
     }
+
+  }
+
+}
+
+class GGEnrolmentServiceSpec extends MockGGEnrolmentService {
+
+  implicit val hc = HeaderCarrier()
+  val dummyResponse = Json.parse("{}")
+  val payload = governmentGatewayEnrolPayload
+
+  def call = await(TestGovernmentGatewayEnrolmentService.ggEnrol(payload))
+  val mock = mockGovernmentGatewayEnrol(payload)
+
+  "GovernmentGatewayEnrolmentService" should {
+
+    "return OK response correctly" in {
+      mock(OK, dummyResponse)
+      call.status shouldBe OK
+    }
+
+    "return BAD_REQUEST response correctly" in {
+      mock(BAD_REQUEST, dummyResponse)
+      call.status shouldBe BAD_REQUEST
+    }
+
 
   }
 

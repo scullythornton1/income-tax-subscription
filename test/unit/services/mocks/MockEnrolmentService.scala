@@ -16,11 +16,16 @@
 
 package unit.services.mocks
 
-import services.EnrolmentService
-import unit.connectors.mocks.MockGGAdminConnector
+import services.{EnrolmentService, GGEnrolmentService}
+import unit.connectors.mocks.{MockGGAdminConnector, MockGGConnector}
 
 trait MockEnrolmentService extends MockGGAdminConnector {
 
   object TestEnrolmentService extends EnrolmentService(TestGGAdminConnector)
 
+}
+
+trait MockGGEnrolmentService extends MockGGConnector {
+
+  object TestGovernmentGatewayEnrolmentService extends GGEnrolmentService(TestGovernmentGatewayEnrolConnector)
 }

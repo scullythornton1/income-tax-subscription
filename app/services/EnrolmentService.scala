@@ -18,10 +18,10 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.GGAdminConnector
+import connectors.{GGAdminConnector, GGConnector}
 import models.ErrorModel
-import models.gg.{KnownFactsRequest, KnownFactsSuccessResponseModel, TypeValuePair}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import models.gg.{EnrolRequest, KnownFactsRequest, KnownFactsSuccessResponseModel, TypeValuePair}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 
@@ -42,5 +42,12 @@ object EnrolmentService {
 
   val MTDITID = "MTDITID"
   val NINO = "NINO"
+
+}
+
+class GGEnrolmentService @Inject()(enrolmentConnector: GGConnector) {
+
+  import scala.concurrent.ExecutionContext.Implicits.global
+  def ggEnrol(request: EnrolRequest)(implicit hc: HeaderCarrier): Future[HttpResponse] = enrolmentConnector.enrol(request)
 
 }
