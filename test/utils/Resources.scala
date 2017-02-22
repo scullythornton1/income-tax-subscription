@@ -16,15 +16,21 @@
 
 package utils
 
-import com.eclipsesource.schema.{SchemaType, SchemaValidator}
+import com.fasterxml.jackson.core.{JsonParseException, JsonProcessingException}
+import com.fasterxml.jackson.databind.{JsonNode, ObjectMapper}
+import com.github.fge.jsonschema.main.{JsonSchema, JsonSchemaFactory}
+import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 
 import scala.io.Source
+import scala.util.{Failure, Success, Try}
 
 trait Resources {
 
+  private final lazy val jsonMapper = new ObjectMapper()
+  private final lazy val jsonFactory = jsonMapper.getFactory
+
   lazy val defaultDataMap = Map(
-    "$nino" -> TestConstants.testNino,
     "$countryCode" -> load(Resources.countryCodeSchema)
   )
 
@@ -32,21 +38,43 @@ trait Resources {
 
   def loadAndParseJsonWithDummyData(path: String): JsValue = Json.parse(loadAndReplace(path, defaultDataMap))
 
-
   def loadAndReplace(path: String, replaceMap: Map[String, String] = defaultDataMap): String = {
     val jsonString: String = load(path).mkString
     replaceMap.foldLeft(jsonString)((json, mapEntry) => json.replace(mapEntry._1, mapEntry._2))
   }
 
-  def loadSchema(schemaPath: String): SchemaType = Json.fromJson[SchemaType](Json.parse(loadAndReplace(schemaPath))).get
+  def loadSchema(schemaPath: String): JsonSchema = {
+    val schemaMapper = new ObjectMapper()
+    val factory = schemaMapper.getFactory
+    val schemaParser = factory.createParser(loadAndReplace(schemaPath))
+    val schemaJson: JsonNode = schemaMapper.readTree(schemaParser)
+    val schemaFactory = JsonSchemaFactory.byDefault()
+    schemaFactory.getJsonSchema(schemaJson)
+  }
 
   def validateJson(schemaPath: String, json: JsValue): Boolean = {
-    val validator = SchemaValidator()
-    val schema: SchemaType = loadSchema(schemaPath)
-    validator.validate(schema, json).isSuccess
+    val schemaValidator = loadSchema(schemaPath)
+    Try {
+      val jsonParser = jsonFactory.createParser(json.toString)
+      val jsonJson: JsonNode = jsonMapper.readTree(jsonParser)
+      val report = schemaValidator.validate(jsonJson)
+      report.isSuccess
+    } match {
+      case Success(result) => result
+      case Failure(e: JsonParseException) =>
+        Logger.error(s"getJsonValidationReport: There was an error parsing the Json: ${e.getMessage}")
+        false
+      case Failure(e: JsonProcessingException) =>
+        Logger.error(s"getJsonValidationReport: There was an Json Validator Processing Exception: ${e.getMessage}")
+        false
+      case Failure(e) =>
+        Logger.error(s"getJsonValidationReport: There was an a general exception: ${e.getMessage}")
+        false
+    }
   }
 
 }
+
 
 object Resources extends Resources {
   lazy val newRegistrationRequestSchema = "/schemas/new_registration_request.schema"

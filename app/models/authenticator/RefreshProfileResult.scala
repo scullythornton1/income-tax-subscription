@@ -14,16 +14,10 @@
  * limitations under the License.
  */
 
-package models.gg
+package models.authenticator
 
-import play.api.libs.json.Json
+sealed trait RefreshProfileResult
 
+case object RefreshSuccessful extends RefreshProfileResult
 
-case class EnrolRequest(portalId: String,
-                        serviceName: String,
-                        friendlyName: String,
-                        knownFacts: List[String])
-
-object EnrolRequest {
-  implicit val format = Json.format[EnrolRequest]
-}
+case object RefreshFailure extends RefreshProfileResult
