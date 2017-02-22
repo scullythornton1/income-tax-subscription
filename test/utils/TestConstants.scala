@@ -17,7 +17,7 @@
 package utils
 
 import models.frontend.{Both, Business, FERequest, Property}
-import models.gg.{KnownFactsRequest, TypeValuePair}
+import models.gg.{EnrolRequest, KnownFactsRequest, TypeValuePair}
 import models.registration.RegistrationRequestModel
 import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
 import models.{DateModel, ErrorModel}
@@ -84,9 +84,10 @@ object TestConstants {
       cashOrAccruals = "cash"
     ))
   )
+  val governmentGatewayEnrolPayload =
+    EnrolRequest(portalId = "MOSW", serviceName = "MOSW5", friendlyName = "Main Enrolment", knownFacts = List("DV200L", "13 66GH"))
 
   val registerRequestPayload = RegistrationRequestModel(isAnAgent = false)
-
 
   object NewRegistrationResponse {
     val successResponse: String => JsValue = (safeId: String) =>

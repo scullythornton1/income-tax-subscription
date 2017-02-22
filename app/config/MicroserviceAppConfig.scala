@@ -27,6 +27,7 @@ trait AppConfig {
   val authenticatorURL: String
   val desEnvironment: String
   val desToken: String
+  val ggURL: String
 }
 
 @Singleton
@@ -35,6 +36,7 @@ class MicroserviceAppConfig @Inject()(configuration: Configuration) extends AppC
   override lazy val authURL = baseUrl("auth")
   override lazy val authenticatorURL = baseUrl("authenticator")
   override lazy val desURL = baseUrl("des")
+  override lazy val ggURL = baseUrl("government-gateway")
   override lazy val ggAdminURL = baseUrl("gg-admin")
   override lazy val desEnvironment = loadConfig("microservice.services.des.environment")
   override lazy val desToken = loadConfig("microservice.services.des.authorization-token")
