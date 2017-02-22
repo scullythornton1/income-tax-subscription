@@ -28,28 +28,26 @@ class GovernmentGatewayEnrolConnectorSpec extends MockGovernmentGatewayEnrolConn
   implicit val hc = HeaderCarrier()
   val dummyResponse = Json.parse("{}")
 
-  def result = TestGovernmentGatewayEnrolConnector.enrol(governmentGatewayEnrolPayload)
+  def result = await(TestGovernmentGatewayEnrolConnector.enrol(governmentGatewayEnrolPayload))
 
   "return OK response correctly" in {
     mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, dummyResponse))
-    val r = await(result)
-    r.status shouldBe OK
+    result.status shouldBe OK
   }
 
   "return BAD_REQUEST response correctly" in {
     mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((BAD_REQUEST, dummyResponse))
-    val r = await(result)
-    r.status shouldBe BAD_REQUEST
+    result.status shouldBe BAD_REQUEST
   }
 
   "return FORBIDDEN response correctly" in {
     mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((FORBIDDEN, dummyResponse))
-    val r = await(result)
-    r.status shouldBe FORBIDDEN
+    result.status shouldBe FORBIDDEN
+
   }
   "return INTERNAL_SERVER_ERROR response correctly" in {
     mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((INTERNAL_SERVER_ERROR, dummyResponse))
-    val r = await(result)
-    r.status shouldBe INTERNAL_SERVER_ERROR
+    result.status shouldBe INTERNAL_SERVER_ERROR
+
   }
 }
