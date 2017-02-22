@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package models.gg
+package unit.services.mocks
 
-import play.api.libs.json.Json
+import services.EnrolmentService
+import unit.connectors.mocks.MockGGAdminConnector
 
+trait MockEnrolmentService extends MockGGAdminConnector {
 
-case class EnrolRequest(portalId: String,
-                        serviceName: String,
-                        friendlyName: String,
-                        knownFacts: List[String])
+  object TestEnrolmentService extends EnrolmentService(TestGGAdminConnector)
 
-object EnrolRequest {
-  implicit val format = Json.format[EnrolRequest]
 }
