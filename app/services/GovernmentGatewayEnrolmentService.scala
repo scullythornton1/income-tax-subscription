@@ -25,7 +25,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
-class EnrolmentService @Inject() (enrolmentConnector: GovernmentGatewayEnrolConnector) {
+class GovernmentGatewayEnrolmentService @Inject()(enrolmentConnector: GovernmentGatewayEnrolConnector) {
 
   def ggEnrol(request: EnrolRequest)(implicit hc: HeaderCarrier): Future[HttpResponse] = enrolmentConnector.enrol(request)
 
