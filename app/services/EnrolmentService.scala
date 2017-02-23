@@ -23,12 +23,17 @@ import models.ErrorModel
 import models.gg.{EnrolRequest, KnownFactsRequest, KnownFactsSuccessResponseModel, TypeValuePair}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class EnrolmentService @Inject()(gGAdminConnector: GGAdminConnector) {
+class EnrolmentService @Inject()
+(
+  gGAdminConnector: GGAdminConnector,
+  ggConnector: GGConnector
+) {
 
-  import EnrolmentService._
+  val MTDITID = "MTDITID"
+  val NINO = "NINO"
 
   def addKnownFacts(nino: String, mtditId: String)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, KnownFactsSuccessResponseModel]] = {
     val knownFact1 = TypeValuePair(MTDITID, mtditId)
@@ -36,18 +41,6 @@ class EnrolmentService @Inject()(gGAdminConnector: GGAdminConnector) {
     gGAdminConnector.addKnownFacts(KnownFactsRequest(List(knownFact1, knownFact2)))
   }
 
-}
-
-object EnrolmentService {
-
-  val MTDITID = "MTDITID"
-  val NINO = "NINO"
-
-}
-
-class GGEnrolmentService @Inject()(enrolmentConnector: GGConnector) {
-
-  import scala.concurrent.ExecutionContext.Implicits.global
-  def ggEnrol(request: EnrolRequest)(implicit hc: HeaderCarrier): Future[HttpResponse] = enrolmentConnector.enrol(request)
+  def ggEnrol(request: EnrolRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = ggConnector.enrol(request)
 
 }

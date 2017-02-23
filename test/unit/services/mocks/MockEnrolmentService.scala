@@ -16,16 +16,21 @@
 
 package unit.services.mocks
 
-import services.{EnrolmentService, GGEnrolmentService}
+import audit.Logging
+import config.AppConfig
+import play.api.Configuration
+import services.EnrolmentService
+import uk.gov.hmrc.play.http.HttpGet
 import unit.connectors.mocks.{MockGGAdminConnector, MockGGConnector}
 
-trait MockEnrolmentService extends MockGGAdminConnector {
+trait MockEnrolmentService extends MockGGAdminConnector with MockGGConnector {
 
-  object TestEnrolmentService extends EnrolmentService(TestGGAdminConnector)
+  override lazy val config = app.injector.instanceOf[Configuration]
+  override lazy val appConfig = app.injector.instanceOf[AppConfig]
+  override lazy val logging = app.injector.instanceOf[Logging]
+  override lazy val httpPost = mockHttpPost
+  override lazy val httpGet: HttpGet = mockHttpGet
 
-}
+  object TestEnrolmentService extends EnrolmentService(TestGGAdminConnector, TestGovernmentGatewayEnrolConnector)
 
-trait MockGGEnrolmentService extends MockGGConnector {
-
-  object TestGovernmentGatewayEnrolmentService extends GGEnrolmentService(TestGovernmentGatewayEnrolConnector)
 }

@@ -19,18 +19,19 @@ package unit.services
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, _}
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.http.HeaderCarrier
-import unit.services.mocks.{MockEnrolmentService, MockGGEnrolmentService}
+import unit.services.mocks.MockEnrolmentService
 import utils.TestConstants._
 import utils.TestConstants.GG._
 import utils.TestConstants.GG.KnownFactsResponse._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class EnrolmentServiceSpec extends MockEnrolmentService {
 
   implicit val hc = HeaderCarrier()
 
-  def call = await(TestEnrolmentService.addKnownFacts(testNino, testMtditId))
-
   "EnrolmentService.addKnownFacts" should {
+
+    def call = await(TestEnrolmentService.addKnownFacts(testNino, testMtditId))
 
     "return the safeId when the registration is successful" in {
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
@@ -49,18 +50,13 @@ class EnrolmentServiceSpec extends MockEnrolmentService {
 
   }
 
-}
-
-class GGEnrolmentServiceSpec extends MockGGEnrolmentService {
-
-  implicit val hc = HeaderCarrier()
-  val dummyResponse = Json.parse("{}")
-  val payload = governmentGatewayEnrolPayload
-
-  def call = await(TestGovernmentGatewayEnrolmentService.ggEnrol(payload))
-  val mock = mockGovernmentGatewayEnrol(payload)
-
   "GovernmentGatewayEnrolmentService" should {
+
+    val dummyResponse = Json.parse("{}")
+    val payload = governmentGatewayEnrolPayload
+
+    def call = await(TestEnrolmentService.ggEnrol(payload))
+    val mock = mockGovernmentGatewayEnrol(payload)
 
     "return OK response correctly" in {
       mock(OK, dummyResponse)
@@ -71,7 +67,6 @@ class GGEnrolmentServiceSpec extends MockGGEnrolmentService {
       mock(BAD_REQUEST, dummyResponse)
       call.status shouldBe BAD_REQUEST
     }
-
 
   }
 
