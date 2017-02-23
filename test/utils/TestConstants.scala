@@ -212,12 +212,10 @@ object TestConstants {
 
   object GG {
 
-    import services.EnrolmentService.{MTDITID, NINO}
-
     lazy val knowFactsRequest = KnownFactsRequest(
       List(
-        TypeValuePair(MTDITID, testMtditId),
-        TypeValuePair(NINO, testNino)
+        TypeValuePair("MTDITID", testMtditId),
+        TypeValuePair("NINO", testNino)
       )
     )
 

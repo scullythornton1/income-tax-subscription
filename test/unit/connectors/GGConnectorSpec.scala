@@ -18,12 +18,12 @@ package unit.connectors
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.http.HeaderCarrier
-import unit.connectors.mocks.MockGovernmentGatewayEnrolConnector
+import unit.connectors.mocks.MockGGConnector
 import utils.TestConstants._
 import scala.concurrent.ExecutionContext.Implicits.global
 import play.api.http.Status._
 
-class GovernmentGatewayEnrolConnectorSpec extends MockGovernmentGatewayEnrolConnector {
+class GGConnectorSpec extends MockGGConnector {
 
   implicit val hc = HeaderCarrier()
   val dummyResponse = Json.parse("{}")

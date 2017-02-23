@@ -29,7 +29,7 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GovernmentGatewayEnrolConnector @Inject()
+class GGConnector @Inject()
 (
   config: Configuration,
   httpPost: HttpPost,

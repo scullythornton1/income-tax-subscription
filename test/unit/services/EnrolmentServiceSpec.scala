@@ -17,19 +17,21 @@
 package unit.services
 
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, _}
+import play.api.libs.json.Json
 import uk.gov.hmrc.play.http.HeaderCarrier
 import unit.services.mocks.MockEnrolmentService
 import utils.TestConstants._
 import utils.TestConstants.GG._
 import utils.TestConstants.GG.KnownFactsResponse._
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class EnrolmentServiceSpec extends MockEnrolmentService {
 
   implicit val hc = HeaderCarrier()
 
-  def call = await(TestEnrolmentService.addKnownFacts(testNino, testMtditId))
-
   "EnrolmentService.addKnownFacts" should {
+
+    def call = await(TestEnrolmentService.addKnownFacts(testNino, testMtditId))
 
     "return the safeId when the registration is successful" in {
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
@@ -44,6 +46,26 @@ class EnrolmentServiceSpec extends MockEnrolmentService {
     "return the error when both registration is conflict but lookup is unsuccessful" in {
       mockAddKnownFacts(knowFactsRequest)(GATEWAY_ERROR)
       call.left.get.status shouldBe INTERNAL_SERVER_ERROR
+    }
+
+  }
+
+  "GovernmentGatewayEnrolmentService" should {
+
+    val dummyResponse = Json.parse("{}")
+    val payload = governmentGatewayEnrolPayload
+
+    def call = await(TestEnrolmentService.ggEnrol(payload))
+    val mock = mockGovernmentGatewayEnrol(payload)
+
+    "return OK response correctly" in {
+      mock(OK, dummyResponse)
+      call.status shouldBe OK
+    }
+
+    "return BAD_REQUEST response correctly" in {
+      mock(BAD_REQUEST, dummyResponse)
+      call.status shouldBe BAD_REQUEST
     }
 
   }
