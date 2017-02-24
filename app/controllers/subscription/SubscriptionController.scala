@@ -53,7 +53,7 @@ class SubscriptionController @Inject()(logging: Logging,
     )
   }
 
-  private def createSubscription(feRequest: FERequest)(implicit hc: HeaderCarrier): Future[Result] = subManService.orchestrateROSM(feRequest).map {
+  private def createSubscription(feRequest: FERequest)(implicit hc: HeaderCarrier): Future[Result] = subManService.rosmAndEnrol(feRequest).map {
     case Right(r) =>
       logging.debug(s"Subscription successful, responding with\n$r")
       Ok(toJsValue(r))

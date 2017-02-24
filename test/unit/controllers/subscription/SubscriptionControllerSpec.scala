@@ -29,6 +29,10 @@ import uk.gov.hmrc.play.test.UnitSpec
 import unit.services.mocks.MockSubscriptionManagerService
 import utils.JsonUtils._
 import utils.MaterializerSupport
+import utils.TestConstants.AuthenticatorResponse._
+import utils.TestConstants.GG.EnrolResponseExamples._
+import utils.TestConstants.GG.KnownFactsResponse._
+import utils.TestConstants.GG._
 import utils.TestConstants._
 
 import scala.concurrent.Future
@@ -41,10 +45,12 @@ class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerSe
 
   "SubscriptionController" should {
     "return the id when successful" in {
-      val feRequest: JsValue = FERequest(testNino, incomeSource = Property)
-      val fakeRequest: FakeRequest[AnyContentAsJson] = FakeRequest().withJsonBody(feRequest)
+      val fakeRequest: FakeRequest[AnyContentAsJson] = FakeRequest().withJsonBody(fePropertyRequest)
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
+      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
+      mockRefreshProfile(refreshSuccess)
       val result = call(fakeRequest)
       jsonBodyOf(result).as[FESuccessResponse].mtditId shouldBe testMtditId
     }
