@@ -37,8 +37,6 @@ trait MockAuthenticatorConnector extends MockHttp with OneAppPerSuite {
 
   object TestAuthenticatorConnector extends AuthenticatorConnector(config, appConfig, logging, httpPost)
 
-  val refreshSuccess = (NO_CONTENT, None)
-
   def setupRefreshProfile(status: Int, response: Option[JsValue]): Unit =
     setupMockHttpPostEmpty(url = TestAuthenticatorConnector.refreshProfileURI)(status, response)
 

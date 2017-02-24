@@ -23,36 +23,12 @@ import unit.services.mocks.MockEnrolmentService
 import utils.TestConstants._
 import utils.TestConstants.GG._
 import utils.TestConstants.GG.KnownFactsResponse._
+import utils.TestConstants.GG.EnrolResponseExamples._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class EnrolmentServiceSpec extends MockEnrolmentService {
 
   implicit val hc = HeaderCarrier()
-
-  "EnrolmentService.createEnrolment" should {
-
-    val dummyResponse = Json.parse("{}")
-
-    def call = await(TestEnrolmentService.createEnrolment(testNino, testMtditId))
-
-    "return OK response correctly when both KnownFactsAdd and ggEnrol are successful" in {
-      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, dummyResponse))
-      call.right.get.status shouldBe OK
-    }
-
-    "return BAD request response correctly when KnownFactsAdd successful and ggEnrol fail" in {
-      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((BAD_REQUEST, dummyResponse))
-      call.right.get.status shouldBe BAD_REQUEST
-    }
-
-    "return BAD_REQUEST response correctly" in {
-      mockAddKnownFacts(knowFactsRequest)(GATEWAY_ERROR)
-      call.left.get.status shouldBe INTERNAL_SERVER_ERROR
-    }
-
-  }
 
   "EnrolmentService.addKnownFacts" should {
 
@@ -77,17 +53,15 @@ class EnrolmentServiceSpec extends MockEnrolmentService {
 
   "EnrolmentService.ggEnrol" should {
 
-    val dummyResponse = Json.parse("{}")
-
     def call = await(TestEnrolmentService.ggEnrol(testNino, testMtditId))
 
     "return OK response correctly" in {
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(OK, dummyResponse)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(OK, enrolSuccess)
       call.status shouldBe OK
     }
 
     "return BAD_REQUEST response correctly" in {
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(BAD_REQUEST, dummyResponse)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(BAD_REQUEST, enrolSuccess)
       call.status shouldBe BAD_REQUEST
     }
 

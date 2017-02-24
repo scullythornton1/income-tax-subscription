@@ -22,7 +22,7 @@ import models.registration.RegistrationRequestModel
 import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
 import models.{DateModel, ErrorModel}
 import play.api.http.Status._
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.domain.Generator
 import utils.JsonUtils._
 
@@ -237,6 +237,7 @@ object TestConstants {
            | "message" : "$message"
            | }""".stripMargin
 
+      lazy val addKnownFactsSuccess = (OK, successResponse(1))
 
       val SERVICE_DOES_NOT_EXISTS_MODEL = ErrorModel(BAD_REQUEST, "The service specified does not exist")
       val GATEWAY_ERROR_MODEL = ErrorModel(INTERNAL_SERVER_ERROR, "Authentication successful, but error accessing user information with Gateway token")
@@ -277,13 +278,13 @@ object TestConstants {
     }
 
     object EnrolResponseExamples {
-      val serviceName = "MOSW5"
-      val state = "NotYetActivated"
+      val serviceName = "HMRC-MTD-IT"
+      val state = "Activated"
       val friendlyName = ""
-      val testType1 = "MOSW5PostCode"
-      val testValue1 = "13 9DF"
-      val testType2 = "MOSW5Reference"
-      val testValue2 = "DV200L"
+      val testType1 = "MTDITID"
+      val testValue1 = testMtditId
+      val testType2 = "NINO"
+      val testValue2 = testNino
 
       def jsonEnrolResponse(serviceName: String, state: String, friendlyName: String, identifier: List[TypeValuePair]): JsValue =
         s"""{
@@ -294,12 +295,24 @@ object TestConstants {
            |        ${identifier.map(x => s"""{ "type" : "${x.`type`}", "value" : "${x.value}"}""").mkString(",")}
            |      ]
            |}""".stripMargin
+
+      val enrolSuccess = jsonEnrolResponse(
+        serviceName,
+        state,
+        friendlyName,
+        List(
+          TypeValuePair(testType1, testValue1),
+          TypeValuePair(testType2, testValue2)
+        ))
+
+      val enrolFailure = Json.toJson("""{reason:"Dummy Reason"}""")
     }
 
   }
 
-  object Authenticator {
+  object AuthenticatorResponse {
 
+    val refreshSuccess = (NO_CONTENT, None)
     val refreshFailure: (Int, Option[JsValue]) = (BAD_REQUEST, """{ "reason" : "Bearer token missing or invalid, or GG-token has expired" }""": JsValue)
 
   }

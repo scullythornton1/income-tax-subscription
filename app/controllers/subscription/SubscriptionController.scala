@@ -21,7 +21,7 @@ import javax.inject.Inject
 import audit.{Logging, LoggingConfig}
 import models.frontend.{FEFailureResponse, FERequest}
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import services.SubscriptionManagerService
+import services.RosmAndEnrolManagerService
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import utils.JsonUtils._
@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SubscriptionController @Inject()(logging: Logging,
-                                       subManService: SubscriptionManagerService) extends BaseController {
+                                       subManService: RosmAndEnrolManagerService) extends BaseController {
 
   def subscribe(nino: String): Action[AnyContent] = Action.async { implicit request =>
     implicit val loggingConfig = SubscriptionController.subscribeLoggingConfig
@@ -53,7 +53,7 @@ class SubscriptionController @Inject()(logging: Logging,
     )
   }
 
-  private def createSubscription(feRequest: FERequest)(implicit hc: HeaderCarrier): Future[Result] = subManService.orchestrateSubscription(feRequest).map {
+  private def createSubscription(feRequest: FERequest)(implicit hc: HeaderCarrier): Future[Result] = subManService.orchestrateROSM(feRequest).map {
     case Right(r) =>
       logging.debug(s"Subscription successful, responding with\n$r")
       Ok(toJsValue(r))

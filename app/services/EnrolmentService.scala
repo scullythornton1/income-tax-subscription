@@ -23,7 +23,6 @@ import models.ErrorModel
 import models.gg.{EnrolRequest, KnownFactsRequest, KnownFactsSuccessResponseModel, TypeValuePair}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import common.Constants.GovernmentGateway._
-import utils.JsonUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,14 +32,6 @@ class EnrolmentService @Inject()
   gGAdminConnector: GGAdminConnector,
   ggConnector: GGConnector
 ) {
-
-  def createEnrolment(nino: String, mtditId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext):
-  Future[Either[ErrorModel, HttpResponse]] = {
-    addKnownFacts(nino, mtditId).flatMap {
-      case Right(knownFactSuccess) => ggEnrol(nino, mtditId).map(x => x)
-      case Left(knownFactError) => Future.successful(knownFactError)
-    }
-  }
 
   def addKnownFacts(nino: String, mtditId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext)
   : Future[Either[ErrorModel, KnownFactsSuccessResponseModel]] = {
