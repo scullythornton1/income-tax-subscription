@@ -29,6 +29,31 @@ class EnrolmentServiceSpec extends MockEnrolmentService {
 
   implicit val hc = HeaderCarrier()
 
+  "EnrolmentService.createEnrolment" should {
+
+    val dummyResponse = Json.parse("{}")
+
+    def call = await(TestEnrolmentService.createEnrolment(testNino, testMtditId))
+
+    "return OK response correctly when both KnownFactsAdd and ggEnrol are successful" in {
+      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, dummyResponse))
+      call.right.get.status shouldBe OK
+    }
+
+    "return BAD request response correctly when KnownFactsAdd successful and ggEnrol fail" in {
+      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((BAD_REQUEST, dummyResponse))
+      call.right.get.status shouldBe BAD_REQUEST
+    }
+
+    "return BAD_REQUEST response correctly" in {
+      mockAddKnownFacts(knowFactsRequest)(GATEWAY_ERROR)
+      call.left.get.status shouldBe INTERNAL_SERVER_ERROR
+    }
+
+  }
+
   "EnrolmentService.addKnownFacts" should {
 
     def call = await(TestEnrolmentService.addKnownFacts(testNino, testMtditId))
@@ -50,20 +75,19 @@ class EnrolmentServiceSpec extends MockEnrolmentService {
 
   }
 
-  "GovernmentGatewayEnrolmentService" should {
+  "EnrolmentService.ggEnrol" should {
 
     val dummyResponse = Json.parse("{}")
-    val payload = governmentGatewayEnrolPayload
 
     def call = await(TestEnrolmentService.ggEnrol(testNino, testMtditId))
 
     "return OK response correctly" in {
-      mockGovernmentGatewayEnrol(payload)(OK, dummyResponse)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(OK, dummyResponse)
       call.status shouldBe OK
     }
 
     "return BAD_REQUEST response correctly" in {
-      mockGovernmentGatewayEnrol(payload)(BAD_REQUEST, dummyResponse)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(BAD_REQUEST, dummyResponse)
       call.status shouldBe BAD_REQUEST
     }
 
