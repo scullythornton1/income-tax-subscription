@@ -19,8 +19,7 @@ package controllers.subscription
 import javax.inject.Inject
 
 import audit.{Logging, LoggingConfig}
-import models.frontend.{FEFailureResponse, FERequest, FESuccessResponse}
-import play.api.libs.json.JsValue
+import models.frontend.{FEFailureResponse, FERequest}
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import services.SubscriptionManagerService
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -33,7 +32,17 @@ import scala.concurrent.Future
 class SubscriptionController @Inject()(logging: Logging,
                                        subManService: SubscriptionManagerService) extends BaseController {
 
-  def parseRequest(request: Request[AnyContent]): Option[FERequest] = request.body.asJson.fold[Option[FERequest]](None) {
+  def subscribe(nino: String): Action[AnyContent] = Action.async { implicit request =>
+    implicit val loggingConfig = SubscriptionController.subscribeLoggingConfig
+    logging.debug(s"Request received for $nino")
+    lazy val parseError: Future[Result] = BadRequest(toJsValue(FEFailureResponse("Request is invalid")))
+
+    parseRequest(request).fold(parseError) { feRequest =>
+      createSubscription(feRequest)
+    }
+  }
+
+  private def parseRequest(request: Request[AnyContent]): Option[FERequest] = request.body.asJson.fold[Option[FERequest]](None) {
     implicit val loggingConfig = SubscriptionController.parseRequestLoggingConfig
     jsonBody => parseUtil(jsonBody)(FERequest.format).fold(
       invalid => {
@@ -44,23 +53,13 @@ class SubscriptionController @Inject()(logging: Logging,
     )
   }
 
-  def createSubscription(feRequest: FERequest)(implicit hc: HeaderCarrier): Future[Result] = subManService.orchestrateSubscription(feRequest).map {
+  private def createSubscription(feRequest: FERequest)(implicit hc: HeaderCarrier): Future[Result] = subManService.orchestrateSubscription(feRequest).map {
     case Right(r) =>
       logging.debug(s"Subscription successful, responding with\n$r")
       Ok(toJsValue(r))
     case Left(l) =>
       logging.warn(s"Subscription failed, responding with\nstatus=${l.status}\nreason=${l.reason}")
       Status(l.status)(toJsValue(FEFailureResponse(l.reason)))
-  }
-
-  def subscribe(nino: String): Action[AnyContent] = Action.async { implicit request =>
-    implicit val loggingConfig = SubscriptionController.subscribeLoggingConfig
-    logging.debug(s"Request received for $nino")
-    lazy val parseError: Future[Result] = BadRequest(toJsValue(FEFailureResponse("Request is invalid")))
-
-    parseRequest(request).fold(parseError) { feRequest =>
-      createSubscription(feRequest)
-    }
   }
 
 }

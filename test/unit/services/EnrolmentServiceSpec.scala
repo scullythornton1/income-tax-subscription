@@ -55,16 +55,15 @@ class EnrolmentServiceSpec extends MockEnrolmentService {
     val dummyResponse = Json.parse("{}")
     val payload = governmentGatewayEnrolPayload
 
-    def call = await(TestEnrolmentService.ggEnrol(payload))
-    val mock = mockGovernmentGatewayEnrol(payload)
+    def call = await(TestEnrolmentService.ggEnrol(testNino, testMtditId))
 
     "return OK response correctly" in {
-      mock(OK, dummyResponse)
+      mockGovernmentGatewayEnrol(payload)(OK, dummyResponse)
       call.status shouldBe OK
     }
 
     "return BAD_REQUEST response correctly" in {
-      mock(BAD_REQUEST, dummyResponse)
+      mockGovernmentGatewayEnrol(payload)(BAD_REQUEST, dummyResponse)
       call.status shouldBe BAD_REQUEST
     }
 

@@ -85,7 +85,12 @@ object TestConstants {
     ))
   )
   val governmentGatewayEnrolPayload =
-    EnrolRequest(portalId = "MOSW", serviceName = "MOSW5", friendlyName = "Main Enrolment", knownFacts = List("DV200L", "13 66GH"))
+    EnrolRequest(
+      portalId = "Default",
+      serviceName = "HMRC-MTD-IT",
+      friendlyName = "Making Tax Digital Income Tax Self-Assessment enrolment",
+      knownFacts = List(testMtditId, testNino)
+    )
 
   val registerRequestPayload = RegistrationRequestModel(isAnAgent = false)
 

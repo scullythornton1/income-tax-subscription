@@ -22,6 +22,7 @@ import connectors.{GGAdminConnector, GGConnector}
 import models.ErrorModel
 import models.gg.{EnrolRequest, KnownFactsRequest, KnownFactsSuccessResponseModel, TypeValuePair}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
+import common.Constants.GovernmentGateway._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -32,15 +33,22 @@ class EnrolmentService @Inject()
   ggConnector: GGConnector
 ) {
 
-  val MTDITID = "MTDITID"
-  val NINO = "NINO"
-
   def addKnownFacts(nino: String, mtditId: String)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, KnownFactsSuccessResponseModel]] = {
     val knownFact1 = TypeValuePair(MTDITID, mtditId)
     val knownFact2 = TypeValuePair(NINO, nino)
     gGAdminConnector.addKnownFacts(KnownFactsRequest(List(knownFact1, knownFact2)))
   }
 
-  def ggEnrol(request: EnrolRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = ggConnector.enrol(request)
+  def ggEnrol(nino: String, mtditId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+
+    val enrolRequest = EnrolRequest(
+      portalId = ggPortalId,
+      serviceName = ggServiceName,
+      friendlyName = ggFriendlyName,
+      knownFacts = List(mtditId, nino)
+    )
+
+    ggConnector.enrol(enrolRequest)
+  }
 
 }
