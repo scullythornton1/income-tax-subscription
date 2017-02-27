@@ -16,6 +16,7 @@
 
 package unit.connectors.mocks
 
+import audit.Logging
 import config.AppConfig
 import connectors.SubscriptionConnector
 import models.subscription.business.BusinessSubscriptionRequestModel
@@ -32,6 +33,7 @@ trait MockSubscriptionConnector extends MockHttp with OneAppPerSuite {
   lazy val config: Configuration = app.injector.instanceOf[Configuration]
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val httpPost: HttpPost = mockHttpPost
+  lazy val logging: Logging = app.injector.instanceOf[Logging]
 
   val mockPropertySubscribe = (setupMockPropertySubscribe(testNino) _).tupled
   def mockBusinessSubscribe(payload: BusinessSubscriptionRequestModel) = (setupMockBusinessSubscribe(testNino, payload) _).tupled
@@ -39,7 +41,7 @@ trait MockSubscriptionConnector extends MockHttp with OneAppPerSuite {
   val propertySubscribeSuccess = (OK, PropertySubscriptionResponse.successResponse(testSafeId, testMtditId, testSourceId))
   val businessSubscribeSuccess = (OK, BusinessSubscriptionResponse.successResponse(testSafeId, testMtditId, testSourceId))
 
-  object TestSubscriptionConnector extends SubscriptionConnector(config, httpPost, appConfig)
+  object TestSubscriptionConnector extends SubscriptionConnector(config, httpPost, appConfig, logging)
 
   def setupMockBusinessSubscribe(nino: String, payload: BusinessSubscriptionRequestModel)(status: Int, response: JsValue): Unit =
     setupMockHttpPost(url = TestSubscriptionConnector.businessSubscribeUrl(nino), payload)(status, response)

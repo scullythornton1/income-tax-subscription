@@ -42,7 +42,7 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(OK, enrolSuccess)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
       mockRefreshProfile(refreshSuccess)
       call(fePropertyRequest).right.get.mtditId shouldBe testMtditId
     }
@@ -51,7 +51,7 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
       mockRegister(registerRequestPayload)(regSuccess)
       mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(OK, enrolSuccess)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
       mockRefreshProfile(refreshSuccess)
       call(feBusinessRequest).right.get.mtditId shouldBe testMtditId
     }
@@ -61,7 +61,7 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
       mockPropertySubscribe(propertySubscribeSuccess)
       mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(OK, enrolSuccess)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
       mockRefreshProfile(refreshSuccess)
       call(feBothRequest).right.get.mtditId shouldBe testMtditId
     }
@@ -71,7 +71,7 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
       mockPropertySubscribe(propertySubscribeSuccess)
       mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(OK, enrolSuccess)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
       mockRefreshProfile(refreshFailure)
       call(feBothRequest).left.get.status shouldBe INTERNAL_SERVER_ERROR
     }
@@ -81,7 +81,7 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
       mockPropertySubscribe(propertySubscribeSuccess)
       mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(BAD_REQUEST, enrolFailure)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((BAD_REQUEST, enrolFailure))
       call(feBothRequest).left.get.status shouldBe BAD_REQUEST
     }
 
