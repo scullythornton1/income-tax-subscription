@@ -86,9 +86,9 @@ object TestConstants {
   )
   val governmentGatewayEnrolPayload =
     EnrolRequest(
-      portalId = "Default",
-      serviceName = "HMRC-MTD-IT",
-      friendlyName = "Making Tax Digital Income Tax Self-Assessment enrolment",
+      portalId = GovernmentGateway.ggPortalId,
+      serviceName = GovernmentGateway.ggServiceName,
+      friendlyName = GovernmentGateway.ggFriendlyName,
       knownFacts = List(testMtditId, testNino)
     )
 
@@ -219,8 +219,8 @@ object TestConstants {
 
     lazy val knowFactsRequest = KnownFactsRequest(
       List(
-        TypeValuePair("MTDITID", testMtditId),
-        TypeValuePair("NINO", testNino)
+        TypeValuePair(GovernmentGateway.MTDITID, testMtditId),
+        TypeValuePair(GovernmentGateway.NINO, testNino)
       )
     )
 
@@ -248,10 +248,10 @@ object TestConstants {
     }
 
     object TypeValuePairExamples {
-      val testType1 = "MOSW2Number"
-      val testValue1 = "10"
-      val testType2 = "MOSW2ID"
-      val testValue2 = "A"
+      val testType1 = GovernmentGateway.MTDITID
+      val testValue1 = testMtditId
+      val testType2 = GovernmentGateway.NINO
+      val testValue2 = testNino
 
       def jsonTypeValuePair(testType: String, testValue: String): JsValue =
         s"""{"type" : "$testType",
@@ -260,11 +260,11 @@ object TestConstants {
     }
 
     object EnrolRequestExamples {
-      val portalId = "MOSW"
-      val serviceName = "MOSW5"
-      val friendlyName = "Main Enrolment"
-      val knownFact1 = "DV200L"
-      val knownFact2 = "13 66GH"
+      val portalId = GovernmentGateway.ggPortalId
+      val serviceName = GovernmentGateway.ggServiceName
+      val friendlyName = GovernmentGateway.ggFriendlyName
+      val knownFact1 = testMtditId
+      val knownFact2 = testNino
 
       def jsonEnrolRequest(portalId: String, serviceName: String, friendlyName: String, knownFacts: List[String]): JsValue =
         s"""{
@@ -278,12 +278,12 @@ object TestConstants {
     }
 
     object EnrolResponseExamples {
-      val serviceName = "HMRC-MTD-IT"
+      val serviceName = GovernmentGateway.ggServiceName
       val state = "Activated"
-      val friendlyName = ""
-      val testType1 = "MTDITID"
+      val friendlyName = GovernmentGateway.ggFriendlyName
+      val testType1 = GovernmentGateway.MTDITID
       val testValue1 = testMtditId
-      val testType2 = "NINO"
+      val testType2 = GovernmentGateway.NINO
       val testValue2 = testNino
 
       def jsonEnrolResponse(serviceName: String, state: String, friendlyName: String, identifier: List[TypeValuePair]): JsValue =
@@ -315,6 +315,14 @@ object TestConstants {
     val refreshSuccess = (NO_CONTENT, None)
     val refreshFailure: (Int, Option[JsValue]) = (BAD_REQUEST, """{ "reason" : "Bearer token missing or invalid, or GG-token has expired" }""": JsValue)
 
+  }
+
+  object GovernmentGateway {
+    val MTDITID = "MTDITID"
+    val NINO = "NINO"
+    val ggPortalId = "Default"
+    val ggServiceName = "HMRC-MTD-IT"
+    val ggFriendlyName = "Making Tax Digital Income Tax Self-Assessment enrolment"
   }
 
 }
