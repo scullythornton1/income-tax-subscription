@@ -23,6 +23,7 @@ import unit.services.mocks.MockEnrolmentService
 import utils.TestConstants._
 import utils.TestConstants.GG._
 import utils.TestConstants.GG.KnownFactsResponse._
+import utils.TestConstants.GG.EnrolResponseExamples._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class EnrolmentServiceSpec extends MockEnrolmentService {
@@ -50,21 +51,17 @@ class EnrolmentServiceSpec extends MockEnrolmentService {
 
   }
 
-  "GovernmentGatewayEnrolmentService" should {
+  "EnrolmentService.ggEnrol" should {
 
-    val dummyResponse = Json.parse("{}")
-    val payload = governmentGatewayEnrolPayload
-
-    def call = await(TestEnrolmentService.ggEnrol(payload))
-    val mock = mockGovernmentGatewayEnrol(payload)
+    def call = await(TestEnrolmentService.ggEnrol(testNino, testMtditId))
 
     "return OK response correctly" in {
-      mock(OK, dummyResponse)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(OK, enrolSuccess)
       call.status shouldBe OK
     }
 
     "return BAD_REQUEST response correctly" in {
-      mock(BAD_REQUEST, dummyResponse)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(BAD_REQUEST, enrolSuccess)
       call.status shouldBe BAD_REQUEST
     }
 

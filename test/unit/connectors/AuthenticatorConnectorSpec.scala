@@ -19,7 +19,7 @@ package unit.connectors
 import models.authenticator.{RefreshFailure, RefreshSuccessful}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import unit.connectors.mocks.MockAuthenticatorConnector
-import utils.TestConstants.Authenticator.refreshFailure
+import utils.TestConstants.AuthenticatorResponse._
 
 
 class AuthenticatorConnectorSpec extends MockAuthenticatorConnector {

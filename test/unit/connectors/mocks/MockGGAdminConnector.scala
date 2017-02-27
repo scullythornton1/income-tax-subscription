@@ -40,8 +40,6 @@ trait MockGGAdminConnector extends MockHttp with OneAppPerSuite {
 
   object TestGGAdminConnector extends GGAdminConnector(config, appConfig, logging, httpPost)
 
-  lazy val addKnownFactsSuccess = (OK, KnownFactsResponse.successResponse(1))
-
   def setupAddKnownFacts(request: KnownFactsRequest)(status: Int, response: JsValue): Unit =
     setupMockHttpPost(url = TestGGAdminConnector.addKnownFactsUrl, request)(status, response)
 

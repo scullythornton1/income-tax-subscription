@@ -22,7 +22,7 @@ import models.registration.RegistrationRequestModel
 import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
 import models.{DateModel, ErrorModel}
 import play.api.http.Status._
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.domain.Generator
 import utils.JsonUtils._
 
@@ -85,7 +85,12 @@ object TestConstants {
     ))
   )
   val governmentGatewayEnrolPayload =
-    EnrolRequest(portalId = "MOSW", serviceName = "MOSW5", friendlyName = "Main Enrolment", knownFacts = List("DV200L", "13 66GH"))
+    EnrolRequest(
+      portalId = GovernmentGateway.ggPortalId,
+      serviceName = GovernmentGateway.ggServiceName,
+      friendlyName = GovernmentGateway.ggFriendlyName,
+      knownFacts = List(testMtditId, testNino)
+    )
 
   val registerRequestPayload = RegistrationRequestModel(isAnAgent = false)
 
@@ -214,8 +219,8 @@ object TestConstants {
 
     lazy val knowFactsRequest = KnownFactsRequest(
       List(
-        TypeValuePair("MTDITID", testMtditId),
-        TypeValuePair("NINO", testNino)
+        TypeValuePair(GovernmentGateway.MTDITID, testMtditId),
+        TypeValuePair(GovernmentGateway.NINO, testNino)
       )
     )
 
@@ -232,6 +237,7 @@ object TestConstants {
            | "message" : "$message"
            | }""".stripMargin
 
+      lazy val addKnownFactsSuccess = (OK, successResponse(1))
 
       val SERVICE_DOES_NOT_EXISTS_MODEL = ErrorModel(BAD_REQUEST, "The service specified does not exist")
       val GATEWAY_ERROR_MODEL = ErrorModel(INTERNAL_SERVER_ERROR, "Authentication successful, but error accessing user information with Gateway token")
@@ -242,10 +248,10 @@ object TestConstants {
     }
 
     object TypeValuePairExamples {
-      val testType1 = "MOSW2Number"
-      val testValue1 = "10"
-      val testType2 = "MOSW2ID"
-      val testValue2 = "A"
+      val testType1 = GovernmentGateway.MTDITID
+      val testValue1 = testMtditId
+      val testType2 = GovernmentGateway.NINO
+      val testValue2 = testNino
 
       def jsonTypeValuePair(testType: String, testValue: String): JsValue =
         s"""{"type" : "$testType",
@@ -254,11 +260,11 @@ object TestConstants {
     }
 
     object EnrolRequestExamples {
-      val portalId = "MOSW"
-      val serviceName = "MOSW5"
-      val friendlyName = "Main Enrolment"
-      val knownFact1 = "DV200L"
-      val knownFact2 = "13 66GH"
+      val portalId = GovernmentGateway.ggPortalId
+      val serviceName = GovernmentGateway.ggServiceName
+      val friendlyName = GovernmentGateway.ggFriendlyName
+      val knownFact1 = testMtditId
+      val knownFact2 = testNino
 
       def jsonEnrolRequest(portalId: String, serviceName: String, friendlyName: String, knownFacts: List[String]): JsValue =
         s"""{
@@ -272,13 +278,13 @@ object TestConstants {
     }
 
     object EnrolResponseExamples {
-      val serviceName = "MOSW5"
-      val state = "NotYetActivated"
-      val friendlyName = ""
-      val testType1 = "MOSW5PostCode"
-      val testValue1 = "13 9DF"
-      val testType2 = "MOSW5Reference"
-      val testValue2 = "DV200L"
+      val serviceName = GovernmentGateway.ggServiceName
+      val state = "Activated"
+      val friendlyName = GovernmentGateway.ggFriendlyName
+      val testType1 = GovernmentGateway.MTDITID
+      val testValue1 = testMtditId
+      val testType2 = GovernmentGateway.NINO
+      val testValue2 = testNino
 
       def jsonEnrolResponse(serviceName: String, state: String, friendlyName: String, identifier: List[TypeValuePair]): JsValue =
         s"""{
@@ -289,14 +295,34 @@ object TestConstants {
            |        ${identifier.map(x => s"""{ "type" : "${x.`type`}", "value" : "${x.value}"}""").mkString(",")}
            |      ]
            |}""".stripMargin
+
+      val enrolSuccess = jsonEnrolResponse(
+        serviceName,
+        state,
+        friendlyName,
+        List(
+          TypeValuePair(testType1, testValue1),
+          TypeValuePair(testType2, testValue2)
+        ))
+
+      val enrolFailure = Json.toJson("""{reason:"Dummy Reason"}""")
     }
 
   }
 
-  object Authenticator {
+  object AuthenticatorResponse {
 
+    val refreshSuccess = (NO_CONTENT, None)
     val refreshFailure: (Int, Option[JsValue]) = (BAD_REQUEST, """{ "reason" : "Bearer token missing or invalid, or GG-token has expired" }""": JsValue)
 
+  }
+
+  object GovernmentGateway {
+    val MTDITID = "MTDITID"
+    val NINO = "NINO"
+    val ggPortalId = "Default"
+    val ggServiceName = "HMRC-MTD-IT"
+    val ggFriendlyName = "Making Tax Digital Income Tax Self-Assessment enrolment"
   }
 
 }
