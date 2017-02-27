@@ -74,21 +74,27 @@ class RegistrationConnector @Inject()(config: Configuration,
         status match {
           case OK => parseSuccess(response.body)
           case BAD_REQUEST =>
+            logging.warn("Registration responded with a bad request error")
             audit(eventTypeBadRequest)
             parseFailure(BAD_REQUEST, response.body)
           case NOT_FOUND =>
+            logging.warn("Registration responded with a not found error")
             audit(eventTypeNotFound)
             parseFailure(NOT_FOUND, response.body)
           case CONFLICT =>
+            logging.warn("Registration responded with a conflict error")
             audit(eventTypeConflict)
             parseFailure(CONFLICT, response.body)
           case INTERNAL_SERVER_ERROR =>
+            logging.warn("Registration responded with a internal server error")
             audit(eventTypeInternalServerError)
             parseFailure(INTERNAL_SERVER_ERROR, response.body)
           case SERVICE_UNAVAILABLE =>
+            logging.warn("Registration responded with a service unavailable error")
             audit(eventTypeServerUnavailable)
             parseFailure(SERVICE_UNAVAILABLE, response.body)
           case x =>
+            logging.warn("Registration responded with a unexpected error")
             audit(eventTypeUnexpectedError)
             parseFailure(x, response.body)
         }

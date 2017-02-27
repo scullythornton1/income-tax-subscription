@@ -18,7 +18,8 @@ package connectors
 
 import javax.inject.Inject
 
-import audit.Logging
+import audit.Logging.eventTypeUnexpectedError
+import audit.{Logging, LoggingConfig}
 import config.AppConfig
 import models.gg._
 import play.api.Configuration
@@ -44,16 +45,38 @@ class GGConnector @Inject()
   def createHeaderCarrierPost(hc: HeaderCarrier): HeaderCarrier = hc.withExtraHeaders("Content-Type" -> "application/json")
 
   def enrol(enrolmentRequest: EnrolRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+    import GGConnector._
+
+    implicit lazy val loggingConfig = addEnrolLoggingConfig
+    lazy val requestDetails: Map[String, String] = Map("enrolRequest" -> enrolmentRequest.toString)
+    val updatedHc = createHeaderCarrierPost(hc)
+    logging.debug(s"Request:\n$requestDetails")
+
     httpPost.POST[EnrolRequest, HttpResponse](enrolUrl, enrolmentRequest)(
       implicitly[Writes[EnrolRequest]], HttpReads.readRaw, createHeaderCarrierPost(hc)
     ).map { response =>
+
+      lazy val audit = logging.auditFor(auditEnrolName, requestDetails + ("response" -> response.body))(updatedHc)
+
       response.status match {
         case OK => response
         case x =>
-          logging.warn(s"Unexpected failure status (${response.status})\n${response.body}")
+          logging.warn("GG enrol responded with a unexpected error")
+          audit(eventTypeUnexpectedError)
           response
       }
     }
 
   }
+}
+
+object GGConnector {
+
+  val auditEnrolName = "GG Enrol"
+
+  import _root_.utils.Implicits.OptionUtl
+
+  val addEnrolLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "GGConnector.enrol")
+
+
 }

@@ -18,6 +18,8 @@ package connectors
 
 import javax.inject.Inject
 
+import audit.Logging._
+import audit.{Logging, LoggingConfig}
 import config.AppConfig
 import connectors.utils.ConnectorUtils
 import models.subscription.business._
@@ -35,7 +37,8 @@ class SubscriptionConnector @Inject()
 (
   config: Configuration,
   httpPost: HttpPost,
-  applicationConfig: AppConfig
+  applicationConfig: AppConfig,
+  logging: Logging
 ) extends ServicesConfig with RawResponseReads {
 
   lazy val desServiceUrl = applicationConfig.desURL
@@ -56,26 +59,61 @@ class SubscriptionConnector @Inject()
   def businessSubscribe(nino: String, businessSubscriptionPayload: BusinessSubscriptionRequestModel)
                        (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[BusinessConnectorUtil.Response] = {
     import BusinessConnectorUtil._
+    import SubscriptionConnector._
+    implicit val loggingConfig = SubscriptionConnector.businessSubscribeLoggingConfig
+    lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
+    val updatedHc = createHeaderCarrierPost(hc)
+    logging.debug(s"Request:\n$requestDetails")
     httpPost.POST[BusinessSubscriptionRequestModel, HttpResponse](businessSubscribeUrl(nino), businessSubscriptionPayload)(
       implicitly[Writes[BusinessSubscriptionRequestModel]], HttpReads.readRaw, createHeaderCarrierPost(hc)
     ).map { response =>
+
+      lazy val audit = logging.auditFor(auditBusinessSubscribeName, requestDetails + ("response" -> response.body))(updatedHc)
+
       response.status match {
         case OK => parseSuccess(response.body)
-        case x => parseFailure(x, response.body)
+        case x =>
+          logging.warn("Business subscription responded with a unexpected error")
+          audit(eventTypeUnexpectedError)
+          parseFailure(x, response.body)
       }
     }
   }
 
   def propertySubscribe(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[PropertyConnectorUtil.Response] = {
     import PropertyConnectorUtil._
+    import SubscriptionConnector._
+    implicit val loggingConfig = SubscriptionConnector.propertySubscribeLoggingConfig
+    lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
+    val updatedHc = createHeaderCarrierPostEmpty(hc)
+    logging.debug(s"Request:\n$requestDetails")
     httpPost.POSTEmpty[HttpResponse](propertySubscribeUrl(nino))(HttpReads.readRaw, createHeaderCarrierPostEmpty(hc)).map {
-      response => response.status match {
-        case OK => parseSuccess(response.body)
-        case x => parseFailure(x, response.body)
-      }
+      response =>
+
+        lazy val audit = logging.auditFor(auditPropertySubscribeName, requestDetails + ("response" -> response.body))(updatedHc)
+
+        response.status match {
+          case OK => parseSuccess(response.body)
+          case x =>
+            logging.warn("Property subscription responded with a unexpected error")
+            audit(eventTypeUnexpectedError)
+            parseFailure(x, response.body)
+        }
     }
   }
 }
 
+object SubscriptionConnector {
+
+  import _root_.utils.Implicits.OptionUtl
+
+  val auditBusinessSubscribeName = "Business Subscribe"
+  val businessSubscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionConnector.businessSubscribe")
+
+  val auditPropertySubscribeName = "Property Subscribe"
+  val propertySubscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionConnector.propertySubscribe")
+}
+
 object PropertyConnectorUtil extends ConnectorUtils[PropertySubscriptionFailureModel, PropertySubscriptionResponseModel]
+
 object BusinessConnectorUtil extends ConnectorUtils[BusinessSubscriptionErrorResponseModel, BusinessSubscriptionSuccessResponseModel]
