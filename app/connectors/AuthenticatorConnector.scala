@@ -22,9 +22,10 @@ import audit.{Logging, LoggingConfig}
 import config.AppConfig
 import models.authenticator.{RefreshFailure, RefreshProfileResult, RefreshSuccessful}
 import play.api.Configuration
+import play.api.http.Status._
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpResponse}
-import scala.concurrent.ExecutionContext.Implicits.global
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class AuthenticatorConnector @Inject()(configuration: Configuration,
@@ -39,9 +40,8 @@ class AuthenticatorConnector @Inject()(configuration: Configuration,
     httpPost.POSTEmpty[HttpResponse](refreshProfileURI).map {
       response =>
         implicit lazy val loggingConfig = AuthenticatorConnector.refreshProfileLoggingConfig
-
         response.status match {
-          case 204 => RefreshSuccessful
+          case NO_CONTENT => RefreshSuccessful
           case x =>
             logging.warn(s"Unexpected failure status (${response.status})\n${response.body}")
             RefreshFailure
