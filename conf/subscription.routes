@@ -1,1 +1,3 @@
+GET         /throttle/:nino            @controllers.subscription.UserAccessController.checkUserAccess(nino: String)
+
 POST        /subscription/:nino        @controllers.subscription.SubscriptionController.subscribe(nino: String)
