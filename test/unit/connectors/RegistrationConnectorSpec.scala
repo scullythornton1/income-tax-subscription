@@ -41,7 +41,7 @@ class RegistrationConnectorSpec extends MockRegistrationConnector {
     }
 
     "Post to the correct url" in {
-      TestRegistrationConnector.newRegistrationUrl(testNino) should endWith(s"/registration/individual/NINO/$testNino")
+      TestRegistrationConnector.newRegistrationUrl(testNino) should endWith(s"/registration/individual/nino/$testNino")
     }
 
     def result = await(TestRegistrationConnector.register(testNino, registerRequestPayload))
