@@ -18,7 +18,7 @@ package models.throttling
 
 import play.api.libs.json.Json
 
-case class UserCount(_id: String, users_in: Int, threshold: Int)
+case class UserCount(_id: String, users: Set[String], threshold: Int)
 
 object UserCount {
   implicit val formats = Json.format[UserCount]

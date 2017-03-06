@@ -16,10 +16,11 @@
 
 package repositories
 
+import utils.Implicits._
 import models.throttling.UserCount
 import play.api.libs.json.JsValue
 import reactivemongo.api.DB
-import reactivemongo.bson._
+import reactivemongo.bson.{BSONArray, _}
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import uk.gov.hmrc.mongo.{ReactiveRepository, Repository}
 
@@ -27,42 +28,34 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait ThrottleRepository extends Repository[UserCount, BSONObjectID] {
-  def update(date: String, threshold: Int, internalId: String, compensate: Boolean): Future[Int]
 
-  def compensate(date: String, threshold: Int, internalId: String): Future[Int]
+  def checkAndUpdate(date: String, threshold: Int, internalId: String): Future[Int]
+
 }
 
 class ThrottleMongoRepository(implicit mongo: () => DB)
   extends ReactiveRepository[UserCount, BSONObjectID]("throttle", mongo, UserCount.formats, ReactiveMongoFormats.objectIdFormats)
     with ThrottleRepository {
 
-  def update(date: String, threshold: Int, internalId: String, compensate: Boolean = false): Future[Int] = {
+  def checkAndUpdate(date: String, threshold: Int, internalId: String): Future[Int] = {
     val selector = BSONDocument("_id" -> date)
-    val modifier = compensate match {
-      case true => BSONDocument("$inc" -> BSONDocument("users_in" -> -1, "users_blocked" -> 1), "$set" -> BSONDocument("threshold" -> threshold))
-      case false => BSONDocument("$inc" -> BSONDocument("users_in" -> 1), "$set" -> BSONDocument("threshold" -> threshold))
+    collection.find(selector = selector).
+      cursor[UserCount]().collect[List]().flatMap {
+      users =>
+        users.nonEmpty && users.head.users.contains(internalId) match {
+          case true => users.size
+          case false =>
+            val modifier =
+              BSONDocument("$push" -> BSONDocument("users" -> internalId), "$set" -> BSONDocument("threshold" -> threshold))
+            collection.findAndUpdate(selector, modifier, fetchNewObject = true, upsert = true) map {
+              _.result[JsValue] match {
+                case None => -1
+                case Some(res) => (res \ "users").as[Set[String]].size
+              }
+            }
+        }
     }
 
-    collection.findAndUpdate(selector, modifier, fetchNewObject = true, upsert = true) map {
-      _.result[JsValue] match {
-        case None => -1
-        case Some(res) => (res \ "users_in").as[Int]
-      }
-    }
   }
 
-  def compensate(date: String, threshold: Int, internalId: String): Future[Int] =
-    update(date, threshold, internalId, compensate = true)
-
-  def modifyThrottledUsers(date: String, usersIn: Int): Future[Int] = {
-    val selector = BSONDocument("_id" -> date)
-    val modifier = BSONDocument("$set" -> BSONDocument("users_in" -> usersIn))
-
-    collection.findAndUpdate(selector, modifier, fetchNewObject = true, upsert = true) map {
-      _.result[JsValue] match {
-        case None => -1
-        case Some(res) => (res \ "users_in").as[Int]
-      }
-    }
-  }
 }
