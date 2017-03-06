@@ -43,8 +43,11 @@ class RegistrationConnector @Inject()(config: Configuration,
   lazy val urlHeaderAuthorization: String = s"Bearer ${config.getString("microservice.services.des.authorization-token").fold("")(x => x)}"
   lazy val registrationServiceUrl: String = baseUrl("des")
 
-  val newRegistrationUrl: String => String = (nino: String) => s"$registrationServiceUrl/registration/individual/NINO/$nino"
+  // DES API numbering [MTD API numbering]
+  // API4 [API 9]
+  val newRegistrationUrl: String => String = (nino: String) => s"$registrationServiceUrl/registration/individual/nino/$nino"
 
+  // API 1(b) [API 1 (b)]
   val getRegistrationUrl: String => String = (nino: String) => s"$registrationServiceUrl/registration/details?nino=$nino"
 
   def createHeaderCarrierPost(headerCarrier: HeaderCarrier): HeaderCarrier =
