@@ -16,16 +16,18 @@
 
 package auth
 
-import play.api.mvc.Result
-import play.api.Logger
 import connectors.{AuthConnector, Authority}
+import play.api.Logger
+import play.api.mvc.Result
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-sealed trait AuthenticationResult {}
+sealed trait AuthenticationResult
+
 case object NotLoggedIn extends AuthenticationResult
+
 final case class LoggedIn(authContext: Authority) extends AuthenticationResult
 
 trait Authenticated {
@@ -44,7 +46,7 @@ trait Authenticated {
     }
   }
 
-  private def mapToAuthResult(authContext: Option[Authority]) : AuthenticationResult = {
+  private def mapToAuthResult(authContext: Option[Authority]): AuthenticationResult = {
     authContext match {
       case None => NotLoggedIn
       case Some(context) => LoggedIn(context)

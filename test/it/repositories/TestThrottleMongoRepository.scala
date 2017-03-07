@@ -14,30 +14,29 @@
  * limitations under the License.
  */
 
-package services
+package it.repositories
 
-import javax.inject.Inject
-
-import models.throttling._
-import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
-import utils.Implicits._
+import models.throttling.UserCount
+import reactivemongo.api.DB
+import reactivemongo.bson.BSONDocument
+import repositories.ThrottleMongoRepository
+import uk.gov.hmrc.time.DateTimeUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.control.NoStackTrace
 
+class TestThrottleMongoRepository(implicit mongo: () => DB) extends ThrottleMongoRepository {
 
-private[services] class MissingRegistration(regId: String) extends NoStackTrace
+  def dateTime: String = DateTimeUtils.now.toString("yyyy-MM-dd")
 
-class UserAccessService @Inject()(val throttleService: ThrottleService) extends ServicesConfig {
+  def collectionExists: Future[Boolean] = collection.count().map(c => c != 0)
 
-  def checkUserAccess(internalId: String)(implicit hc: HeaderCarrier): Future[UserAccess] =
-    throttleService.checkUserAccess(internalId) flatMap {
-      case true => CanAccess
-      case false => LimitReached
+  val selector = BSONDocument("_id" -> dateTime)
+
+  def userCount: Future[Int] =
+    collection.find(selector = selector).cursor[UserCount]().collect[List]().map {
+      case Nil => 0
+      case head :: _ => head.users.size
     }
-
-  def dropDb: Future[Unit] = throttleService.dropDb
 
 }

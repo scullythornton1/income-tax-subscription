@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package services
+package it.repositories
 
-import javax.inject.{Inject, Singleton}
+import repositories.Repositories
+import uk.gov.hmrc.lock.LockRepository
 
-import com.codahale.metrics.Timer
-import com.kenshoo.play.metrics.Metrics
+object TestRepositories extends Repositories {
 
-@Singleton
-class MetricsService @Inject()(val metrics: Metrics) {
-
-  val userAccessCRTimer: Timer = metrics.defaultRegistry.timer("user-access-ITSA-timer")
+  override lazy val throttleRepository = new TestThrottleMongoRepository
+  override lazy val lockRepository = new LockRepository
 
 }
+
+
+

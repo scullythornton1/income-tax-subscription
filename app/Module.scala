@@ -16,7 +16,7 @@
 
 import com.google.inject.AbstractModule
 import config.AppConfig
-import controllers.subscription.{UserAccessController, UserAccessControllerImp}
+import controllers.throttling.UserAccessController
 import services._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.http.ws._
@@ -36,10 +36,7 @@ class Module extends AbstractModule {
     bind(classOf[WSPut]).to(classOf[config.WSHttp]).asEagerSingleton()
     bind(classOf[HttpPut]).to(classOf[config.WSHttp]).asEagerSingleton()
 
-    bind(classOf[UserAccessController]).to(classOf[UserAccessControllerImp])
-    bind(classOf[MetricsService]).to(classOf[MetricsServiceImp])
     bind(classOf[ThrottleService]).to(classOf[ThrottleServiceImp])
-    bind(classOf[UserAccessService]).to(classOf[UserAccessServiceImp])
   }
 
 }

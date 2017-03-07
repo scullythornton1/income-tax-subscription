@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers.subscription
+package controllers.throttling
 
 import javax.inject.Inject
 
@@ -28,16 +28,13 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class UserAccessControllerImp @Inject()(metrics: MetricsService, userAccessServ: UserAccessService) extends UserAccessController {
+
+class UserAccessController @Inject()(val metricsService: MetricsService,
+                                     val userAccessService: UserAccessService)
+  extends BaseController
+    with Authenticated {
+
   override val auth = AuthConnector
-  val userAccessService = userAccessServ
-  override val metricsService: MetricsService = metrics
-}
-
-trait UserAccessController extends BaseController with Authenticated {
-
-  val userAccessService: UserAccessService
-  val metricsService: MetricsService
 
   def checkUserAccess(nino: String) = Action.async {
     implicit request =>

@@ -16,16 +16,16 @@
 
 package services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import org.joda.time.DateTime
+import repositories.{Repositories, ThrottleMongoRepository}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import repositories.{Repositories, ThrottleMongoRepository}
 import uk.gov.hmrc.time.DateTimeUtils
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 sealed trait ThrottleResponse
 
@@ -40,7 +40,7 @@ class ThrottleServiceImp @Inject()(repositories: Repositories) extends ThrottleS
   //$COVERAGE-OFF$
   def dateTime = DateTimeUtils.now
 
-  val threshold = getConfInt("throttle-threshold", throw new Exception("throttle-threshold not found in config"))
+  lazy val threshold = getConfInt("throttle-threshold", throw new Exception("throttle-threshold not found in config"))
   //$COVERAGE-ON$
 }
 
@@ -52,13 +52,17 @@ trait ThrottleService extends BaseController {
   val threshold: Int
 
   def checkUserAccess(internalId: String): Future[Boolean] =
-    throttleMongoRepository.checkAndUpdate(getCurrentDay, threshold, internalId) map {
-      case count if threshold < count => false
-      case count => true
+    throttleMongoRepository.checkUserAndUpdate(getCurrentDay, threshold, internalId) map {
+      case count if count < threshold => true
+      case count => false
     }
 
   private[services] def getCurrentDay: String = {
     dateTime.toString("yyyy-MM-dd")
+  }
+
+  def dropDb: Future[Unit] = {
+    throttleMongoRepository.dropDb
   }
 
 }

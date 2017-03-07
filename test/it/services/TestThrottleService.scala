@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-package services
+package it.services
 
-import javax.inject.{Inject, Singleton}
+import it.repositories.TestRepositories
+import services.ThrottleServiceImp
 
-import com.codahale.metrics.Timer
-import com.kenshoo.play.metrics.Metrics
-
-@Singleton
-class MetricsService @Inject()(val metrics: Metrics) {
-
-  val userAccessCRTimer: Timer = metrics.defaultRegistry.timer("user-access-ITSA-timer")
-
+object TestThrottleService extends ThrottleServiceImp(repositories = TestRepositories) {
+  override lazy val threshold: Int = 2
 }

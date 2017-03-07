@@ -19,13 +19,8 @@ package repositories
 import play.modules.reactivemongo.MongoDbConnection
 import uk.gov.hmrc.lock.LockRepository
 
-class Repositories extends MongoDbConnection with Repos {
-  override lazy val throttleRepository = new ThrottleMongoRepository
-  override lazy val lockRepository = new LockRepository
-}
-
-trait Repos {
-  val throttleRepository: ThrottleMongoRepository
-  val lockRepository: LockRepository
+class Repositories extends MongoDbConnection {
+  lazy val throttleRepository = new ThrottleMongoRepository
+  lazy val lockRepository = new LockRepository
 }
 

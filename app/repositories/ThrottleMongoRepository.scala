@@ -16,46 +16,38 @@
 
 package repositories
 
-import utils.Implicits._
 import models.throttling.UserCount
 import play.api.libs.json.JsValue
 import reactivemongo.api.DB
-import reactivemongo.bson.{BSONArray, _}
+import utils.Implicits._
+import reactivemongo.bson._
+import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
-import uk.gov.hmrc.mongo.{ReactiveRepository, Repository}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait ThrottleRepository extends Repository[UserCount, BSONObjectID] {
-
-  def checkAndUpdate(date: String, threshold: Int, internalId: String): Future[Int]
-
-}
-
 class ThrottleMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[UserCount, BSONObjectID]("throttle", mongo, UserCount.formats, ReactiveMongoFormats.objectIdFormats)
-    with ThrottleRepository {
+  extends ReactiveRepository[UserCount, BSONObjectID]("throttle", mongo, UserCount.formats, ReactiveMongoFormats.objectIdFormats) {
 
-  def checkAndUpdate(date: String, threshold: Int, internalId: String): Future[Int] = {
+  def checkUserAndUpdate(date: String, threshold: Int, internalId: String): Future[Int] = {
     val selector = BSONDocument("_id" -> date)
-    collection.find(selector = selector).
-      cursor[UserCount]().collect[List]().flatMap {
-      users =>
-        users.nonEmpty && users.head.users.contains(internalId) match {
-          case true => users.size
-          case false =>
-            val modifier =
-              BSONDocument("$push" -> BSONDocument("users" -> internalId), "$set" -> BSONDocument("threshold" -> threshold))
-            collection.findAndUpdate(selector, modifier, fetchNewObject = true, upsert = true) map {
-              _.result[JsValue] match {
-                case None => -1
-                case Some(res) => (res \ "users").as[Set[String]].size
-              }
+    //TODO change this so that we query the db for the size of the users rather than returning it
+    collection.find(selector = selector).cursor[UserCount]().collect[List]().flatMap { users =>
+      users.nonEmpty && users.head.users.contains(internalId) match {
+        case true => users.size
+        case false =>
+          val modifier = BSONDocument("$push" -> BSONDocument("users" -> internalId), "$set" -> BSONDocument("threshold" -> threshold))
+          collection.findAndUpdate(selector, modifier, fetchNewObject = true, upsert = true).map {
+            _.result[JsValue] match {
+              case None => -1
+              case Some(res) => (res \ "users").as[Set[String]].size
             }
-        }
+          }
+      }
     }
-
   }
+
+  def dropDb: Future[Unit] = collection.drop()
 
 }
