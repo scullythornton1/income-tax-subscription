@@ -16,7 +16,7 @@
 
 package it.services
 
-import _root_.it.repositories.TestRepositories
+import it.services.its.ITThrottleService
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
@@ -25,7 +25,8 @@ import uk.gov.hmrc.play.test.UnitSpec
 class ThrottleServiceSpec extends UnitSpec
   with MockitoSugar
   with BeforeAndAfterEach
-  with OneAppPerSuite {
+  with OneAppPerSuite
+  with ITThrottleService {
 
   override def beforeEach: Unit = {
     super.beforeEach
@@ -40,7 +41,7 @@ class ThrottleServiceSpec extends UnitSpec
   "ThrottleService" should {
     "allow clear db" in {
       val f = TestThrottleService.dropDb
-      await(f) shouldBe()
+      await(f) shouldBe ((): Unit)
       await(TestRepositories.throttleRepository.collectionExists) shouldBe false
     }
 

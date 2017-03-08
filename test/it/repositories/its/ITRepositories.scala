@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-package it.services
+package it.repositories.its
 
-import services.UserAccessService
+import it.repositories.TestThrottleMongoRepository
+import repositories.Repositories
+import uk.gov.hmrc.lock.LockRepository
 
-object TestUserAccessService extends UserAccessService(throttleService = TestThrottleService) {
+trait ITRepositories {
+
+  object TestRepositories extends Repositories {
+    override lazy val throttleRepository = new TestThrottleMongoRepository
+    override lazy val lockRepository = new LockRepository
+  }
 
 }
+
+
+

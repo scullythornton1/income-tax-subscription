@@ -21,7 +21,7 @@ import javax.inject.Inject
 import auth.{Authenticated, LoggedIn, NotLoggedIn}
 import connectors.AuthConnector
 import models.throttling.{CanAccess, LimitReached}
-import play.api.mvc.Action
+import play.api.mvc.{Action, AnyContent}
 import services.{MetricsService, UserAccessService}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -30,13 +30,12 @@ import scala.concurrent.Future
 
 
 class UserAccessController @Inject()(val metricsService: MetricsService,
-                                     val userAccessService: UserAccessService)
+                                     val userAccessService: UserAccessService,
+                                     override val auth: AuthConnector)
   extends BaseController
     with Authenticated {
 
-  override val auth = AuthConnector
-
-  def checkUserAccess(nino: String) = Action.async {
+  def checkUserAccess(nino: String): Action[AnyContent] = Action.async {
     implicit request =>
       val timer = metricsService.userAccessCRTimer.time()
       authenticated {
@@ -52,4 +51,5 @@ class UserAccessController @Inject()(val metricsService: MetricsService,
           }
       }
   }
+
 }

@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package it.services
+package it.services.its
 
-import it.repositories.TestRepositories
+import it.repositories.its.ITRepositories
 import services.ThrottleServiceImp
 
-object TestThrottleService extends ThrottleServiceImp(repositories = TestRepositories) {
-  override lazy val threshold: Int = 2
+trait ITThrottleService extends ITRepositories {
+
+  object TestThrottleService extends ThrottleServiceImp(repositories = TestRepositories) {
+    override lazy val threshold: Int = 2
+  }
+
 }

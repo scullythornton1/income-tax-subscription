@@ -16,7 +16,8 @@
 
 package connectors
 
-import config.WSHttp
+import javax.inject.Inject
+
 import play.api.http.Status._
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -34,8 +35,8 @@ case class Authority(
                       ids: UserIds
                     )
 
-case class UserIds(internalId : String,
-                   externalId : String)
+case class UserIds(internalId: String,
+                   externalId: String)
 
 case class UserDetailsModel(name: String,
                             email: String,
@@ -47,7 +48,7 @@ case class UserDetailsModel(name: String,
                             authProviderId: String,
                             authProviderType: String)
 
-object UserDetailsModel{
+object UserDetailsModel {
   implicit val format = Json.format[UserDetailsModel]
 }
 
@@ -56,13 +57,11 @@ object UserIds {
   implicit val format = Json.format[UserIds]
 }
 
-trait AuthConnector extends ServicesConfig with RawResponseReads {
-
-  def serviceUrl: String
-
-  def authorityUri: String
-
-  def http: HttpGet with HttpPost
+class AuthConnector @Inject()(val http: HttpGet) extends ServicesConfig with RawResponseReads {
+  // $COVERAGE-OFF$
+  lazy val serviceUrl = baseUrl("auth")
+  // $COVERAGE-OFF$
+  val authorityUri = "auth/authority"
 
   def getCurrentAuthority()(implicit headerCarrier: HeaderCarrier): Future[Option[Authority]] = {
     val getUrl = s"""$serviceUrl/$authorityUri"""
@@ -71,7 +70,7 @@ trait AuthConnector extends ServicesConfig with RawResponseReads {
       response =>
         Logger.debug(s"[AuthConnector][getCurrentAuthority] - RESPONSE status: ${response.status}, body: ${response.body}")
         response.status match {
-          case OK => {
+          case OK =>
             val uri = (response.json \ "uri").as[String]
             val gatewayId = (response.json \ "credentials" \ "gatewayId").as[String]
             val userDetails = (response.json \ "userDetailsLink").as[String]
@@ -84,7 +83,6 @@ trait AuthConnector extends ServicesConfig with RawResponseReads {
                 val ids = response.json.as[UserIds]
                 Some(Authority(uri, gatewayId, userDetails, ids))
             }
-          }
           case status => Future.successful(None)
         }
     }
@@ -96,12 +94,4 @@ trait AuthConnector extends ServicesConfig with RawResponseReads {
       case _ => Future.successful(None)
     }
   }
-}
-
-object AuthConnector extends AuthConnector {
-  // $COVERAGE-OFF$
-  lazy val serviceUrl = baseUrl("auth")
-  // $COVERAGE-OFF$
-  val authorityUri = "auth/authority"
-  val http: HttpGet with HttpPost = WSHttp
 }

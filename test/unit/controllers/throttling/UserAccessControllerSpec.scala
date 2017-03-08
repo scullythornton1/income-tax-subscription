@@ -33,21 +33,52 @@
 package unit.controllers.throttling
 
 import controllers.throttling.UserAccessController
-import it.services.TestUserAccessService
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
+import models.throttling.{CanAccess, LimitReached}
+import play.api.http.Status._
+import play.api.mvc.{AnyContentAsEmpty, Request, Result}
+import play.api.test.FakeRequest
 import services.MetricsService
-import uk.gov.hmrc.play.test.UnitSpec
+import unit.connectors.mocks.MockAuthConnector
+import unit.controllers.throttling.mocks.MockUserAccessService
+import utils.Implicits._
+import utils.TestConstants
 
-class UserAccessControllerSpec extends UnitSpec with MockitoSugar with OneServerPerSuite {
+import scala.concurrent.Future
 
-  val mockMetrics: MetricsService = mock[MetricsService]
+class UserAccessControllerSpec extends MockUserAccessService
+  with MockAuthConnector {
 
   object TestUserAccessController extends UserAccessController(
-    mockMetrics,
-    TestUserAccessService) {}
+    app.injector.instanceOf[MetricsService],
+    mockUserAccessService,
+    mockAuthConnector) {
+  }
 
-  // TODO
+  def call(request: Request[AnyContentAsEmpty.type]): Future[Result] = TestUserAccessController.checkUserAccess(TestConstants.testNino)(request)
 
+  "UserAccessController" should {
+    "if a user is not logged in return forbidden" in {
+      val request = FakeRequest()
+      setupMockCurrentAuthority(None)
+      val r = call(request)
+      status(r) shouldBe FORBIDDEN
+    }
+
+    "if a user is logged and within daily limit in return OK" in {
+      val request = FakeRequest()
+      setupMockCurrentAuthority(validAuthority)
+      setupMockCheckUserAccess(CanAccess)
+      val r = call(request)
+      status(r) shouldBe OK
+    }
+
+    "if a user is logged but exceeds daily limit in return OK" in {
+      val request = FakeRequest()
+      setupMockCurrentAuthority(validAuthority)
+      setupMockCheckUserAccess(LimitReached)
+      val r = call(request)
+      status(r) shouldBe TOO_MANY_REQUESTS
+    }
+  }
 
 }

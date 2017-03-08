@@ -16,7 +16,7 @@
 
 package it.services
 
-import it.repositories.TestRepositories
+import it.services.its.ITUserAccessService
 import models.throttling.{CanAccess, LimitReached}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mock.MockitoSugar
@@ -24,13 +24,13 @@ import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
-
 class UserAccessServiceSpec extends UnitSpec
   with MockitoSugar
   with BeforeAndAfterEach
-  with OneAppPerSuite {
+  with OneAppPerSuite
+  with ITUserAccessService {
 
-  implicit val hc : HeaderCarrier = HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   override def beforeEach: Unit = {
     super.beforeEach
@@ -45,7 +45,7 @@ class UserAccessServiceSpec extends UnitSpec
   "UserAccessService.dropDb" should {
     "clear the mongo repo" in {
       val f = TestUserAccessService.dropDb
-      await(f) shouldBe()
+      await(f) shouldBe ((): Unit)
       await(TestRepositories.throttleRepository.collectionExists) shouldBe false
     }
   }
