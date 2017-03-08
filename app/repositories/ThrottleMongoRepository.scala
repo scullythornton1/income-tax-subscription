@@ -17,7 +17,6 @@
 package repositories
 
 import models.throttling.UserCount
-import play.api.libs.json.JsValue
 import reactivemongo.api.DB
 import utils.Implicits._
 import reactivemongo.bson._
@@ -30,21 +29,17 @@ import scala.concurrent.Future
 class ThrottleMongoRepository(implicit mongo: () => DB)
   extends ReactiveRepository[UserCount, BSONObjectID]("throttle", mongo, UserCount.formats, ReactiveMongoFormats.objectIdFormats) {
 
-  def checkUserAndUpdate(date: String, threshold: Int, internalId: String): Future[Int] = {
+  def checkUserAndUpdate(date: String, threshold: Int, internalId: String): Future[Boolean] = {
     val selector = BSONDocument("_id" -> date)
     //TODO change this so that we query the db for the size of the users rather than returning it
-    collection.find(selector = selector).cursor[UserCount]().collect[List]().flatMap { users =>
-      users.nonEmpty && users.head.users.contains(internalId) match {
-        case true => users.size
-        case false =>
-          val modifier = BSONDocument("$push" -> BSONDocument("users" -> internalId), "$set" -> BSONDocument("threshold" -> threshold))
-          collection.findAndUpdate(selector, modifier, fetchNewObject = true, upsert = true).map {
-            _.result[JsValue] match {
-              case None => -1
-              case Some(res) => (res \ "users").as[Set[String]].size
-            }
-          }
-      }
+    lazy val modifier = BSONDocument("$push" -> BSONDocument("users" -> internalId), "$set" -> BSONDocument("threshold" -> threshold))
+    lazy val insertUser = collection.findAndUpdate(selector, modifier, fetchNewObject = false, upsert = true).map(_ => true)
+
+    collection.find(selector = selector).cursor[UserCount]().collect[List]().flatMap {
+      case h :: _ if h.users.contains(internalId) => true
+      case h :: _ if h.users.size < threshold => insertUser
+      case Nil => insertUser
+      case _ => false
     }
   }
 

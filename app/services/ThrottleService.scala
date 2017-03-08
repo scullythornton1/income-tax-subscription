@@ -52,10 +52,7 @@ trait ThrottleService extends BaseController {
   val threshold: Int
 
   def checkUserAccess(internalId: String): Future[Boolean] =
-    throttleMongoRepository.checkUserAndUpdate(getCurrentDay, threshold, internalId) map {
-      case count if count < threshold => true
-      case count => false
-    }
+    throttleMongoRepository.checkUserAndUpdate(getCurrentDay, threshold, internalId)
 
   private[services] def getCurrentDay: String = {
     dateTime.toString("yyyy-MM-dd")

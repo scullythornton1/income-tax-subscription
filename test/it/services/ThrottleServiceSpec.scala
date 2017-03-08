@@ -49,7 +49,7 @@ class ThrottleServiceSpec extends UnitSpec
       await(TestRepositories.throttleRepository.collectionExists) shouldBe false
       await(TestRepositories.throttleRepository.userCount) shouldBe 0
 
-      for (i <- 1 until TestThrottleService.threshold) {
+      for (i <- 1 to TestThrottleService.threshold) {
         val accessGranted = await(TestThrottleService.checkUserAccess(i.toString))
 
         await(TestRepositories.throttleRepository.collectionExists) shouldBe true
@@ -61,12 +61,13 @@ class ThrottleServiceSpec extends UnitSpec
         }
       }
 
+      await(TestRepositories.throttleRepository.userCount) shouldBe TestThrottleService.threshold
       val f = TestThrottleService.checkUserAccess((TestThrottleService.threshold + 1).toString)
       await(f) shouldBe false
       await(TestRepositories.throttleRepository.userCount) shouldBe TestThrottleService.threshold
 
       // now validate the previous users are allowed back in
-      for (i <- 1 until TestThrottleService.threshold) {
+      for (i <- 1 to TestThrottleService.threshold) {
         val accessGranted = await(TestThrottleService.checkUserAccess(i.toString))
 
         await(TestRepositories.throttleRepository.collectionExists) shouldBe true
@@ -83,7 +84,7 @@ class ThrottleServiceSpec extends UnitSpec
       await(TestRepositories.throttleRepository.userCount) shouldBe 0
 
       // add the same user multiple times
-      for (i <- 1 to 2) {
+      for (i <- 1 to TestThrottleService.threshold + 1) {
         val accessGranted = await(TestThrottleService.checkUserAccess("1"))
 
         await(TestRepositories.throttleRepository.collectionExists) shouldBe true
