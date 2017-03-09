@@ -66,6 +66,9 @@ class RegistrationConnector @Inject()(config: Configuration,
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino, "requestJson" -> (registration: JsValue).toString)
     val updatedHc = createHeaderCarrierPost(hc)
 
+    lazy val auditRequest = logging.auditFor(auditRegisterName, requestDetails)(updatedHc)
+    auditRequest(eventTypeRequest)
+
     logging.debug(s"Request:\n$requestDetails")
     httpPost.POST[RegistrationRequestModel, HttpResponse](newRegistrationUrl(nino), registration)(
       implicitly[Writes[RegistrationRequestModel]], implicitly[HttpReads[HttpResponse]], updatedHc)
@@ -113,6 +116,9 @@ class RegistrationConnector @Inject()(config: Configuration,
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
     val updatedHc = createHeaderCarrierPost(hc)
 
+    lazy val auditRequest = logging.auditFor(auditGetRegistrationName, requestDetails)(updatedHc)
+    auditRequest(eventTypeRequest)
+
     logging.debug(s"Request:\n$requestDetails")
     httpGet.GET[HttpResponse](getRegistrationUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc)
       .map { response =>
@@ -145,9 +151,9 @@ class RegistrationConnector @Inject()(config: Configuration,
 
 object RegistrationConnector {
 
-  val auditRegisterName = "API4"
+  val auditRegisterName = "register-api-4"
 
-  val auditGetRegistrationName = "API1(b)"
+  val auditGetRegistrationName = "getRegistration-api-1(b)"
 
   import _root_.utils.Implicits.OptionUtl
 

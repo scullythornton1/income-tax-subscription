@@ -18,17 +18,17 @@ package connectors
 
 import javax.inject.Inject
 
+import audit.Logging.{eventTypeBadRequest, eventTypeInternalServerError, eventTypeRequest, eventTypeUnexpectedError}
 import audit.{Logging, LoggingConfig}
-import audit.Logging.{eventTypeBadRequest, eventTypeInternalServerError, eventTypeUnexpectedError}
+import common.Constants.GovernmentGateway
 import config.AppConfig
 import connectors.utils.ConnectorUtils
 import models.gg.{KnownFactsFailureResponseModel, KnownFactsRequest, KnownFactsSuccessResponseModel}
 import play.api.Configuration
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK}
-import play.api.libs.json.Writes
+import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
-import common.Constants.GovernmentGateway
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -50,11 +50,14 @@ class GGAdminConnector @Inject()(config: Configuration,
 
   def addKnownFacts(knownFacts: KnownFactsRequest)(implicit hc: HeaderCarrier): Future[AddKnownFactsUtil.Response] = {
     import AddKnownFactsUtil._
-    import GGAdminConnector.{auditAddKnownFactsName, addKnownFactsLoggingConfig}
+    import GGAdminConnector.{addKnownFactsLoggingConfig, auditAddKnownFactsName}
 
     implicit lazy val loggingConfig = addKnownFactsLoggingConfig
-    lazy val requestDetails: Map[String, String] = Map("knownFacts" -> knownFacts.toString)
     val updatedHc = createHeaderCarrierPost(hc)
+
+    lazy val requestDetails: Map[String, String] = Map("knownFacts" -> (knownFacts: JsValue).toString)
+    lazy val auditRequest = logging.auditFor(auditAddKnownFactsName, requestDetails)(updatedHc)
+    auditRequest(eventTypeRequest)
 
     httpPost.POST[KnownFactsRequest, HttpResponse](addKnownFactsUrl, knownFacts)(
       implicitly[Writes[KnownFactsRequest]], implicitly[HttpReads[HttpResponse]], updatedHc).map { response =>
@@ -83,7 +86,7 @@ class GGAdminConnector @Inject()(config: Configuration,
 
 object GGAdminConnector {
 
-  val auditAddKnownFactsName = "GGAdmin"
+  val auditAddKnownFactsName = "ggAdmin-addKnownFacts"
 
   import _root_.utils.Implicits.OptionUtl
 

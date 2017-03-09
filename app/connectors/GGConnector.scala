@@ -18,13 +18,14 @@ package connectors
 
 import javax.inject.Inject
 
-import audit.Logging.eventTypeUnexpectedError
+import _root_.utils.JsonUtils._
+import audit.Logging.{eventTypeRequest, eventTypeUnexpectedError}
 import audit.{Logging, LoggingConfig}
 import config.AppConfig
 import models.gg._
 import play.api.Configuration
 import play.api.http.Status.OK
-import play.api.libs.json.Writes
+import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
 
@@ -48,8 +49,14 @@ class GGConnector @Inject()
     import GGConnector._
 
     implicit lazy val loggingConfig = addEnrolLoggingConfig
-    lazy val requestDetails: Map[String, String] = Map("enrolRequest" -> enrolmentRequest.toString)
+
+    lazy val requestDetails: Map[String, String] = Map("enrolRequest" -> (enrolmentRequest: JsValue).toString)
     val updatedHc = createHeaderCarrierPost(hc)
+
+    lazy val auditRequest = logging.auditFor(auditEnrolName, requestDetails)(updatedHc)
+    auditRequest(eventTypeRequest)
+
+
     logging.debug(s"Request:\n$requestDetails")
 
     httpPost.POST[EnrolRequest, HttpResponse](enrolUrl, enrolmentRequest)(
@@ -72,7 +79,7 @@ class GGConnector @Inject()
 
 object GGConnector {
 
-  val auditEnrolName = "GG Enrol"
+  val auditEnrolName = "gg-enrol"
 
   import _root_.utils.Implicits.OptionUtl
 
