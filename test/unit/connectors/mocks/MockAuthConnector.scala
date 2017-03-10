@@ -16,7 +16,8 @@
 
 package unit.connectors.mocks
 
-import connectors.{AuthConnector, Authority, UserIds}
+import connectors.AuthConnector
+import models.auth.{Authority, UserIds}
 import org.mockito.Matchers
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach

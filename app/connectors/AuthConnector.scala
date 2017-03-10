@@ -18,44 +18,14 @@ package connectors
 
 import javax.inject.Inject
 
-import play.api.http.Status._
-import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
+import models.auth.{Authority, UserDetailsModel, UserIds}
 import play.api.Logger
-import play.api.libs.json.Json
+import play.api.http.Status._
+import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.http.{HeaderCarrier, _}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
-case class Authority(
-                      uri: String,
-                      gatewayId: String,
-                      userDetailsLink: String,
-                      ids: UserIds
-                    )
-
-case class UserIds(internalId: String,
-                   externalId: String)
-
-case class UserDetailsModel(name: String,
-                            email: String,
-                            affinityGroup: String,
-                            description: Option[String] = None,
-                            lastName: Option[String] = None,
-                            dateOfBirth: Option[String] = None,
-                            postcode: Option[String] = None,
-                            authProviderId: String,
-                            authProviderType: String)
-
-object UserDetailsModel {
-  implicit val format = Json.format[UserDetailsModel]
-}
-
-
-object UserIds {
-  implicit val format = Json.format[UserIds]
-}
 
 class AuthConnector @Inject()(val http: HttpGet) extends ServicesConfig with RawResponseReads {
   // $COVERAGE-OFF$

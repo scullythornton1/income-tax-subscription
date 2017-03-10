@@ -18,7 +18,8 @@ package unit.connectors
 
 import java.util.UUID
 
-import connectors.{AuthConnector, Authority, UserIds}
+import connectors.AuthConnector
+import models.auth.{Authority, UserIds}
 import org.mockito.Matchers
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfter
@@ -42,7 +43,7 @@ class AuthConnectorSpec extends MockAuthConnector
     override val authorityUri = "auth/authority"
     override val http: HttpGet with HttpPost = mockHttp
   }
-
+Authority
   def authResponseJson(uri: String, userDetailsLink: String, gatewayId: String, idsLink: String): JsValue = Json.parse(
     s"""
        |{
