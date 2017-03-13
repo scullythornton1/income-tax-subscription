@@ -19,9 +19,9 @@ package connectors
 import javax.inject.Inject
 
 import audit.{Logging, LoggingConfig}
+import config.AppConfig
 import connectors.utils.ConnectorUtils
 import models.registration._
-import play.api.Configuration
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -31,36 +31,29 @@ import uk.gov.hmrc.play.http.logging.Authorization
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class RegistrationConnector @Inject()(config: Configuration,
-                                      logging: Logging,
-                                      httpPost: HttpPost,
-                                      httpGet: HttpGet
+class RegistrationConnector @Inject()( appConfig: AppConfig,
+                                       logging: Logging,
+                                       httpPost: HttpPost,
+                                       httpGet: HttpGet
                                      ) extends ServicesConfig with RawResponseReads {
 
   import Logging._
 
-  lazy val desBase = config.getString("feature-switching.useNewDesRoute").fold(false)(x=>x.toBoolean) match {
-    case true =>"microservice.services.new-des"
-    case _ =>"microservice.services.des"
-  }
-
-  lazy val urlHeaderEnvironment: String = config.getString(s"$desBase.environment").fold("")(x => x)
-  lazy val urlHeaderAuthorization: String = s"Bearer ${config.getString(s"$desBase.authorization-token").fold("")(x => x)}"
-  lazy val registrationServiceUrl: String = config.getString(s"$desBase.url").fold("")(x => x)
+  lazy val urlHeaderAuthorization: String = s"Bearer ${appConfig.desToken}"
 
   // DES API numbering [MTD API numbering]
   // API4 [API 9]
-  val newRegistrationUrl: String => String = (nino: String) => s"$registrationServiceUrl/registration/individual/nino/$nino"
+  val newRegistrationUrl: String => String = (nino: String) => s"${appConfig.desURL}/registration/individual/nino/$nino"
 
   // API 1(b) [API 1 (b)]
-  val getRegistrationUrl: String => String = (nino: String) => s"$registrationServiceUrl/registration/details?nino=$nino"
+  val getRegistrationUrl: String => String = (nino: String) => s"${appConfig.desURL}/registration/details?nino=$nino"
 
   def createHeaderCarrierPost: HeaderCarrier =
-    HeaderCarrier(extraHeaders = Seq("Environment" -> urlHeaderEnvironment, "Content-Type" -> "application/json"),
+    HeaderCarrier(extraHeaders = Seq("Environment" -> appConfig.desEnvironment, "Content-Type" -> "application/json"),
       authorization = Some(Authorization(urlHeaderAuthorization)))
 
   def createHeaderCarrierGet: HeaderCarrier =
-    HeaderCarrier(extraHeaders = Seq("Environment" -> urlHeaderEnvironment),
+    HeaderCarrier(extraHeaders = Seq("Environment" -> appConfig.desEnvironment),
       authorization = Some(Authorization(urlHeaderAuthorization)))
 
   def register(nino: String, registration: RegistrationRequestModel)(implicit hc: HeaderCarrier): Future[NewRegistrationUtil.Response] = {

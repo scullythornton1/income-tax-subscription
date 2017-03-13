@@ -35,26 +35,21 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SubscriptionConnector @Inject()
 (
-  config: Configuration,
-  httpPost: HttpPost,
   applicationConfig: AppConfig,
+  httpPost: HttpPost,
   logging: Logging
 ) extends ServicesConfig with RawResponseReads {
 
-  lazy val desServiceUrl = applicationConfig.desURL
-  lazy val urlHeaderEnvironment = applicationConfig.desEnvironment
-  lazy val urlHeaderAuthorization = applicationConfig.desToken
-
-  val businessSubscribeUrl: String => String = nino => s"$desServiceUrl/income-tax-self-assessment/nino/$nino/business"
-  val propertySubscribeUrl: String => String = nino => s"$desServiceUrl/income-tax-self-assessment/nino/$nino/properties"
+  val businessSubscribeUrl: String => String = nino => s"${applicationConfig.desURL}/income-tax-self-assessment/nino/$nino/business"
+  val propertySubscribeUrl: String => String = nino => s"${applicationConfig.desURL}/income-tax-self-assessment/nino/$nino/properties"
 
   def createHeaderCarrierPost(hc: HeaderCarrier): HeaderCarrier =
-    hc.copy(authorization = Some(Authorization(s"Bearer $urlHeaderAuthorization")))
-      .withExtraHeaders("Environment" -> urlHeaderEnvironment, "Content-Type" -> "application/json")
+    hc.copy(authorization = Some(Authorization(s"Bearer ${applicationConfig.desToken}")))
+      .withExtraHeaders("Environment" -> applicationConfig.desEnvironment, "Content-Type" -> "application/json")
 
   def createHeaderCarrierPostEmpty(headerCarrier: HeaderCarrier): HeaderCarrier =
-    headerCarrier.copy(authorization = Some(Authorization(s"Bearer $urlHeaderAuthorization")))
-      .withExtraHeaders("Environment" -> urlHeaderEnvironment)
+    headerCarrier.copy(authorization = Some(Authorization(s"Bearer ${applicationConfig.desToken}")))
+      .withExtraHeaders("Environment" -> applicationConfig.desEnvironment)
 
   def businessSubscribe(nino: String, businessSubscriptionPayload: BusinessSubscriptionRequestModel)
                        (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[BusinessConnectorUtil.Response] = {
