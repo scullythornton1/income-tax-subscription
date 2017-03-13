@@ -35,6 +35,8 @@ object LoggingConfig {
 
 }
 
+import utils.JsonUtils._
+
 @Singleton
 class Logging @Inject()(application: Application,
                         configuration: Configuration,
@@ -50,15 +52,16 @@ class Logging @Inject()(application: Application,
                             tags: Map[String, String] = Map.empty[String, String],
                             detail: Map[String, String],
                             eventType: String)
-                           (implicit hc: HeaderCarrier): Unit =
-    audit.sendDataEvent(
-      DataEvent(
-        appName,
-        auditType = eventType,
-        tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(transactionName, path) ++ tags,
-        detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(detail.toSeq: _*)
-      )
+                           (implicit hc: HeaderCarrier): Unit = {
+    val packet = DataEvent(
+      appName,
+      auditType = transactionName + "-" + eventType,
+      tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(transactionName, path) ++ tags,
+      detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(detail.toSeq: _*)
     )
+    val pjs = packet: JsValue
+    audit.sendDataEvent(packet)
+  }
 
   private def splunkToLogger(transactionName: String, detail: Map[String, String], eventType: String): String =
     s"${if (eventType.nonEmpty) eventType + "\n"}$transactionName\n$detail"
@@ -97,6 +100,7 @@ object Logging {
 
   val splunkString = "SPLUNK AUDIT:\n"
 
+  final val eventTypeRequest: String = "Request"
   final val eventTypeSuccess: String = "Success"
   final val eventTypeFailure: String = "Failure"
   final val eventTypeBadRequest: String = "BadRequest"

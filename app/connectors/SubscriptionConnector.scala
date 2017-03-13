@@ -26,7 +26,7 @@ import models.subscription.business._
 import models.subscription.property.{PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
 import play.api.Configuration
 import play.api.http.Status._
-import play.api.libs.json.Writes
+import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.Authorization
@@ -61,8 +61,12 @@ class SubscriptionConnector @Inject()
     import BusinessConnectorUtil._
     import SubscriptionConnector._
     implicit val loggingConfig = SubscriptionConnector.businessSubscribeLoggingConfig
-    lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
+    lazy val requestDetails: Map[String, String] = Map("nino" -> nino, "subscribe" -> (businessSubscriptionPayload: JsValue).toString)
     val updatedHc = createHeaderCarrierPost(hc)
+
+    lazy val auditRequest = logging.auditFor(auditBusinessSubscribeName, requestDetails)(updatedHc)
+    auditRequest(eventTypeRequest)
+
     logging.debug(s"Request:\n$requestDetails")
     httpPost.POST[BusinessSubscriptionRequestModel, HttpResponse](businessSubscribeUrl(nino), businessSubscriptionPayload)(
       implicitly[Writes[BusinessSubscriptionRequestModel]], HttpReads.readRaw, createHeaderCarrierPost(hc)
@@ -86,6 +90,10 @@ class SubscriptionConnector @Inject()
     implicit val loggingConfig = SubscriptionConnector.propertySubscribeLoggingConfig
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
     val updatedHc = createHeaderCarrierPostEmpty(hc)
+
+    lazy val auditRequest = logging.auditFor(auditPropertySubscribeName, requestDetails)(updatedHc)
+    auditRequest(eventTypeRequest)
+
     logging.debug(s"Request:\n$requestDetails")
     httpPost.POSTEmpty[HttpResponse](propertySubscribeUrl(nino))(HttpReads.readRaw, createHeaderCarrierPostEmpty(hc)).map {
       response =>
@@ -107,10 +115,10 @@ object SubscriptionConnector {
 
   import _root_.utils.Implicits.OptionUtl
 
-  val auditBusinessSubscribeName = "Business Subscribe"
+  val auditBusinessSubscribeName = "business-subscribe-api-10"
   val businessSubscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionConnector.businessSubscribe")
 
-  val auditPropertySubscribeName = "Property Subscribe"
+  val auditPropertySubscribeName = "property-subscribe-api-35"
   val propertySubscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionConnector.propertySubscribe")
 }
 
