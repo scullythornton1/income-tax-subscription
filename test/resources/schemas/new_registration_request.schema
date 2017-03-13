@@ -42,6 +42,7 @@
       "oneOf": [
         {
           "required": [
+            "regime",
             "requiresNameMatch",
             "isAnAgent",
             "individual"
@@ -49,6 +50,7 @@
         },
         {
           "required": [
+            "regime",
             "requiresNameMatch",
             "isAnAgent",
             "organisation"
@@ -60,6 +62,11 @@
     "noIndividualOrOrganisation": {
       "type": "object",
       "properties": {
+        "regime": {
+          "description": "The type of Tax Regime. Values for regime: ATED, AWRS, AMLS, CDS, DDS, TAVC, ITSA",
+          "type": "string",
+          "pattern": "^[A-Z]{3,10}$"
+        },
         "requiresNameMatch": {
           "description": "Boolean value to indicate whether or not matching by name is required",
           "type": "boolean",
@@ -73,6 +80,7 @@
         }
       },
       "required": [
+        "regime",
         "requiresNameMatch",
         "isAnAgent"
       ],
