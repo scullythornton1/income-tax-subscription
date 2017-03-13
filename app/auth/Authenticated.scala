@@ -16,7 +16,8 @@
 
 package auth
 
-import connectors.{AuthConnector, Authority}
+import connectors.AuthConnector
+import models.auth.Authority
 import play.api.Logger
 import play.api.mvc.Result
 import uk.gov.hmrc.play.http.HeaderCarrier
