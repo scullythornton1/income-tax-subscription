@@ -39,9 +39,14 @@ class RegistrationConnector @Inject()(config: Configuration,
 
   import Logging._
 
-  lazy val urlHeaderEnvironment: String = config.getString("microservice.services.des.environment").fold("")(x => x)
-  lazy val urlHeaderAuthorization: String = s"Bearer ${config.getString("microservice.services.des.authorization-token").fold("")(x => x)}"
-  lazy val registrationServiceUrl: String = baseUrl("des")
+  lazy val desBase = config.getString("feature-switching.useNewDesRoute").fold(false)(x=>x.toBoolean) match {
+    case true =>"microservice.services.new-des"
+    case _ =>"microservice.services.des"
+  }
+
+  lazy val urlHeaderEnvironment: String = config.getString(s"$desBase.environment").fold("")(x => x)
+  lazy val urlHeaderAuthorization: String = s"Bearer ${config.getString(s"$desBase.authorization-token").fold("")(x => x)}"
+  lazy val registrationServiceUrl: String = config.getString(s"$desBase.url").fold("")(x => x)
 
   // DES API numbering [MTD API numbering]
   // API4 [API 9]
@@ -69,7 +74,7 @@ class RegistrationConnector @Inject()(config: Configuration,
     lazy val auditRequest = logging.auditFor(auditRegisterName, requestDetails)(updatedHc)
     auditRequest(eventTypeRequest)
 
-    logging.debug(s"Request:\n$requestDetails")
+    logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
     httpPost.POST[RegistrationRequestModel, HttpResponse](newRegistrationUrl(nino), registration)(
       implicitly[Writes[RegistrationRequestModel]], implicitly[HttpReads[HttpResponse]], updatedHc)
       .map { response =>
@@ -119,7 +124,7 @@ class RegistrationConnector @Inject()(config: Configuration,
     lazy val auditRequest = logging.auditFor(auditGetRegistrationName, requestDetails)(updatedHc)
     auditRequest(eventTypeRequest)
 
-    logging.debug(s"Request:\n$requestDetails")
+    logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
     httpGet.GET[HttpResponse](getRegistrationUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc)
       .map { response =>
 
