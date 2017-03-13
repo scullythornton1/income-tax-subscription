@@ -34,7 +34,7 @@ class RegistrationConnectorSpec extends MockRegistrationConnector {
 
   "RegistrationConnector.register" should {
     "Put in the correct headers" in {
-      val rHc = TestRegistrationConnector.createHeaderCarrierPost(hc)
+      val rHc = TestRegistrationConnector.createHeaderCarrierPost
       rHc.headers.contains("Authorization" -> s"Bearer $authToken") shouldBe true
       rHc.headers.contains("Content-Type" -> "application/json") shouldBe true
       rHc.headers.contains("Environment" -> env) shouldBe true
@@ -86,7 +86,7 @@ class RegistrationConnectorSpec extends MockRegistrationConnector {
   "RegistrationConnector.getRegistration" should {
 
     "Put in the correct headers" in {
-      val rHc = TestRegistrationConnector.createHeaderCarrierGet(hc)
+      val rHc = TestRegistrationConnector.createHeaderCarrierGet
       rHc.headers.contains("Authorization" -> s"Bearer $authToken") shouldBe true
       rHc.headers.contains("Environment" -> env) shouldBe true
     }
