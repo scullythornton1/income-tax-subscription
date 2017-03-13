@@ -23,20 +23,29 @@ import models.ErrorModel
 import models.registration.{RegistrationRequestModel, RegistrationSuccessResponseModel}
 import play.api.http.Status.CONFLICT
 import uk.gov.hmrc.play.http.HeaderCarrier
+import audit.{Logging, LoggingConfig}
 import utils.Implicits._
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class RegistrationService @Inject()(registrationConnector: RegistrationConnector) {
+class RegistrationService @Inject()(logging: Logging, registrationConnector: RegistrationConnector) {
 
-  def register(isAgent: Boolean, nino: String)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, RegistrationSuccessResponseModel]] =
+  val registerLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "RegistrationService")
+  implicit val loggingConfig = registerLoggingConfig
+
+
+  def register(isAgent: Boolean, nino: String)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, RegistrationSuccessResponseModel]] = {
+    logging.debug(s"Request received for register with NINO = $nino")
     registrationConnector.register(nino, RegistrationRequestModel(isAgent)).flatMap {
       case Left(ErrorModel(CONFLICT, _, _)) => lookupRegister(nino)
       case r => r
     }
+  }
 
-  @inline private[services] def lookupRegister(nino: String)(implicit hc: HeaderCarrier) = registrationConnector.getRegistration(nino)
-
+  @inline private[services] def lookupRegister(nino: String)(implicit hc: HeaderCarrier) = {
+    logging.debug(s"Request received to look up NINO = $nino")
+    registrationConnector.getRegistration(nino)
+  }
 }

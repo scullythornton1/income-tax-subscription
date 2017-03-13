@@ -18,20 +18,27 @@ package services
 
 import javax.inject.Inject
 
+import audit.{Logging, LoggingConfig}
 import connectors.SubscriptionConnector
 import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel, BusinessSubscriptionSuccessResponseModel}
 import models.ErrorModel
 import models.frontend.FERequest
 import models.subscription.property.PropertySubscriptionResponseModel
 import uk.gov.hmrc.play.http.HeaderCarrier
+import utils.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SubscriptionService @Inject() (subscriptionConnector: SubscriptionConnector){
+class SubscriptionService @Inject()(logging: Logging, subscriptionConnector: SubscriptionConnector) {
 
-  def propertySubscribe(request: FERequest)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, PropertySubscriptionResponseModel]] =
+  val subscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionService")
+  implicit val loggingConfig = subscribeLoggingConfig
+
+  def propertySubscribe(request: FERequest)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, PropertySubscriptionResponseModel]] = {
+    logging.debug(s"Request received for property subscribe = $request")
     subscriptionConnector.propertySubscribe(request.nino)
+  }
 
   def businessSubscribe(request: FERequest)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, BusinessSubscriptionSuccessResponseModel]] = {
 
@@ -41,7 +48,7 @@ class SubscriptionService @Inject() (subscriptionConnector: SubscriptionConnecto
       cashOrAccruals = request.cashOrAccruals.get,
       tradingName = request.tradingName.get
     )
-
+    logging.debug(s"Request received for business subscribe = $request")
     subscriptionConnector.businessSubscribe(request.nino, BusinessSubscriptionRequestModel(List(businessDetails)))
   }
 }

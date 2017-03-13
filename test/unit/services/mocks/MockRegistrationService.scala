@@ -21,6 +21,6 @@ import unit.connectors.mocks.MockRegistrationConnector
 
 trait MockRegistrationService extends MockRegistrationConnector {
 
-  object TestRegistrationService extends RegistrationService(TestRegistrationConnector)
+  object TestRegistrationService extends RegistrationService(logging, TestRegistrationConnector)
 
 }
