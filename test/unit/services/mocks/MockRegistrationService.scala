@@ -16,11 +16,12 @@
 
 package unit.services.mocks
 
+import audit.Logging
 import services.RegistrationService
 import unit.connectors.mocks.MockRegistrationConnector
 
 trait MockRegistrationService extends MockRegistrationConnector {
 
-  object TestRegistrationService extends RegistrationService(logging, TestRegistrationConnector)
+  object TestRegistrationService extends RegistrationService(app.injector.instanceOf[Logging], TestRegistrationConnector)
 
 }

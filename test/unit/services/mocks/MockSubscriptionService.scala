@@ -16,11 +16,12 @@
 
 package unit.services.mocks
 
+import audit.Logging
 import services.SubscriptionService
 import unit.connectors.mocks.MockSubscriptionConnector
 
 trait MockSubscriptionService extends MockSubscriptionConnector {
 
-  object TestSubscriptionService extends SubscriptionService(logging, TestSubscriptionConnector)
+  object TestSubscriptionService extends SubscriptionService(app.injector.instanceOf[Logging], TestSubscriptionConnector)
 
 }
