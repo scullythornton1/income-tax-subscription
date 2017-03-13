@@ -43,7 +43,9 @@ class Logging @Inject()(application: Application,
                         auditConnector: AuditConnector) {
 
 
-  lazy val appName: String = configuration.getString("appName").getOrElse("APP NAME NOT SET")
+  lazy val appName: String = configuration.getString("appName").fold("APP NAME NOT SET")(x => x)
+
+  lazy val debugToWarn: Boolean = configuration.getString("feature-switching.debugToWarn").fold(false)(x => x.toBoolean)
 
   lazy val audit: Audit = new Audit(appName, auditConnector)
 
@@ -67,7 +69,8 @@ class Logging @Inject()(application: Application,
     s"${if (eventType.nonEmpty) eventType + "\n"}$transactionName\n$detail"
 
   private def splunkFunction(transactionName: String, detail: Map[String, String], eventType: String)(implicit hc: HeaderCarrier) = {
-    Logger.debug(Logging.splunkString + splunkToLogger(transactionName, detail, eventType))
+    val loggingFunc: String => Unit = if (debugToWarn) Logger.warn(_) else Logger.debug(_)
+    loggingFunc(Logging.splunkString + splunkToLogger(transactionName, detail, eventType))
     sendDataEvent(
       transactionName = transactionName,
       detail = detail,
