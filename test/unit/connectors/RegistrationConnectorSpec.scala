@@ -29,8 +29,8 @@ class RegistrationConnectorSpec extends MockRegistrationConnector {
 
   implicit val hc = HeaderCarrier()
 
-  val env = config.getString("microservice.services.des.environment").get
-  val authToken = config.getString("microservice.services.des.authorization-token").get
+  val env = appConfig.desEnvironment
+  val authToken = appConfig.desToken
 
   "RegistrationConnector.register" should {
     "Put in the correct headers" in {
