@@ -17,15 +17,15 @@
 package unit.connectors
 
 import models.ErrorModel
+import models.subscription.IncomeSourceModel
 import models.subscription.business._
+import models.subscription.property.PropertySubscriptionResponseModel
 import play.api.http.Status._
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.HeaderCarrier
 import unit.connectors.mocks.MockSubscriptionConnector
 import utils.JsonUtils._
 import utils.TestConstants._
-import models.subscription.property.PropertySubscriptionResponseModel
-import models.subscription.IncomeSourceModel
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

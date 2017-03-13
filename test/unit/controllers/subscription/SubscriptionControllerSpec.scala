@@ -16,13 +16,9 @@
 
 package unit.controllers.subscription
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import controllers.subscription.SubscriptionController
-import models.frontend.{Both, FERequest, FESuccessResponse, Property}
-import play.api.Application
+import models.frontend.FESuccessResponse
 import play.api.http.Status._
-import play.api.libs.json.JsValue
 import play.api.mvc.{AnyContentAsJson, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
