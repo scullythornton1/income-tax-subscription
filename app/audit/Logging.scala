@@ -65,8 +65,14 @@ class Logging @Inject()(application: Application,
     audit.sendDataEvent(packet)
   }
 
-  private def splunkToLogger(transactionName: String, detail: Map[String, String], eventType: String): String =
-    s"${if (eventType.nonEmpty) eventType + "\n"}$transactionName\n$detail"
+  private def splunkToLogger(transactionName: String, detail: Map[String, String], eventType: String)(implicit hc: HeaderCarrier): String =
+    s"""| Transaction Name: $transactionName
+        | ${if (eventType.nonEmpty) "Event Type: " + eventType}
+        | Header Carrier:
+        | $hc
+        | Request Details:
+        | $detail
+    """.stripMargin
 
   private def splunkFunction(transactionName: String, detail: Map[String, String], eventType: String)(implicit hc: HeaderCarrier) = {
     val loggingFunc: String => Unit = if (debugToWarn) Logger.warn(_) else Logger.debug(_)
