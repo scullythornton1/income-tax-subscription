@@ -43,13 +43,15 @@ class SubscriptionConnector @Inject()
   val businessSubscribeUrl: String => String = nino => s"${applicationConfig.desURL}/income-tax-self-assessment/nino/$nino/business"
   val propertySubscribeUrl: String => String = nino => s"${applicationConfig.desURL}/income-tax-self-assessment/nino/$nino/properties"
 
+  lazy val urlHeaderAuthorization: String = s"Bearer ${applicationConfig.desToken}"
+
   def createHeaderCarrierPost(hc: HeaderCarrier): HeaderCarrier =
-    hc.copy(authorization = Some(Authorization(s"Bearer ${applicationConfig.desToken}")))
-      .withExtraHeaders("Environment" -> applicationConfig.desEnvironment, "Content-Type" -> "application/json")
+    HeaderCarrier(extraHeaders = Seq("Environment" -> applicationConfig.desEnvironment, "Content-Type" -> "application/json"),
+      authorization = Some(Authorization(urlHeaderAuthorization)))
 
   def createHeaderCarrierPostEmpty(headerCarrier: HeaderCarrier): HeaderCarrier =
-    headerCarrier.copy(authorization = Some(Authorization(s"Bearer ${applicationConfig.desToken}")))
-      .withExtraHeaders("Environment" -> applicationConfig.desEnvironment)
+    HeaderCarrier(extraHeaders = Seq("Environment" -> applicationConfig.desEnvironment),
+      authorization = Some(Authorization(urlHeaderAuthorization)))
 
   def businessSubscribe(nino: String, businessSubscriptionPayload: BusinessSubscriptionRequestModel)
                        (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[BusinessConnectorUtil.Response] = {
