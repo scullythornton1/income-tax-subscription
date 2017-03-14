@@ -18,17 +18,9 @@ package it.services
 
 import it.services.its.ITUserAccessService
 import models.throttling.{CanAccess, LimitReached}
-import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
 
-class UserAccessServiceSpec extends UnitSpec
-  with MockitoSugar
-  with BeforeAndAfterEach
-  with OneAppPerSuite
-  with ITUserAccessService {
+class UserAccessServiceSpec extends ITUserAccessService {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 

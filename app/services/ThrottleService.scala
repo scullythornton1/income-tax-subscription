@@ -16,15 +16,15 @@
 
 package services
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+import audit.{Logging, LoggingConfig}
 import org.joda.time.DateTime
 import repositories.{Repositories, ThrottleMongoRepository}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import uk.gov.hmrc.time.DateTimeUtils
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 sealed trait ThrottleResponse
@@ -33,8 +33,11 @@ case class ThrottleSuccessResponse(registrationID: String) extends ThrottleRespo
 
 case object ThrottleTooManyRequestsResponse extends ThrottleResponse
 
+import utils.Implicits._
 
-class ThrottleServiceImp @Inject()(repositories: Repositories) extends ThrottleService with ServicesConfig {
+@Singleton
+class ThrottleServiceImp @Inject()(repositories: Repositories,
+                                   val logging: Logging) extends ThrottleService with ServicesConfig {
   val throttleMongoRepository = repositories.throttleRepository
 
   //$COVERAGE-OFF$
@@ -51,15 +54,27 @@ trait ThrottleService extends BaseController {
 
   val threshold: Int
 
-  def checkUserAccess(internalId: String): Future[Boolean] =
+  val logging: Logging
+
+  def checkUserAccess(internalId: String): Future[Boolean] = {
+    implicit val checkUserAccessLoggingConfig: Option[LoggingConfig] = ThrottleService.checkUserAccessLoggingConfig
+    logging.debug(s"Request: internalId=$internalId")
     throttleMongoRepository.checkUserAndUpdate(getCurrentDay, threshold, internalId)
+  }
 
   private[services] def getCurrentDay: String = {
     dateTime.toString("yyyy-MM-dd")
   }
 
   def dropDb: Future[Unit] = {
+    implicit val checkUserAccessLoggingConfig: Option[LoggingConfig] = ThrottleService.dropDbLoggingConfig
+    logging.debug(s"Request: dropDb")
     throttleMongoRepository.dropDb
   }
 
+}
+
+object ThrottleService {
+  val checkUserAccessLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "ThrottleService.checkUserAccess")
+  val dropDbLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "ThrottleService.dropDb")
 }

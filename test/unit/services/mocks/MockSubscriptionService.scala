@@ -21,6 +21,6 @@ import unit.connectors.mocks.MockSubscriptionConnector
 
 trait MockSubscriptionService extends MockSubscriptionConnector {
 
-  object TestSubscriptionService extends SubscriptionService(TestSubscriptionConnector)
+  object TestSubscriptionService extends SubscriptionService(TestSubscriptionConnector, logging)
 
 }

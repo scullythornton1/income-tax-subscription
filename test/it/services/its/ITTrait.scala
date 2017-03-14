@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package unit.services.mocks
+package it.services.its
 
 import audit.Logging
-import services.RegistrationService
-import unit.connectors.mocks.MockRegistrationConnector
+import config.AppConfig
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneServerPerSuite
+import play.api.Configuration
+import uk.gov.hmrc.play.test.UnitSpec
 
-trait MockRegistrationService extends MockRegistrationConnector {
 
-  object TestRegistrationService extends RegistrationService(TestRegistrationConnector, logging)
+trait ITTrait extends UnitSpec
+  with MockitoSugar
+  with BeforeAndAfterEach
+  with OneServerPerSuite {
 
+  lazy val config = app.injector.instanceOf[Configuration]
+  lazy val appConfig = app.injector.instanceOf[AppConfig]
+  lazy val logging = app.injector.instanceOf[Logging]
 }

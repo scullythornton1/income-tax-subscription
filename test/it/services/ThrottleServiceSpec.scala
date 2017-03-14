@@ -17,16 +17,8 @@
 package it.services
 
 import it.services.its.ITThrottleService
-import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
-import uk.gov.hmrc.play.test.UnitSpec
 
-class ThrottleServiceSpec extends UnitSpec
-  with MockitoSugar
-  with BeforeAndAfterEach
-  with OneAppPerSuite
-  with ITThrottleService {
+class ThrottleServiceSpec extends ITThrottleService {
 
   override def beforeEach: Unit = {
     super.beforeEach
