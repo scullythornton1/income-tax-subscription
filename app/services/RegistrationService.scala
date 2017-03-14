@@ -18,26 +18,24 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
+import audit.{Logging, LoggingConfig}
 import connectors.RegistrationConnector
 import models.ErrorModel
 import models.registration.{RegistrationRequestModel, RegistrationSuccessResponseModel}
 import play.api.http.Status.CONFLICT
 import uk.gov.hmrc.play.http.HeaderCarrier
-import audit.{Logging, LoggingConfig}
 import utils.Implicits._
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
-class RegistrationService @Inject()(logging: Logging, registrationConnector: RegistrationConnector) {
-
-  val registerLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "RegistrationService")
-  implicit val loggingConfig = registerLoggingConfig
-
+class RegistrationService @Inject()(registrationConnector: RegistrationConnector,
+                                    logging: Logging) {
 
   def register(isAgent: Boolean, nino: String)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, RegistrationSuccessResponseModel]] = {
-    logging.debug(s"Request received for register with NINO = $nino")
+    implicit val registerLoggingConfig: Option[LoggingConfig] = RegistrationService.registerLoggingConfig
+    logging.debug(s"Request: NINO=$nino, isAgent=$isAgent")
     registrationConnector.register(nino, RegistrationRequestModel(isAgent)).flatMap {
       case Left(ErrorModel(CONFLICT, _, _)) => lookupRegister(nino)
       case r => r
@@ -45,7 +43,14 @@ class RegistrationService @Inject()(logging: Logging, registrationConnector: Reg
   }
 
   @inline private[services] def lookupRegister(nino: String)(implicit hc: HeaderCarrier) = {
-    logging.debug(s"Request received to look up NINO = $nino")
+    implicit val lookupRegisterConfig: Option[LoggingConfig] = RegistrationService.lookupRegisterLoggingConfig
+    logging.debug(s"Request: NINO=$nino")
     registrationConnector.getRegistration(nino)
   }
+
+}
+
+object RegistrationService {
+  val registerLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "RegistrationService.register")
+  val lookupRegisterLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "RegistrationService.lookupRegister")
 }

@@ -21,7 +21,7 @@ import services.ThrottleServiceImp
 
 trait ITThrottleService extends ITRepositories {
 
-  object TestThrottleService extends ThrottleServiceImp(repositories = TestRepositories) {
+  lazy val TestThrottleService = new ThrottleServiceImp(repositories = TestRepositories, logging = logging) {
     override lazy val threshold: Int = 2
   }
 

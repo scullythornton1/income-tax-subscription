@@ -16,13 +16,13 @@
 
 package services
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import audit.{Logging, LoggingConfig}
 import connectors.SubscriptionConnector
-import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel, BusinessSubscriptionSuccessResponseModel}
 import models.ErrorModel
 import models.frontend.FERequest
+import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel, BusinessSubscriptionSuccessResponseModel}
 import models.subscription.property.PropertySubscriptionResponseModel
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.Implicits._
@@ -30,25 +30,31 @@ import utils.Implicits._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SubscriptionService @Inject()(logging: Logging, subscriptionConnector: SubscriptionConnector) {
-
-  val subscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionService")
-  implicit val loggingConfig = subscribeLoggingConfig
+@Singleton
+class SubscriptionService @Inject()(subscriptionConnector: SubscriptionConnector,
+                                    logging: Logging) {
 
   def propertySubscribe(request: FERequest)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, PropertySubscriptionResponseModel]] = {
-    logging.debug(s"Request received for property subscribe = $request")
+    implicit val subscribeLoggingConfig: Option[LoggingConfig] = SubscriptionService.propertySubscribeLoggingConfig
+    logging.debug(s"Request: $request")
     subscriptionConnector.propertySubscribe(request.nino)
   }
 
   def businessSubscribe(request: FERequest)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, BusinessSubscriptionSuccessResponseModel]] = {
-
+    implicit val businessSubscribeLoggingConfig: Option[LoggingConfig] = SubscriptionService.businessSubscribeLoggingConfig
+    logging.debug(s"Request: $request")
     val businessDetails = BusinessDetailsModel(
       accountingPeriodStartDate = request.accountingPeriodStart.get.toDesDateFormat,
       accountingPeriodEndDate = request.accountingPeriodEnd.get.toDesDateFormat,
       cashOrAccruals = request.cashOrAccruals.get,
       tradingName = request.tradingName.get
     )
-    logging.debug(s"Request received for business subscribe = $request")
     subscriptionConnector.businessSubscribe(request.nino, BusinessSubscriptionRequestModel(List(businessDetails)))
   }
+
+}
+
+object SubscriptionService {
+  val propertySubscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionService.propertySubscribe")
+  val businessSubscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionService.businessSubscribe")
 }

@@ -20,6 +20,6 @@ import services.UserAccessService
 
 trait ITUserAccessService extends ITThrottleService {
 
-  object TestUserAccessService extends UserAccessService(throttleService = TestThrottleService)
+  lazy val TestUserAccessService = new UserAccessService(throttleService = TestThrottleService, logging = logging)
 
 }

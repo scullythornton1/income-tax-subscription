@@ -17,10 +17,11 @@
 package it.repositories.its
 
 import it.repositories.TestThrottleMongoRepository
+import it.services.its.ITTrait
 import repositories.Repositories
 import uk.gov.hmrc.lock.LockRepository
 
-trait ITRepositories {
+trait ITRepositories extends ITTrait {
 
   object TestRepositories extends Repositories {
     override lazy val throttleRepository = new TestThrottleMongoRepository

@@ -18,11 +18,13 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
+import audit.{Logging, LoggingConfig}
+import common.Constants.GovernmentGateway._
 import connectors.{GGAdminConnector, GGConnector}
 import models.ErrorModel
 import models.gg.{EnrolRequest, KnownFactsRequest, KnownFactsSuccessResponseModel, TypeValuePair}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
-import common.Constants.GovernmentGateway._
+import utils.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -30,18 +32,22 @@ import scala.concurrent.{ExecutionContext, Future}
 class EnrolmentService @Inject()
 (
   gGAdminConnector: GGAdminConnector,
-  ggConnector: GGConnector
+  ggConnector: GGConnector,
+  logging: Logging
 ) {
 
   def addKnownFacts(nino: String, mtditId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext)
   : Future[Either[ErrorModel, KnownFactsSuccessResponseModel]] = {
+    implicit val addKnownFactsLoggingConfig = EnrolmentService.addKnownFactsLoggingConfig
+    logging.debug(s"Request: NINO=$nino, MTDITID=$mtditId")
     val knownFact1 = TypeValuePair(MTDITID, mtditId)
     val knownFact2 = TypeValuePair(NINO, nino)
     gGAdminConnector.addKnownFacts(KnownFactsRequest(List(knownFact1, knownFact2)))
   }
 
   def ggEnrol(nino: String, mtditId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
-
+    implicit val ggEnrolLoggingConfig = EnrolmentService.ggEnrolLoggingConfig
+    logging.debug(s"Request: NINO=$nino, MTDITID=$mtditId")
     val enrolRequest = EnrolRequest(
       portalId = ggPortalId,
       serviceName = ggServiceName,
@@ -52,4 +58,9 @@ class EnrolmentService @Inject()
     ggConnector.enrol(enrolRequest)
   }
 
+}
+
+object EnrolmentService {
+  val addKnownFactsLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "EnrolmentService.addKnownFacts")
+  val ggEnrolLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "EnrolmentService.ggEnrol")
 }

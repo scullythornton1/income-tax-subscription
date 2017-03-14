@@ -16,8 +16,9 @@
 
 package services
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
+import audit.{Logging, LoggingConfig}
 import models.throttling._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -30,14 +31,28 @@ import scala.util.control.NoStackTrace
 
 private[services] class MissingRegistration(regId: String) extends NoStackTrace
 
-class UserAccessService @Inject()(val throttleService: ThrottleService) extends ServicesConfig {
+@Singleton
+class UserAccessService @Inject()(val throttleService: ThrottleService,
+                                  logging: Logging) extends ServicesConfig {
 
-  def checkUserAccess(internalId: String)(implicit hc: HeaderCarrier): Future[UserAccess] =
+  def checkUserAccess(internalId: String)(implicit hc: HeaderCarrier): Future[UserAccess] = {
+    implicit val checkUserAccessLoggingConfig: Option[LoggingConfig] = UserAccessService.checkUserAccessLoggingConfig
+    logging.debug(s"Request: internalId=$internalId")
     throttleService.checkUserAccess(internalId) flatMap {
       case true => CanAccess
       case false => LimitReached
     }
+  }
 
-  def dropDb: Future[Unit] = throttleService.dropDb
+  def dropDb: Future[Unit] = {
+    implicit val checkUserAccessLoggingConfig: Option[LoggingConfig] = UserAccessService.dropDbLoggingConfig
+    logging.debug(s"Request: dropDb")
+    throttleService.dropDb
+  }
 
+}
+
+object UserAccessService {
+  val checkUserAccessLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "UserAccessService.checkUserAccess")
+  val dropDbLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "UserAccessService.dropDb")
 }

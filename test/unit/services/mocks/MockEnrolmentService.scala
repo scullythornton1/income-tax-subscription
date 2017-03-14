@@ -31,6 +31,6 @@ trait MockEnrolmentService extends MockGGAdminConnector with MockGGConnector {
   override lazy val httpPost = mockHttpPost
   override lazy val httpGet: HttpGet = mockHttpGet
 
-  object TestEnrolmentService extends EnrolmentService(TestGGAdminConnector, TestGovernmentGatewayEnrolConnector)
+  object TestEnrolmentService extends EnrolmentService(TestGGAdminConnector, TestGovernmentGatewayEnrolConnector, logging)
 
 }
