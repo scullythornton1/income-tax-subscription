@@ -17,6 +17,7 @@
 package unit.connectors.mocks
 
 import audit.Logging
+import config.AppConfig
 import connectors.RegistrationConnector
 import models.registration.RegistrationRequestModel
 import org.scalatestplus.play.OneAppPerSuite
@@ -29,7 +30,7 @@ import utils.TestConstants.{GetRegistrationResponse, NewRegistrationResponse, _}
 
 trait MockRegistrationConnector extends MockHttp with OneAppPerSuite {
 
-  lazy val config: Configuration = app.injector.instanceOf[Configuration]
+  lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val logging: Logging = app.injector.instanceOf[Logging]
   lazy val httpPost: HttpPost = mockHttpPost
   lazy val httpGet: HttpGet = mockHttpGet
@@ -37,7 +38,7 @@ trait MockRegistrationConnector extends MockHttp with OneAppPerSuite {
   def mockRegister(payload: RegistrationRequestModel) = (setupMockRegister(testNino, payload) _).tupled
   val mockGetRegistration = (setupMockGetRegistration(testNino) _).tupled
 
-  object TestRegistrationConnector extends RegistrationConnector(config, logging, httpPost, httpGet)
+  object TestRegistrationConnector extends RegistrationConnector(appConfig, logging, httpPost, httpGet)
 
   val regSuccess = (OK, NewRegistrationResponse.successResponse(testSafeId))
   val getRegSuccess = (OK, GetRegistrationResponse.successResponse(testSafeId))

@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package models.registration
+package models.throttling
 
 import play.api.libs.json.Json
 
-case class RegistrationRequestModel(isAnAgent: Boolean,
-                                    requiresNameMatch: Boolean = false,
-                                    final val regime: String = RegistrationRequestModel.taxRegime)
+case class UserCount(_id: String, users: Set[String], threshold: Int)
 
-object RegistrationRequestModel {
-
-  final val taxRegime: String = "ITSA"
-  implicit val format = Json.format[RegistrationRequestModel]
-
+object UserCount {
+  implicit val formats = Json.format[UserCount]
 }

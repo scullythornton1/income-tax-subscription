@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package models.registration
+package models.auth
 
 import play.api.libs.json.Json
 
-case class RegistrationRequestModel(isAnAgent: Boolean,
-                                    requiresNameMatch: Boolean = false,
-                                    final val regime: String = RegistrationRequestModel.taxRegime)
 
-object RegistrationRequestModel {
+case class UserIds(internalId: String,
+                   externalId: String)
 
-  final val taxRegime: String = "ITSA"
-  implicit val format = Json.format[RegistrationRequestModel]
-
+object UserIds {
+  implicit val format = Json.format[UserIds]
 }

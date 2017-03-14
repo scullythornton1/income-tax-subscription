@@ -14,17 +14,10 @@
  * limitations under the License.
  */
 
-package models.registration
+package models.auth
 
-import play.api.libs.json.Json
 
-case class RegistrationRequestModel(isAnAgent: Boolean,
-                                    requiresNameMatch: Boolean = false,
-                                    final val regime: String = RegistrationRequestModel.taxRegime)
-
-object RegistrationRequestModel {
-
-  final val taxRegime: String = "ITSA"
-  implicit val format = Json.format[RegistrationRequestModel]
-
-}
+case class Authority(uri: String,
+                     gatewayId: String,
+                     userDetailsLink: String,
+                     ids: UserIds)

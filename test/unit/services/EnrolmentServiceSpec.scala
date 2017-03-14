@@ -56,12 +56,12 @@ class EnrolmentServiceSpec extends MockEnrolmentService {
     def call = await(TestEnrolmentService.ggEnrol(testNino, testMtditId))
 
     "return OK response correctly" in {
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(OK, enrolSuccess)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(OK -> enrolSuccess)
       call.status shouldBe OK
     }
 
     "return BAD_REQUEST response correctly" in {
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(BAD_REQUEST, enrolSuccess)
+      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(BAD_REQUEST -> enrolSuccess)
       call.status shouldBe BAD_REQUEST
     }
 

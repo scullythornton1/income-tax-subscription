@@ -27,6 +27,9 @@ private object AppDependencies {
   private val scalaJVersion = "1.1.5"
   private val cucumberVersion = "1.2.4"
 
+  private val mongoLockVersion = "4.0.0"
+  private val reactiveMongoVersion = "5.1.0"
+
 
   val compile = Seq(
     ws,
@@ -36,7 +39,9 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "play-url-binders" % playUrlBindersVersion,
     "uk.gov.hmrc" %% "play-config" % playConfigVersion,
     "uk.gov.hmrc" %% "logback-json-logger" % logbackJsonLoggerVersion,
-    "uk.gov.hmrc" %% "domain" % domainVersion
+    "uk.gov.hmrc" %% "domain" % domainVersion,
+    "uk.gov.hmrc" %% "mongo-lock" % mongoLockVersion,
+    "uk.gov.hmrc" %% "play-reactivemongo" % reactiveMongoVersion
   )
 
   trait TestDependencies {

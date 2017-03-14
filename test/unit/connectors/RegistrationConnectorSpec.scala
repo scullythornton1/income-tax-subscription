@@ -29,19 +29,19 @@ class RegistrationConnectorSpec extends MockRegistrationConnector {
 
   implicit val hc = HeaderCarrier()
 
-  val env = config.getString("microservice.services.des.environment").get
-  val authToken = config.getString("microservice.services.des.authorization-token").get
+  val env = appConfig.desEnvironment
+  val authToken = appConfig.desToken
 
   "RegistrationConnector.register" should {
     "Put in the correct headers" in {
-      val rHc = TestRegistrationConnector.createHeaderCarrierPost(hc)
+      val rHc = TestRegistrationConnector.createHeaderCarrierPost
       rHc.headers.contains("Authorization" -> s"Bearer $authToken") shouldBe true
       rHc.headers.contains("Content-Type" -> "application/json") shouldBe true
       rHc.headers.contains("Environment" -> env) shouldBe true
     }
 
     "Post to the correct url" in {
-      TestRegistrationConnector.newRegistrationUrl(testNino) should endWith(s"/registration/individual/NINO/$testNino")
+      TestRegistrationConnector.newRegistrationUrl(testNino) should endWith(s"/registration/individual/nino/$testNino")
     }
 
     def result = await(TestRegistrationConnector.register(testNino, registerRequestPayload))
@@ -86,7 +86,7 @@ class RegistrationConnectorSpec extends MockRegistrationConnector {
   "RegistrationConnector.getRegistration" should {
 
     "Put in the correct headers" in {
-      val rHc = TestRegistrationConnector.createHeaderCarrierGet(hc)
+      val rHc = TestRegistrationConnector.createHeaderCarrierGet
       rHc.headers.contains("Authorization" -> s"Bearer $authToken") shouldBe true
       rHc.headers.contains("Environment" -> env) shouldBe true
     }

@@ -35,13 +35,17 @@ object LoggingConfig {
 
 }
 
+import utils.JsonUtils._
+
 @Singleton
 class Logging @Inject()(application: Application,
                         configuration: Configuration,
                         auditConnector: AuditConnector) {
 
 
-  lazy val appName: String = configuration.getString("appName").getOrElse("APP NAME NOT SET")
+  lazy val appName: String = configuration.getString("appName").fold("APP NAME NOT SET")(x => x)
+
+  lazy val debugToWarn: Boolean = configuration.getString("feature-switching.debugToWarn").fold(false)(x => x.toBoolean)
 
   lazy val audit: Audit = new Audit(appName, auditConnector)
 
@@ -50,21 +54,29 @@ class Logging @Inject()(application: Application,
                             tags: Map[String, String] = Map.empty[String, String],
                             detail: Map[String, String],
                             eventType: String)
-                           (implicit hc: HeaderCarrier): Unit =
-    audit.sendDataEvent(
-      DataEvent(
-        appName,
-        auditType = eventType,
-        tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(transactionName, path) ++ tags,
-        detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(detail.toSeq: _*)
-      )
+                           (implicit hc: HeaderCarrier): Unit = {
+    val packet = DataEvent(
+      appName,
+      auditType = transactionName + "-" + eventType,
+      tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(transactionName, path) ++ tags,
+      detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(detail.toSeq: _*)
     )
+    val pjs = packet: JsValue
+    audit.sendDataEvent(packet)
+  }
 
-  private def splunkToLogger(transactionName: String, detail: Map[String, String], eventType: String): String =
-    s"${if (eventType.nonEmpty) eventType + "\n"}$transactionName\n$detail"
+  private def splunkToLogger(transactionName: String, detail: Map[String, String], eventType: String)(implicit hc: HeaderCarrier): String =
+    s"""| Transaction Name: $transactionName
+        | ${if (eventType.nonEmpty) "Event Type: " + eventType}
+        | Header Carrier:
+        | $hc
+        | Request Details:
+        | $detail
+    """.stripMargin
 
   private def splunkFunction(transactionName: String, detail: Map[String, String], eventType: String)(implicit hc: HeaderCarrier) = {
-    Logger.debug(Logging.splunkString + splunkToLogger(transactionName, detail, eventType))
+    val loggingFunc: String => Unit = if (debugToWarn) Logger.warn(_) else Logger.debug(_)
+    loggingFunc(Logging.splunkString + splunkToLogger(transactionName, detail, eventType))
     sendDataEvent(
       transactionName = transactionName,
       detail = detail,
@@ -97,6 +109,7 @@ object Logging {
 
   val splunkString = "SPLUNK AUDIT:\n"
 
+  final val eventTypeRequest: String = "Request"
   final val eventTypeSuccess: String = "Success"
   final val eventTypeFailure: String = "Failure"
   final val eventTypeBadRequest: String = "BadRequest"

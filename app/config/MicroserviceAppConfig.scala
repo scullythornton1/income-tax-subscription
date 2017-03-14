@@ -22,22 +22,29 @@ import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
   val authURL: String
+  val ggURL: String
   val ggAdminURL: String
-  val desURL: String
   val authenticatorURL: String
+  val desURL: String
   val desEnvironment: String
   val desToken: String
-  val ggURL: String
 }
 
 @Singleton
-class MicroserviceAppConfig @Inject()(configuration: Configuration) extends AppConfig with ServicesConfig {
+class MicroserviceAppConfig @Inject()(val configuration: Configuration) extends AppConfig with ServicesConfig {
+
   private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
+
   override lazy val authURL = baseUrl("auth")
   override lazy val authenticatorURL = baseUrl("authenticator")
-  override lazy val desURL = baseUrl("des")
   override lazy val ggURL = baseUrl("government-gateway")
   override lazy val ggAdminURL = baseUrl("gg-admin")
-  override lazy val desEnvironment = loadConfig("microservice.services.des.environment")
-  override lazy val desToken = loadConfig("microservice.services.des.authorization-token")
+
+  lazy val desBase = configuration.getString("feature-switching.useNewDesRoute").fold(false)(x=>x.toBoolean) match {
+    case true =>"microservice.services.new-des"
+    case _ =>"microservice.services.des"
+  }
+  override lazy val desURL = loadConfig(s"$desBase.url")
+  override lazy val desEnvironment = loadConfig(s"$desBase.environment")
+  override lazy val desToken = loadConfig(s"$desBase.authorization-token")
 }

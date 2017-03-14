@@ -26,7 +26,7 @@ import models.subscription.business._
 import models.subscription.property.{PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
 import play.api.Configuration
 import play.api.http.Status._
-import play.api.libs.json.Writes
+import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.Authorization
@@ -35,34 +35,35 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class SubscriptionConnector @Inject()
 (
-  config: Configuration,
-  httpPost: HttpPost,
   applicationConfig: AppConfig,
+  httpPost: HttpPost,
   logging: Logging
 ) extends ServicesConfig with RawResponseReads {
 
-  lazy val desServiceUrl = applicationConfig.desURL
-  lazy val urlHeaderEnvironment = applicationConfig.desEnvironment
-  lazy val urlHeaderAuthorization = applicationConfig.desToken
+  val businessSubscribeUrl: String => String = nino => s"${applicationConfig.desURL}/income-tax-self-assessment/nino/$nino/business"
+  val propertySubscribeUrl: String => String = nino => s"${applicationConfig.desURL}/income-tax-self-assessment/nino/$nino/properties"
 
-  val businessSubscribeUrl: String => String = nino => s"$desServiceUrl/income-tax-self-assessment/nino/$nino/business"
-  val propertySubscribeUrl: String => String = nino => s"$desServiceUrl/income-tax-self-assessment/nino/$nino/properties"
+  lazy val urlHeaderAuthorization: String = s"Bearer ${applicationConfig.desToken}"
 
   def createHeaderCarrierPost(hc: HeaderCarrier): HeaderCarrier =
-    hc.copy(authorization = Some(Authorization(s"Bearer $urlHeaderAuthorization")))
-      .withExtraHeaders("Environment" -> urlHeaderEnvironment, "Content-Type" -> "application/json")
+    HeaderCarrier(extraHeaders = Seq("Environment" -> applicationConfig.desEnvironment, "Content-Type" -> "application/json"),
+      authorization = Some(Authorization(urlHeaderAuthorization)))
 
   def createHeaderCarrierPostEmpty(headerCarrier: HeaderCarrier): HeaderCarrier =
-    headerCarrier.copy(authorization = Some(Authorization(s"Bearer $urlHeaderAuthorization")))
-      .withExtraHeaders("Environment" -> urlHeaderEnvironment)
+    HeaderCarrier(extraHeaders = Seq("Environment" -> applicationConfig.desEnvironment),
+      authorization = Some(Authorization(urlHeaderAuthorization)))
 
   def businessSubscribe(nino: String, businessSubscriptionPayload: BusinessSubscriptionRequestModel)
                        (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[BusinessConnectorUtil.Response] = {
     import BusinessConnectorUtil._
     import SubscriptionConnector._
     implicit val loggingConfig = SubscriptionConnector.businessSubscribeLoggingConfig
-    lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
+    lazy val requestDetails: Map[String, String] = Map("nino" -> nino, "subscribe" -> (businessSubscriptionPayload: JsValue).toString)
     val updatedHc = createHeaderCarrierPost(hc)
+
+    lazy val auditRequest = logging.auditFor(auditBusinessSubscribeName, requestDetails)(updatedHc)
+    auditRequest(eventTypeRequest)
+
     logging.debug(s"Request:\n$requestDetails")
     httpPost.POST[BusinessSubscriptionRequestModel, HttpResponse](businessSubscribeUrl(nino), businessSubscriptionPayload)(
       implicitly[Writes[BusinessSubscriptionRequestModel]], HttpReads.readRaw, createHeaderCarrierPost(hc)
@@ -86,6 +87,10 @@ class SubscriptionConnector @Inject()
     implicit val loggingConfig = SubscriptionConnector.propertySubscribeLoggingConfig
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
     val updatedHc = createHeaderCarrierPostEmpty(hc)
+
+    lazy val auditRequest = logging.auditFor(auditPropertySubscribeName, requestDetails)(updatedHc)
+    auditRequest(eventTypeRequest)
+
     logging.debug(s"Request:\n$requestDetails")
     httpPost.POSTEmpty[HttpResponse](propertySubscribeUrl(nino))(HttpReads.readRaw, createHeaderCarrierPostEmpty(hc)).map {
       response =>
@@ -107,10 +112,10 @@ object SubscriptionConnector {
 
   import _root_.utils.Implicits.OptionUtl
 
-  val auditBusinessSubscribeName = "Business Subscribe"
+  val auditBusinessSubscribeName = "business-subscribe-api-10"
   val businessSubscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionConnector.businessSubscribe")
 
-  val auditPropertySubscribeName = "Property Subscribe"
+  val auditPropertySubscribeName = "property-subscribe-api-35"
   val propertySubscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionConnector.propertySubscribe")
 }
 

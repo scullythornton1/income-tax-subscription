@@ -19,9 +19,9 @@ package connectors
 import javax.inject.Inject
 
 import audit.{Logging, LoggingConfig}
+import config.AppConfig
 import connectors.utils.ConnectorUtils
 import models.registration._
-import play.api.Configuration
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -31,29 +31,30 @@ import uk.gov.hmrc.play.http.logging.Authorization
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class RegistrationConnector @Inject()(config: Configuration,
-                                      logging: Logging,
-                                      httpPost: HttpPost,
-                                      httpGet: HttpGet
+class RegistrationConnector @Inject()( appConfig: AppConfig,
+                                       logging: Logging,
+                                       httpPost: HttpPost,
+                                       httpGet: HttpGet
                                      ) extends ServicesConfig with RawResponseReads {
 
   import Logging._
 
-  lazy val urlHeaderEnvironment: String = config.getString("microservice.services.des.environment").fold("")(x => x)
-  lazy val urlHeaderAuthorization: String = s"Bearer ${config.getString("microservice.services.des.authorization-token").fold("")(x => x)}"
-  lazy val registrationServiceUrl: String = baseUrl("des")
+  lazy val urlHeaderAuthorization: String = s"Bearer ${appConfig.desToken}"
 
-  val newRegistrationUrl: String => String = (nino: String) => s"$registrationServiceUrl/registration/individual/NINO/$nino"
+  // DES API numbering [MTD API numbering]
+  // API4 [API 9]
+  val newRegistrationUrl: String => String = (nino: String) => s"${appConfig.desURL}/registration/individual/nino/$nino"
 
-  val getRegistrationUrl: String => String = (nino: String) => s"$registrationServiceUrl/registration/details?nino=$nino"
+  // API 1(b) [API 1 (b)]
+  val getRegistrationUrl: String => String = (nino: String) => s"${appConfig.desURL}/registration/details?nino=$nino"
 
-  def createHeaderCarrierPost(headerCarrier: HeaderCarrier): HeaderCarrier =
-    headerCarrier.withExtraHeaders("Environment" -> urlHeaderEnvironment, "Content-Type" -> "application/json")
-      .copy(authorization = Some(Authorization(urlHeaderAuthorization)))
+  def createHeaderCarrierPost: HeaderCarrier =
+    HeaderCarrier(extraHeaders = Seq("Environment" -> appConfig.desEnvironment, "Content-Type" -> "application/json"),
+      authorization = Some(Authorization(urlHeaderAuthorization)))
 
-  def createHeaderCarrierGet(headerCarrier: HeaderCarrier): HeaderCarrier =
-    headerCarrier.withExtraHeaders("Environment" -> urlHeaderEnvironment)
-      .copy(authorization = Some(Authorization(urlHeaderAuthorization)))
+  def createHeaderCarrierGet: HeaderCarrier =
+    HeaderCarrier(extraHeaders = Seq("Environment" -> appConfig.desEnvironment),
+      authorization = Some(Authorization(urlHeaderAuthorization)))
 
   def register(nino: String, registration: RegistrationRequestModel)(implicit hc: HeaderCarrier): Future[NewRegistrationUtil.Response] = {
     import NewRegistrationUtil._
@@ -61,9 +62,12 @@ class RegistrationConnector @Inject()(config: Configuration,
 
     implicit val loggingConfig = RegistrationConnector.registerLoggingConfig
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino, "requestJson" -> (registration: JsValue).toString)
-    val updatedHc = createHeaderCarrierPost(hc)
+    val updatedHc = createHeaderCarrierPost
 
-    logging.debug(s"Request:\n$requestDetails")
+    lazy val auditRequest = logging.auditFor(auditRegisterName, requestDetails)(updatedHc)
+    auditRequest(eventTypeRequest)
+
+    logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
     httpPost.POST[RegistrationRequestModel, HttpResponse](newRegistrationUrl(nino), registration)(
       implicitly[Writes[RegistrationRequestModel]], implicitly[HttpReads[HttpResponse]], updatedHc)
       .map { response =>
@@ -108,9 +112,12 @@ class RegistrationConnector @Inject()(config: Configuration,
 
     implicit val loggingConfig = RegistrationConnector.getRegistrationLoggingConfig
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
-    val updatedHc = createHeaderCarrierPost(hc)
+    val updatedHc = createHeaderCarrierGet
 
-    logging.debug(s"Request:\n$requestDetails")
+    lazy val auditRequest = logging.auditFor(auditGetRegistrationName, requestDetails)(updatedHc)
+    auditRequest(eventTypeRequest)
+
+    logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
     httpGet.GET[HttpResponse](getRegistrationUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc)
       .map { response =>
 
@@ -142,9 +149,9 @@ class RegistrationConnector @Inject()(config: Configuration,
 
 object RegistrationConnector {
 
-  val auditRegisterName = "API4"
+  val auditRegisterName = "register-api-4"
 
-  val auditGetRegistrationName = "API1(b)"
+  val auditGetRegistrationName = "getRegistration-api-1(b)"
 
   import _root_.utils.Implicits.OptionUtl
 

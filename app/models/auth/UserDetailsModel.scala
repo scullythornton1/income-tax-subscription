@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package models.registration
+package models.auth
 
 import play.api.libs.json.Json
 
-case class RegistrationRequestModel(isAnAgent: Boolean,
-                                    requiresNameMatch: Boolean = false,
-                                    final val regime: String = RegistrationRequestModel.taxRegime)
 
-object RegistrationRequestModel {
+case class UserDetailsModel(name: String,
+                            email: String,
+                            affinityGroup: String,
+                            description: Option[String] = None,
+                            lastName: Option[String] = None,
+                            dateOfBirth: Option[String] = None,
+                            postcode: Option[String] = None,
+                            authProviderId: String,
+                            authProviderType: String)
 
-  final val taxRegime: String = "ITSA"
-  implicit val format = Json.format[RegistrationRequestModel]
-
+object UserDetailsModel {
+  implicit val format = Json.format[UserDetailsModel]
 }

@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package models.registration
+package it.services.its
 
-import play.api.libs.json.Json
+import services.UserAccessService
 
-case class RegistrationRequestModel(isAnAgent: Boolean,
-                                    requiresNameMatch: Boolean = false,
-                                    final val regime: String = RegistrationRequestModel.taxRegime)
+trait ITUserAccessService extends ITThrottleService {
 
-object RegistrationRequestModel {
-
-  final val taxRegime: String = "ITSA"
-  implicit val format = Json.format[RegistrationRequestModel]
+  object TestUserAccessService extends UserAccessService(throttleService = TestThrottleService)
 
 }

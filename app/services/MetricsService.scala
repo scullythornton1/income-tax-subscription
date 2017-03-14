@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package models.registration
+package services
 
-import play.api.libs.json.Json
+import javax.inject.{Inject, Singleton}
 
-case class RegistrationRequestModel(isAnAgent: Boolean,
-                                    requiresNameMatch: Boolean = false,
-                                    final val regime: String = RegistrationRequestModel.taxRegime)
+import com.codahale.metrics.Timer
+import com.kenshoo.play.metrics.Metrics
 
-object RegistrationRequestModel {
+@Singleton
+class MetricsService @Inject()(val metrics: Metrics) {
 
-  final val taxRegime: String = "ITSA"
-  implicit val format = Json.format[RegistrationRequestModel]
+  val userAccessCRTimer: Timer = metrics.defaultRegistry.timer("user-access-ITSA-timer")
 
 }

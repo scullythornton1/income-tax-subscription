@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package models.registration
+package unit.controllers.throttling.mocks
 
-import play.api.libs.json.Json
+import models.throttling.UserAccess
+import org.mockito.Matchers
+import org.mockito.Mockito.when
+import org.scalatest.mock.MockitoSugar
+import services.UserAccessService
+import uk.gov.hmrc.play.http.HeaderCarrier
+import utils.Implicits._
 
-case class RegistrationRequestModel(isAnAgent: Boolean,
-                                    requiresNameMatch: Boolean = false,
-                                    final val regime: String = RegistrationRequestModel.taxRegime)
+trait MockUserAccessService {
 
-object RegistrationRequestModel {
+  this: MockitoSugar =>
 
-  final val taxRegime: String = "ITSA"
-  implicit val format = Json.format[RegistrationRequestModel]
+  val mockUserAccessService: UserAccessService = mock[UserAccessService]
+
+  def setupMockCheckUserAccess(userAccess: UserAccess): Unit =
+    when(mockUserAccessService.checkUserAccess(Matchers.any())(Matchers.any[HeaderCarrier]())).thenReturn(userAccess)
 
 }

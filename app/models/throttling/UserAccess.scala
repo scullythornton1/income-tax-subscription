@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-package models.registration
+package models.throttling
 
-import play.api.libs.json.Json
+sealed trait UserAccess
 
-case class RegistrationRequestModel(isAnAgent: Boolean,
-                                    requiresNameMatch: Boolean = false,
-                                    final val regime: String = RegistrationRequestModel.taxRegime)
+case object LimitReached extends UserAccess
 
-object RegistrationRequestModel {
+case object CanAccess extends UserAccess
 
-  final val taxRegime: String = "ITSA"
-  implicit val format = Json.format[RegistrationRequestModel]
 
-}

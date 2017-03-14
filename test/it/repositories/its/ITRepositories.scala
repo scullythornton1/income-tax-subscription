@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package models.registration
+package it.repositories.its
 
-import play.api.libs.json.Json
+import it.repositories.TestThrottleMongoRepository
+import repositories.Repositories
+import uk.gov.hmrc.lock.LockRepository
 
-case class RegistrationRequestModel(isAnAgent: Boolean,
-                                    requiresNameMatch: Boolean = false,
-                                    final val regime: String = RegistrationRequestModel.taxRegime)
+trait ITRepositories {
 
-object RegistrationRequestModel {
-
-  final val taxRegime: String = "ITSA"
-  implicit val format = Json.format[RegistrationRequestModel]
+  object TestRepositories extends Repositories {
+    override lazy val throttleRepository = new TestThrottleMongoRepository
+    override lazy val lockRepository = new LockRepository
+  }
 
 }
+
+
+

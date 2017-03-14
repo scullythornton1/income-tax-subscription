@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package models.registration
+//$COVERAGE-OFF$Disabling scoverage on this test only class as it is only required by our acceptance test
 
-import play.api.libs.json.Json
+package testonly.controllers
 
-case class RegistrationRequestModel(isAnAgent: Boolean,
-                                    requiresNameMatch: Boolean = false,
-                                    final val regime: String = RegistrationRequestModel.taxRegime)
+import javax.inject.Inject
 
-object RegistrationRequestModel {
+import play.api.mvc.{Action, AnyContent}
+import services.UserAccessService
+import uk.gov.hmrc.play.microservice.controller.BaseController
 
-  final val taxRegime: String = "ITSA"
-  implicit val format = Json.format[RegistrationRequestModel]
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class ResetThrottleController @Inject()(val userAccessService: UserAccessService) extends BaseController {
+
+  def resetThrottle(): Action[AnyContent] = Action.async { implicit request =>
+    userAccessService.dropDb.map(_ => Ok)
+  }
 
 }
+// $COVERAGE-ON$
