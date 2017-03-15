@@ -16,10 +16,16 @@
 
 package repositories
 
-import play.modules.reactivemongo.MongoDbConnection
+import javax.inject.Inject
+
+import play.modules.reactivemongo.ReactiveMongoComponent
+import reactivemongo.api.DefaultDB
 import uk.gov.hmrc.lock.LockRepository
 
-class Repositories extends MongoDbConnection {
+class Repositories @Inject()(mongo: ReactiveMongoComponent) {
+
+  implicit lazy val db: () => DefaultDB = mongo.mongoConnector.db
+
   lazy val throttleRepository = new ThrottleMongoRepository
   lazy val lockRepository = new LockRepository
 }

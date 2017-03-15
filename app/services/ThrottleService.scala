@@ -38,7 +38,7 @@ import utils.Implicits._
 @Singleton
 class ThrottleServiceImp @Inject()(repositories: Repositories,
                                    val logging: Logging) extends ThrottleService with ServicesConfig {
-  val throttleMongoRepository = repositories.throttleRepository
+  lazy val throttleMongoRepository = repositories.throttleRepository
 
   //$COVERAGE-OFF$
   def dateTime = DateTimeUtils.now

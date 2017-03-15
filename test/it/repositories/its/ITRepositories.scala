@@ -18,12 +18,13 @@ package it.repositories.its
 
 import it.repositories.TestThrottleMongoRepository
 import it.services.its.ITTrait
+import play.modules.reactivemongo.ReactiveMongoComponent
 import repositories.Repositories
 import uk.gov.hmrc.lock.LockRepository
 
 trait ITRepositories extends ITTrait {
 
-  object TestRepositories extends Repositories {
+  object TestRepositories extends Repositories(app.injector.instanceOf[ReactiveMongoComponent]) {
     override lazy val throttleRepository = new TestThrottleMongoRepository
     override lazy val lockRepository = new LockRepository
   }
