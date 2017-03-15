@@ -16,10 +16,19 @@
 
 package repositories
 
+import javax.inject.Inject
+
 import play.modules.reactivemongo.MongoDbConnection
 import uk.gov.hmrc.lock.LockRepository
 
-class Repositories extends MongoDbConnection {
+@Inject
+class Repositories {
+
+  // this is done because MongoDbConnection.db is not lazy and caused problems with injection
+  object DBConnection extends MongoDbConnection
+
+  implicit lazy val db = DBConnection.db
+
   lazy val throttleRepository = new ThrottleMongoRepository
   lazy val lockRepository = new LockRepository
 }
