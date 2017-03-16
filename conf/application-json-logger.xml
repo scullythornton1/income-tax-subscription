@@ -7,10 +7,6 @@
 
     <logger name="uk.gov" level="INFO"/>
 
-    <logger name="org.asynchttpclient.netty" level="INFO"/>
-    <logger name="io.netty.buffer" level="INFO"/>
-    <logger name="play.core.netty" level="INFO"/>
-
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
