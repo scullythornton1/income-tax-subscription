@@ -49,10 +49,10 @@ class RosmAndEnrolManagerService @Inject()
     Map(
       "nino" -> feRequest.nino,
       "sourceOfIncome" -> feRequest.incomeSource.toString,
-      "acccountingPeriodStartDate" -> feRequest.accountingPeriodStart.fold("")(x => x.toDesDateFormat),
-      "acccountingPeriodEndDate" -> feRequest.accountingPeriodEnd.fold("")(x => x.toDesDateFormat),
-      "tradingName" -> feRequest.tradingName.fold("")(x => x),
-      "cashOrAccruals" -> feRequest.cashOrAccruals.fold("")(x => x.toLowerCase),
+      "acccountingPeriodStartDate" -> feRequest.accountingPeriodStart.fold("-")(x => x.toDesDateFormat),
+      "acccountingPeriodEndDate" -> feRequest.accountingPeriodEnd.fold("-")(x => x.toDesDateFormat),
+      "tradingName" -> feRequest.tradingName.fold("-")(x => x),
+      "cashOrAccruals" -> feRequest.cashOrAccruals.fold("-")(x => x.toLowerCase),
       "Authorization" -> urlHeaderAuthorization
     )
 
