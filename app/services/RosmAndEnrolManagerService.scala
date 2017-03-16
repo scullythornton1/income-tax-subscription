@@ -19,21 +19,23 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import audit.Logging
+import config.AppConfig
 import connectors.AuthenticatorConnector
 import models.ErrorModel
 import models.authenticator.{RefreshFailure, RefreshSuccessful}
-import models.frontend.{Both, Business, FERequest, FESuccessResponse, Property}
+import models.frontend._
 import models.subscription.business.BusinessSubscriptionSuccessResponseModel
 import models.subscription.property.PropertySubscriptionResponseModel
+import play.api.http.Status._
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import utils.Implicits._
-import play.api.http.Status._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RosmAndEnrolManagerService @Inject()
 (
+  appConfig: AppConfig,
   logging: Logging,
   registrationService: RegistrationService,
   subscriptionService: SubscriptionService,
@@ -41,8 +43,26 @@ class RosmAndEnrolManagerService @Inject()
   authenticatorConnector: AuthenticatorConnector
 ) {
 
-  //TODO add logging
+  lazy val urlHeaderAuthorization: String = s"Bearer ${appConfig.desToken}"
+
+  val feRequestToAuditMap: FERequest => Map[String, String] = (feRequest: FERequest) =>
+    Map(
+      "nino" -> feRequest.nino,
+      "sourceOfIncome" -> feRequest.incomeSource.toString,
+      "acccountingPeriodStartDate" -> feRequest.accountingPeriodStart.fold("")(x => x.toDesDateFormat),
+      "acccountingPeriodEndDate" -> feRequest.accountingPeriodEnd.fold("")(x => x.toDesDateFormat),
+      "tradingName" -> feRequest.tradingName.fold("")(x => x),
+      "cashOrAccruals" -> feRequest.cashOrAccruals.fold("")(x => x.toLowerCase),
+      "Authorization" -> urlHeaderAuthorization
+    )
+
   def rosmAndEnrol(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, FESuccessResponse]] = {
+
+    lazy val requestDetails: Map[String, String] = feRequestToAuditMap(request)
+
+    lazy val auditRequest = logging.auditFor(Logging.transactionName, requestDetails)
+    auditRequest(Logging.auditType)
+
     orchestrateROSM(request).flatMap {
       case Right(rosmSuccess) =>
         orchestrateEnrolment(request.nino, rosmSuccess.mtditId).flatMap {
@@ -68,7 +88,7 @@ class RosmAndEnrolManagerService @Inject()
           case (_, Some(Left(err))) => err
           case (Some(Right(x)), _) => FESuccessResponse(x.mtditId) // As long as there's no error reported then
           case (_, Some(Right(x))) => FESuccessResponse(x.mtditId) // We only need the response of one of the calls
-          case (_,_) => ErrorModel(INTERNAL_SERVER_ERROR, "Unexpected Error") // this error is impossible but included for exhaustive match
+          case (_, _) => ErrorModel(INTERNAL_SERVER_ERROR, "Unexpected Error") // this error is impossible but included for exhaustive match
         }
       }
       case Left(failure) => Future.successful(failure)

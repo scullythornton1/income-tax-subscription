@@ -52,11 +52,6 @@ class GGConnector @Inject()
 
     lazy val requestDetails: Map[String, String] = Map("enrolRequest" -> (enrolmentRequest: JsValue).toString)
     val updatedHc = createHeaderCarrierPost(hc)
-
-    lazy val auditRequest = logging.auditFor(auditEnrolName, requestDetails)(updatedHc)
-    auditRequest(eventTypeRequest)
-
-
     logging.debug(s"Request:\n$requestDetails")
 
     httpPost.POST[EnrolRequest, HttpResponse](enrolUrl, enrolmentRequest)(

@@ -87,10 +87,6 @@ class SubscriptionConnector @Inject()
     implicit val loggingConfig = SubscriptionConnector.propertySubscribeLoggingConfig
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
     val updatedHc = createHeaderCarrierPostEmpty(hc)
-
-    lazy val auditRequest = logging.auditFor(auditPropertySubscribeName, requestDetails)(updatedHc)
-    auditRequest(eventTypeRequest)
-
     logging.debug(s"Request:\n$requestDetails")
     httpPost.POSTEmpty[HttpResponse](propertySubscribeUrl(nino))(HttpReads.readRaw, createHeaderCarrierPostEmpty(hc)).map {
       response =>

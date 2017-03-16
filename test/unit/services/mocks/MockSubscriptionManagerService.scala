@@ -32,6 +32,7 @@ trait MockSubscriptionManagerService extends MockRegistrationService with MockSu
   override lazy val httpGet: HttpGet = mockHttpGet
 
   object TestSubscriptionManagerService extends RosmAndEnrolManagerService(
+    appConfig,
     logging,
     TestRegistrationService,
     TestSubscriptionService,

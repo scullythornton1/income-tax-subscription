@@ -64,9 +64,6 @@ class RegistrationConnector @Inject()( appConfig: AppConfig,
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino, "requestJson" -> (registration: JsValue).toString)
     val updatedHc = createHeaderCarrierPost
 
-    lazy val auditRequest = logging.auditFor(auditRegisterName, requestDetails)(updatedHc)
-    auditRequest(eventTypeRequest)
-
     logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
     httpPost.POST[RegistrationRequestModel, HttpResponse](newRegistrationUrl(nino), registration)(
       implicitly[Writes[RegistrationRequestModel]], implicitly[HttpReads[HttpResponse]], updatedHc)
