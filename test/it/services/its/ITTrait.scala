@@ -19,8 +19,8 @@ package it.services.its
 import audit.Logging
 import config.AppConfig
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.OneServerPerSuite
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -28,7 +28,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 trait ITTrait extends UnitSpec
   with MockitoSugar
   with BeforeAndAfterEach
-  with OneServerPerSuite {
+  with GuiceOneAppPerSuite {
 
   lazy val config = app.injector.instanceOf[Configuration]
   lazy val appConfig = app.injector.instanceOf[AppConfig]

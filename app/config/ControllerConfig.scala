@@ -17,11 +17,12 @@
 package config
 
 import javax.inject.{Inject, Singleton}
-import play.api.Application
-import uk.gov.hmrc.play.config.ServicesConfig
+import com.typesafe.config.Config
+import play.api.Configuration
+import uk.gov.hmrc.play.config.{ControllerConfig => HmrcControllerConfig}
+import net.ceedubs.ficus.Ficus._
 
 @Singleton
-class AppContext @Inject()(val application: Application) extends ServicesConfig {
-  lazy val appName = application.configuration.getString("appName").getOrElse(throw new RuntimeException("appName is not configured"))
-  lazy val appUrl = application.configuration.getString("appUrl").getOrElse(throw new RuntimeException("appUrl is not configured"))
+class ControllerConfig @Inject()(val configuration: Configuration) extends HmrcControllerConfig {
+  lazy val controllerConfigs: Config = configuration.underlying.as[Config]("controllers")
 }

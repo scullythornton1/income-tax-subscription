@@ -16,28 +16,24 @@
 
 package config
 
-import com.typesafe.config.Config
 import models.{ErrorGenericBadRequest, ErrorInternalServerError, ErrorNotFound, ErrorUnauthorized}
-import net.ceedubs.ficus.Ficus._
 import play.api._
+import play.api.http.Status.UNAUTHORIZED
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{RequestHeader, Result}
 import uk.gov.hmrc.play.audit.filters.AuditFilter
 import uk.gov.hmrc.play.auth.controllers.AuthParamsControllerConfig
 import uk.gov.hmrc.play.auth.microservice.filters.AuthorisationFilter
-import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
+import uk.gov.hmrc.play.config.{AppName, RunMode}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.logging.filters.LoggingFilter
 import uk.gov.hmrc.play.microservice.bootstrap.DefaultMicroserviceGlobal
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object ControllerConfiguration extends ControllerConfig {
-  lazy val controllerConfigs = Play.current.configuration.underlying.as[Config]("controllers")
-}
+object ControllerConfiguration extends ControllerConfig(Play.current.configuration)
 
 object AuthParamsControllerConfiguration extends AuthParamsControllerConfig {
   lazy val controllerConfigs = ControllerConfiguration.controllerConfigs
@@ -75,7 +71,7 @@ object MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode {
     super.onError(request, ex) map (res => {
       res.header.status
       match {
-        case 401 => Status(ErrorUnauthorized.httpStatusCode)(Json.toJson(ErrorUnauthorized))
+        case UNAUTHORIZED => Status(ErrorUnauthorized.httpStatusCode)(Json.toJson(ErrorUnauthorized))
         case _ => Status(ErrorInternalServerError.httpStatusCode)(Json.toJson(ErrorInternalServerError))
       }
     })
