@@ -18,18 +18,18 @@ package unit.connectors.mocks
 
 import connectors.AuthConnector
 import models.auth.{Authority, UserIds}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
 
-trait MockAuthConnector extends UnitSpec with MockitoSugar with BeforeAndAfterEach with OneAppPerSuite {
+trait MockAuthConnector extends UnitSpec with MockitoSugar with BeforeAndAfterEach with GuiceOneAppPerSuite {
 
   lazy val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
@@ -39,7 +39,7 @@ trait MockAuthConnector extends UnitSpec with MockitoSugar with BeforeAndAfterEa
   }
 
   def setupMockCurrentAuthority(authority: Option[Authority]): Unit = {
-    when(mockAuthConnector.getCurrentAuthority()(Matchers.any[HeaderCarrier]())).thenReturn(Future.successful(authority))
+    when(mockAuthConnector.getCurrentAuthority()(ArgumentMatchers.any[HeaderCarrier]())).thenReturn(Future.successful(authority))
   }
 
   val validAuthority = Authority(

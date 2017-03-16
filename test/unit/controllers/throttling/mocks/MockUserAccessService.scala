@@ -17,9 +17,9 @@
 package unit.controllers.throttling.mocks
 
 import models.throttling.UserAccess
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import services.UserAccessService
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.Implicits._
@@ -31,6 +31,6 @@ trait MockUserAccessService {
   val mockUserAccessService: UserAccessService = mock[UserAccessService]
 
   def setupMockCheckUserAccess(userAccess: UserAccess): Unit =
-    when(mockUserAccessService.checkUserAccess(Matchers.any())(Matchers.any[HeaderCarrier]())).thenReturn(userAccess)
+    when(mockUserAccessService.checkUserAccess(ArgumentMatchers.any())(ArgumentMatchers.any[HeaderCarrier]())).thenReturn(userAccess)
 
 }
