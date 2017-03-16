@@ -49,9 +49,9 @@ class SubscriptionConnector @Inject()
     HeaderCarrier(extraHeaders = Seq("Environment" -> applicationConfig.desEnvironment, "Content-Type" -> "application/json"),
       authorization = Some(Authorization(urlHeaderAuthorization)))
 
-  def createHeaderCarrierPostEmpty(headerCarrier: HeaderCarrier): HeaderCarrier =
-    HeaderCarrier(extraHeaders = Seq("Environment" -> applicationConfig.desEnvironment),
-      authorization = Some(Authorization(urlHeaderAuthorization)))
+//  def createHeaderCarrierPostEmpty(headerCarrier: HeaderCarrier): HeaderCarrier =
+//    HeaderCarrier(extraHeaders = Seq("Environment" -> applicationConfig.desEnvironment),
+//      authorization = Some(Authorization(urlHeaderAuthorization)))
 
   def businessSubscribe(nino: String, businessSubscriptionPayload: BusinessSubscriptionRequestModel)
                        (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[BusinessConnectorUtil.Response] = {
@@ -86,13 +86,13 @@ class SubscriptionConnector @Inject()
     import SubscriptionConnector._
     implicit val loggingConfig = SubscriptionConnector.propertySubscribeLoggingConfig
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
-    val updatedHc = createHeaderCarrierPostEmpty(hc)
+    val updatedHc = createHeaderCarrierPost(hc)
 
     lazy val auditRequest = logging.auditFor(auditPropertySubscribeName, requestDetails)(updatedHc)
     auditRequest(eventTypeRequest)
 
     logging.debug(s"Request:\n$requestDetails")
-    httpPost.POSTEmpty[HttpResponse](propertySubscribeUrl(nino))(HttpReads.readRaw, createHeaderCarrierPostEmpty(hc)).map {
+    httpPost.POST[JsValue, HttpResponse](propertySubscribeUrl(nino),"{}": JsValue)(implicitly[Writes[JsValue]], HttpReads.readRaw, updatedHc).map {
       response =>
 
         lazy val audit = logging.auditFor(auditPropertySubscribeName, requestDetails + ("response" -> response.body))(updatedHc)

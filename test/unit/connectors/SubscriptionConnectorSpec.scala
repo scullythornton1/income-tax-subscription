@@ -40,13 +40,6 @@ class SubscriptionConnectorSpec extends MockSubscriptionConnector {
     rHc.headers.contains("Environment" -> appConfig.desEnvironment) shouldBe true
   }
 
-  "The connector should have the correct POST EMPTY request headers for DES" in {
-    val rHc = TestSubscriptionConnector.createHeaderCarrierPostEmpty(hc)
-    rHc.headers.contains("Authorization" -> s"Bearer ${appConfig.desToken}") shouldBe true
-    rHc.headers.contains("Content-Type" -> "application/json") shouldBe false
-    rHc.headers.contains("Environment" -> appConfig.desEnvironment) shouldBe true
-  }
-
   "SubscriptionConnector.businessSubscribe" should {
 
     def result = await(TestSubscriptionConnector.businessSubscribe(testNino, businessSubscriptionRequestPayload))
