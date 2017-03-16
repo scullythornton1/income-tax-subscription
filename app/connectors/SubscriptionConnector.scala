@@ -24,7 +24,6 @@ import config.AppConfig
 import connectors.utils.ConnectorUtils
 import models.subscription.business._
 import models.subscription.property.{PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
-import play.api.Configuration
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -45,13 +44,13 @@ class SubscriptionConnector @Inject()
 
   lazy val urlHeaderAuthorization: String = s"Bearer ${applicationConfig.desToken}"
 
-  def createHeaderCarrierPost(hc: HeaderCarrier): HeaderCarrier =
-    HeaderCarrier(extraHeaders = Seq("Environment" -> applicationConfig.desEnvironment, "Content-Type" -> "application/json"),
-      authorization = Some(Authorization(urlHeaderAuthorization)))
+  def createHeaderCarrierPost(headerCarrier: HeaderCarrier): HeaderCarrier =
+    headerCarrier.copy(authorization = Some(Authorization(urlHeaderAuthorization)))
+      .withExtraHeaders("Environment" -> applicationConfig.desEnvironment, "Content-Type" -> "application/json")
 
   def createHeaderCarrierPostEmpty(headerCarrier: HeaderCarrier): HeaderCarrier =
-    HeaderCarrier(extraHeaders = Seq("Environment" -> applicationConfig.desEnvironment),
-      authorization = Some(Authorization(urlHeaderAuthorization)))
+    headerCarrier.copy(authorization = Some(Authorization(urlHeaderAuthorization)))
+      .withExtraHeaders("Environment" -> applicationConfig.desEnvironment)
 
   def businessSubscribe(nino: String, businessSubscriptionPayload: BusinessSubscriptionRequestModel)
                        (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[BusinessConnectorUtil.Response] = {
