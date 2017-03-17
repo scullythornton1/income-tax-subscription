@@ -48,10 +48,6 @@ class SubscriptionConnector @Inject()
     headerCarrier.copy(authorization = Some(Authorization(urlHeaderAuthorization)))
       .withExtraHeaders("Environment" -> applicationConfig.desEnvironment, "Content-Type" -> "application/json")
 
-  def createHeaderCarrierPostEmpty(headerCarrier: HeaderCarrier): HeaderCarrier =
-    headerCarrier.copy(authorization = Some(Authorization(urlHeaderAuthorization)))
-      .withExtraHeaders("Environment" -> applicationConfig.desEnvironment)
-
   def businessSubscribe(nino: String, businessSubscriptionPayload: BusinessSubscriptionRequestModel)
                        (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[BusinessConnectorUtil.Response] = {
     import BusinessConnectorUtil._
@@ -63,7 +59,7 @@ class SubscriptionConnector @Inject()
     lazy val auditRequest = logging.auditFor(auditBusinessSubscribeName, requestDetails)(updatedHc)
     auditRequest(eventTypeRequest)
 
-    logging.debug(s"Request:\n$requestDetails")
+    logging.debug(s"Request:\n$requestDetails\n\nHeader Carrier:\n$updatedHc")
     httpPost.POST[BusinessSubscriptionRequestModel, HttpResponse](businessSubscribeUrl(nino), businessSubscriptionPayload)(
       implicitly[Writes[BusinessSubscriptionRequestModel]], HttpReads.readRaw, createHeaderCarrierPost(hc)
     ).map { response =>
@@ -85,9 +81,11 @@ class SubscriptionConnector @Inject()
     import SubscriptionConnector._
     implicit val loggingConfig = SubscriptionConnector.propertySubscribeLoggingConfig
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
-    val updatedHc = createHeaderCarrierPostEmpty(hc)
-    logging.debug(s"Request:\n$requestDetails")
-    httpPost.POSTEmpty[HttpResponse](propertySubscribeUrl(nino))(HttpReads.readRaw, createHeaderCarrierPostEmpty(hc)).map {
+
+    
+    val updatedHc = createHeaderCarrierPost(hc)
+    logging.debug(s"Request:\n$requestDetails\n\nHeader Carrier:\n$updatedHc")
+    httpPost.POST[JsValue, HttpResponse](propertySubscribeUrl(nino),"{}": JsValue)(implicitly[Writes[JsValue]], HttpReads.readRaw, updatedHc).map {
       response =>
 
         lazy val audit = logging.auditFor(auditPropertySubscribeName, requestDetails + ("response" -> response.body))(updatedHc)

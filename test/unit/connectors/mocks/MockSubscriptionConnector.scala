@@ -21,11 +21,10 @@ import config.AppConfig
 import connectors.SubscriptionConnector
 import models.subscription.business.BusinessSubscriptionRequestModel
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.Configuration
 import play.api.http.Status._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.HttpPost
-import utils.Implicits._
+import utils.JsonUtils._
 import utils.TestConstants.{BusinessSubscriptionResponse, PropertySubscriptionResponse, _}
 
 trait MockSubscriptionConnector extends MockHttp with OneAppPerSuite {
@@ -46,6 +45,6 @@ trait MockSubscriptionConnector extends MockHttp with OneAppPerSuite {
     setupMockHttpPost(url = TestSubscriptionConnector.businessSubscribeUrl(nino), payload)(status, response)
 
   def setupMockPropertySubscribe(nino: String)(status: Int, response: JsValue): Unit =
-    setupMockHttpPostEmpty(url = TestSubscriptionConnector.propertySubscribeUrl(nino))(status, response)
+    setupMockHttpPost(url = TestSubscriptionConnector.propertySubscribeUrl(nino), OptionUtl("{}": JsValue))(status, response)
 
 }

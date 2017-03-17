@@ -20,7 +20,7 @@ import java.util.UUID
 
 import connectors.AuthConnector
 import models.auth.{Authority, UserIds}
-import org.mockito.Matchers
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfter
 import play.api.http.Status._
@@ -78,10 +78,10 @@ Authority
       val userIDs = UserIds("foo", "bar")
       val expected = Authority(uri, ggid, userDetailsLink, userIDs)
 
-      when(mockHttp.GET[HttpResponse](Matchers.eq("localhost/auth/authority"))(Matchers.any(), Matchers.any())).
+      when(mockHttp.GET[HttpResponse](ArgumentMatchers.eq("localhost/auth/authority"))(ArgumentMatchers.any(), ArgumentMatchers.any())).
         thenReturn(Future.successful(HttpResponse(OK, Some(authResponseJson(uri, userDetailsLink, ggid, idsLink)))))
 
-      when(mockHttp.GET[HttpResponse](Matchers.eq(s"localhost$idsLink"))(Matchers.any(), Matchers.any())).
+      when(mockHttp.GET[HttpResponse](ArgumentMatchers.eq(s"localhost$idsLink"))(ArgumentMatchers.any(), ArgumentMatchers.any())).
         thenReturn(Future.successful(HttpResponse(OK, Some(idsResponseJson(userIDs.internalId, userIDs.externalId)))))
 
 
@@ -94,7 +94,7 @@ Authority
 
     "return None when an authority isn't found" in {
 
-      when(mockHttp.GET[HttpResponse](Matchers.eq("localhost/auth/authority"))(Matchers.any(), Matchers.any())).
+      when(mockHttp.GET[HttpResponse](ArgumentMatchers.eq("localhost/auth/authority"))(ArgumentMatchers.any(), ArgumentMatchers.any())).
         thenReturn(Future.successful(HttpResponse(NOT_FOUND, None)))
 
       implicit val hc = new HeaderCarrier(sessionId = Some(SessionId(s"session-${UUID.randomUUID}")))
