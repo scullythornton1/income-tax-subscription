@@ -105,18 +105,23 @@ class Logging @Inject()(application: Application,
 
 object Logging {
 
-  val auditRegistrationTxName: String = "Registration"
 
   val splunkString = "SPLUNK AUDIT:\n"
 
-  final val eventTypeRequest: String = "Request"
-  final val eventTypeSuccess: String = "Success"
-  final val eventTypeFailure: String = "Failure"
-  final val eventTypeBadRequest: String = "BadRequest"
-  final val eventTypeConflict: String = "Conflict"
-  final val eventTypeNotFound: String = "NotFound"
-  final val eventTypeInternalServerError: String = "InternalServerError"
-  final val eventTypeServerUnavailable: String = "ServerUnavailable"
-  final val eventTypeUnexpectedError: String = "UnexpectedError"
+  val auditType = "CustomerSubscribedToSendQtrlySAIncomeTaxReports"
+  val transactionName = "Customer-subscribed-to-send-quarterly-SA-income-tax-reports"
+
+
+//  val auditRegistrationTxName: String = "Registration"
+
+  val eventTypeRequest: String = "Request"
+  val eventTypeSuccess: String = "Success"
+  val eventTypeFailure: String = "Failure"
+  val eventTypeBadRequest: String = "BadRequest"
+  val eventTypeConflict: String = "Conflict"
+  val eventTypeNotFound: String = "NotFound"
+  val eventTypeInternalServerError: String = "InternalServerError"
+  val eventTypeServerUnavailable: String = "ServerUnavailable"
+  val eventTypeUnexpectedError: String = "UnexpectedError"
 }
 

@@ -56,8 +56,7 @@ class GGAdminConnector @Inject()(config: Configuration,
     val updatedHc = createHeaderCarrierPost(hc)
 
     lazy val requestDetails: Map[String, String] = Map("knownFacts" -> (knownFacts: JsValue).toString)
-    lazy val auditRequest = logging.auditFor(auditAddKnownFactsName, requestDetails)(updatedHc)
-    auditRequest(eventTypeRequest)
+    logging.debug(s"Request:\n$requestDetails")
 
     httpPost.POST[KnownFactsRequest, HttpResponse](addKnownFactsUrl, knownFacts)(
       implicitly[Writes[KnownFactsRequest]], implicitly[HttpReads[HttpResponse]], updatedHc).map { response =>

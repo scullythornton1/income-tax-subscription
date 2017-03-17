@@ -48,13 +48,13 @@ class RegistrationConnector @Inject()( appConfig: AppConfig,
   // API 1(b) [API 1 (b)]
   val getRegistrationUrl: String => String = (nino: String) => s"${appConfig.desURL}/registration/details?nino=$nino"
 
-  def createHeaderCarrierPost: HeaderCarrier =
-    HeaderCarrier(extraHeaders = Seq("Environment" -> appConfig.desEnvironment, "Content-Type" -> "application/json"),
-      authorization = Some(Authorization(urlHeaderAuthorization)))
+  def createHeaderCarrierPost(headerCarrier: HeaderCarrier): HeaderCarrier =
+    headerCarrier.withExtraHeaders("Environment" -> appConfig.desEnvironment, "Content-Type" -> "application/json")
+      .copy(authorization = Some(Authorization(urlHeaderAuthorization)))
 
-  def createHeaderCarrierGet: HeaderCarrier =
-    HeaderCarrier(extraHeaders = Seq("Environment" -> appConfig.desEnvironment),
-      authorization = Some(Authorization(urlHeaderAuthorization)))
+  def createHeaderCarrierGet(headerCarrier: HeaderCarrier): HeaderCarrier =
+    headerCarrier.withExtraHeaders("Environment" -> appConfig.desEnvironment)
+      .copy(authorization = Some(Authorization(urlHeaderAuthorization)))
 
   def register(nino: String, registration: RegistrationRequestModel)(implicit hc: HeaderCarrier): Future[NewRegistrationUtil.Response] = {
     import NewRegistrationUtil._
@@ -62,10 +62,7 @@ class RegistrationConnector @Inject()( appConfig: AppConfig,
 
     implicit val loggingConfig = RegistrationConnector.registerLoggingConfig
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino, "requestJson" -> (registration: JsValue).toString)
-    val updatedHc = createHeaderCarrierPost
-
-    lazy val auditRequest = logging.auditFor(auditRegisterName, requestDetails)(updatedHc)
-    auditRequest(eventTypeRequest)
+    val updatedHc = createHeaderCarrierPost(hc)
 
     logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
     httpPost.POST[RegistrationRequestModel, HttpResponse](newRegistrationUrl(nino), registration)(
@@ -112,7 +109,7 @@ class RegistrationConnector @Inject()( appConfig: AppConfig,
 
     implicit val loggingConfig = RegistrationConnector.getRegistrationLoggingConfig
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
-    val updatedHc = createHeaderCarrierGet
+    val updatedHc = createHeaderCarrierGet(hc)
 
     lazy val auditRequest = logging.auditFor(auditGetRegistrationName, requestDetails)(updatedHc)
     auditRequest(eventTypeRequest)
