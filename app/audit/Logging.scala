@@ -108,8 +108,15 @@ object Logging {
 
   val splunkString = "SPLUNK AUDIT:\n"
 
-  val auditType = "CustomerSubscribedToSendQtrlySAIncomeTaxReports"
-  val transactionName = "Customer-subscribed-to-send-quarterly-SA-income-tax-reports"
+  object AuditSubscribeRequest {
+    val auditType = "mtdItsaSubscription"
+    val transactionName = "Customer-subscribed-to-send-quarterly-SA-income-tax-reports"
+  }
+
+  object AuditReferenceNumber {
+    val auditType = "mtdItsaSubscriptionReferenceNumber"
+    val transactionName = "Customer-subscribed-mtd-itsa-reference-number"
+  }
 
 
 //  val auditRegistrationTxName: String = "Registration"
