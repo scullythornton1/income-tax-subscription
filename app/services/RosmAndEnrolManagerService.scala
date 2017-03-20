@@ -45,7 +45,7 @@ class RosmAndEnrolManagerService @Inject()
 
   lazy val urlHeaderAuthorization: String = s"Bearer ${appConfig.desToken}"
 
-  val feRequestToAuditMap: FERequest => Map[String, String] = (feRequest: FERequest) =>
+  def feRequestToAuditMap: FERequest => Map[String, String] = (feRequest: FERequest) =>
     Map(
       "nino" -> feRequest.nino,
       "sourceOfIncome" -> feRequest.incomeSource.toString,
@@ -56,7 +56,7 @@ class RosmAndEnrolManagerService @Inject()
       "Authorization" -> urlHeaderAuthorization
     )
 
-  val auditResponseMap: FESuccessResponse => Map[String, String] = response =>
+  def auditResponseMap: FESuccessResponse => Map[String, String] = response =>
     Map(
       "mtdItsaReferenceNumber" -> response.mtditId
     )
@@ -64,15 +64,13 @@ class RosmAndEnrolManagerService @Inject()
   def rosmAndEnrol(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, FESuccessResponse]] = {
 
     // Splunk the request for Transaction Monitoring
-    lazy val auditRequest = logging.auditFor(Logging.AuditSubscribeRequest.transactionName, feRequestToAuditMap(request))
-    auditRequest(Logging.AuditSubscribeRequest.auditType)
+    logging.audit(Logging.AuditSubscribeRequest.transactionName, feRequestToAuditMap(request), Logging.AuditSubscribeRequest.auditType)
 
     orchestrateROSM(request).flatMap {
       case Right(rosmSuccess) =>
 
         // Splunk the MTD Reference Number returned for Transaction Monitoring
-        lazy val auditResponse = logging.auditFor(Logging.AuditReferenceNumber.transactionName, auditResponseMap(rosmSuccess))
-        auditResponse(Logging.AuditReferenceNumber.auditType)
+        logging.audit(Logging.AuditReferenceNumber.transactionName, auditResponseMap(rosmSuccess), Logging.AuditReferenceNumber.auditType)
 
         orchestrateEnrolment(request.nino, rosmSuccess.mtditId).flatMap {
           case Right(enrolSuccess) =>

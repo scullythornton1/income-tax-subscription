@@ -48,8 +48,8 @@ class AuthConnector @Inject()(val http: HttpGet) extends ServicesConfig with Raw
 
             http.GET[HttpResponse](s"$serviceUrl$idsLink") map {
               response =>
-                Logger.info(s"[AuthConnector] - [getCurrentAuthority] API call : $serviceUrl/$idsLink")
-                Logger.info(s"[AuthConnector] - [getCurrentAuthority] response from ids call : ${response.json}")
+                Logger.debug(s"[AuthConnector] - [getCurrentAuthority] API call : $serviceUrl/$idsLink")
+                Logger.debug(s"[AuthConnector] - [getCurrentAuthority] response from ids call : ${response.json}")
                 val ids = response.json.as[UserIds]
                 Some(Authority(uri, gatewayId, userDetails, ids))
             }

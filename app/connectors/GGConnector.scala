@@ -64,7 +64,7 @@ class GGConnector @Inject()
         case OK => response
         case x =>
           logging.warn("GG enrol responded with a unexpected error")
-          audit(eventTypeUnexpectedError)
+          audit(auditEnrolName + "-" + eventTypeUnexpectedError)
           response
       }
     }

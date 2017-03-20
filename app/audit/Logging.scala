@@ -53,11 +53,11 @@ class Logging @Inject()(application: Application,
                             path: String = "N/A",
                             tags: Map[String, String] = Map.empty[String, String],
                             detail: Map[String, String],
-                            eventType: String)
+                            auditType: String)
                            (implicit hc: HeaderCarrier): Unit = {
     val packet = DataEvent(
-      appName,
-      auditType = transactionName + "-" + eventType,
+      auditSource = appName,
+      auditType = auditType,
       tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(transactionName, path) ++ tags,
       detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(detail.toSeq: _*)
     )
@@ -65,31 +65,32 @@ class Logging @Inject()(application: Application,
     audit.sendDataEvent(packet)
   }
 
-  private def splunkToLogger(transactionName: String, detail: Map[String, String], eventType: String)(implicit hc: HeaderCarrier): String =
-    s"""| Transaction Name: $transactionName
-        | ${if (eventType.nonEmpty) "Event Type: " + eventType}
+  private def splunkToLogger(transactionName: String, detail: Map[String, String], auditType: String)(implicit hc: HeaderCarrier): String =
+    s"""| Audit Source: $appName
+        | Audit Type: $auditType
+        | Transaction Name: $transactionName
         | Header Carrier:
         | $hc
         | Request Details:
         | $detail
     """.stripMargin
 
-  private def splunkFunction(transactionName: String, detail: Map[String, String], eventType: String)(implicit hc: HeaderCarrier) = {
+  private def splunkFunction(transactionName: String, detail: Map[String, String], auditType: String)(implicit hc: HeaderCarrier) = {
     val loggingFunc: String => Unit = if (debugToWarn) Logger.warn(_) else Logger.debug(_)
-    loggingFunc(Logging.splunkString + splunkToLogger(transactionName, detail, eventType))
+    loggingFunc(Logging.splunkString + splunkToLogger(transactionName, detail, auditType))
     sendDataEvent(
       transactionName = transactionName,
       detail = detail,
-      eventType = eventType
+      auditType = auditType
     )
   }
 
-  def audit(transactionName: String, detail: Map[String, String], eventType: String)(implicit hc: HeaderCarrier): Unit =
-    splunkFunction(transactionName, detail, eventType)
+  def audit(transactionName: String, detail: Map[String, String], auditType: String)(implicit hc: HeaderCarrier): Unit =
+    splunkFunction(transactionName, detail, auditType)
 
-  def auditFor(auditName: String)(implicit hc: HeaderCarrier): (Map[String, String], String) => Unit = audit(auditName, _, _)(hc)
+  def auditFor(transactionName: String)(implicit hc: HeaderCarrier): (Map[String, String], String) => Unit = audit(transactionName, _, _)(hc)
 
-  def auditFor(auditName: String, detail: Map[String, String])(implicit hc: HeaderCarrier): String => Unit = audit(auditName, detail, _)(hc)
+  def auditFor(transactionName: String, detail: Map[String, String])(implicit hc: HeaderCarrier): String => Unit = audit(transactionName, detail, _)(hc)
 
   @inline def trace(msg: String)(implicit config: Option[LoggingConfig] = None): Unit = Logger.trace(config.addHeading(msg))
 

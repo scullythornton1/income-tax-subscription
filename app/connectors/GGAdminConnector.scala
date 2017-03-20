@@ -67,15 +67,15 @@ class GGAdminConnector @Inject()(config: Configuration,
         case OK => parseSuccess(response.body)
         case BAD_REQUEST =>
           logging.warn("GG admin responded with a bad request")
-          audit(eventTypeBadRequest)
+          audit(auditAddKnownFactsName + "-" + eventTypeBadRequest)
           parseFailure(BAD_REQUEST, response.body)
         case INTERNAL_SERVER_ERROR =>
           logging.warn("GG admin responded with an internal server error")
-          audit(eventTypeInternalServerError)
+          audit(auditAddKnownFactsName + "-" + eventTypeInternalServerError)
           parseFailure(INTERNAL_SERVER_ERROR, response.body)
         case x =>
           logging.warn(s"GG admin responded with an unexpected status code ($x)")
-          audit(eventTypeUnexpectedError)
+          audit(auditAddKnownFactsName + "-" + eventTypeUnexpectedError)
           parseFailure(x, response.body)
       }
     }
