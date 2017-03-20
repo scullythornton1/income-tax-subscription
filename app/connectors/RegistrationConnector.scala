@@ -76,27 +76,27 @@ class RegistrationConnector @Inject()( appConfig: AppConfig,
           case OK => parseSuccess(response.body)
           case BAD_REQUEST =>
             logging.warn("Registration responded with a bad request error")
-            audit(eventTypeBadRequest)
+            audit(auditRegisterName + "-" + eventTypeBadRequest)
             parseFailure(BAD_REQUEST, response.body)
           case NOT_FOUND =>
             logging.warn("Registration responded with a not found error")
-            audit(eventTypeNotFound)
+            audit(auditRegisterName + "-" + eventTypeNotFound)
             parseFailure(NOT_FOUND, response.body)
           case CONFLICT =>
             logging.warn("Registration responded with a conflict error")
-            audit(eventTypeConflict)
+            audit(auditRegisterName + "-" + eventTypeConflict)
             parseFailure(CONFLICT, response.body)
           case INTERNAL_SERVER_ERROR =>
             logging.warn("Registration responded with a internal server error")
-            audit(eventTypeInternalServerError)
+            audit(auditRegisterName + "-" + eventTypeInternalServerError)
             parseFailure(INTERNAL_SERVER_ERROR, response.body)
           case SERVICE_UNAVAILABLE =>
             logging.warn("Registration responded with a service unavailable error")
-            audit(eventTypeServerUnavailable)
+            audit(auditRegisterName + "-" + eventTypeServerUnavailable)
             parseFailure(SERVICE_UNAVAILABLE, response.body)
           case x =>
             logging.warn("Registration responded with a unexpected error")
-            audit(eventTypeUnexpectedError)
+            audit(auditRegisterName + "-" + eventTypeUnexpectedError)
             parseFailure(x, response.body)
         }
 
@@ -124,19 +124,19 @@ class RegistrationConnector @Inject()( appConfig: AppConfig,
         status match {
           case OK => parseSuccess(response.body)
           case BAD_REQUEST =>
-            audit(eventTypeBadRequest)
+            audit(auditGetRegistrationName + "-" + eventTypeBadRequest)
             parseFailure(BAD_REQUEST, response.body)
           case NOT_FOUND =>
-            audit(eventTypeNotFound)
+            audit(auditGetRegistrationName + "-" + eventTypeNotFound)
             parseFailure(NOT_FOUND, response.body)
           case INTERNAL_SERVER_ERROR =>
-            audit(eventTypeInternalServerError)
+            audit(auditGetRegistrationName + "-" + eventTypeInternalServerError)
             parseFailure(INTERNAL_SERVER_ERROR, response.body)
           case SERVICE_UNAVAILABLE =>
-            audit(eventTypeServerUnavailable)
+            audit(auditGetRegistrationName + "-" + eventTypeServerUnavailable)
             parseFailure(SERVICE_UNAVAILABLE, response.body)
           case x =>
-            audit(eventTypeUnexpectedError)
+            audit(auditGetRegistrationName + "-" + eventTypeUnexpectedError)
             parseFailure(x, response.body)
         }
       }

@@ -56,9 +56,6 @@ class SubscriptionConnector @Inject()
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino, "subscribe" -> (businessSubscriptionPayload: JsValue).toString)
     val updatedHc = createHeaderCarrierPost(hc)
 
-    lazy val auditRequest = logging.auditFor(auditBusinessSubscribeName, requestDetails)(updatedHc)
-    auditRequest(eventTypeRequest)
-
     logging.debug(s"Request:\n$requestDetails\n\nHeader Carrier:\n$updatedHc")
     httpPost.POST[BusinessSubscriptionRequestModel, HttpResponse](businessSubscribeUrl(nino), businessSubscriptionPayload)(
       implicitly[Writes[BusinessSubscriptionRequestModel]], HttpReads.readRaw, createHeaderCarrierPost(hc)
@@ -70,7 +67,7 @@ class SubscriptionConnector @Inject()
         case OK => parseSuccess(response.body)
         case x =>
           logging.warn("Business subscription responded with a unexpected error")
-          audit(eventTypeUnexpectedError)
+          audit(auditBusinessSubscribeName + "-" + eventTypeUnexpectedError)
           parseFailure(x, response.body)
       }
     }
@@ -81,8 +78,6 @@ class SubscriptionConnector @Inject()
     import SubscriptionConnector._
     implicit val loggingConfig = SubscriptionConnector.propertySubscribeLoggingConfig
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
-
-    
     val updatedHc = createHeaderCarrierPost(hc)
     logging.debug(s"Request:\n$requestDetails\n\nHeader Carrier:\n$updatedHc")
     httpPost.POST[JsValue, HttpResponse](propertySubscribeUrl(nino),"{}": JsValue)(implicitly[Writes[JsValue]], HttpReads.readRaw, updatedHc).map {
@@ -94,7 +89,7 @@ class SubscriptionConnector @Inject()
           case OK => parseSuccess(response.body)
           case x =>
             logging.warn("Property subscription responded with a unexpected error")
-            audit(eventTypeUnexpectedError)
+            audit(auditPropertySubscribeName + "-" + eventTypeUnexpectedError)
             parseFailure(x, response.body)
         }
     }

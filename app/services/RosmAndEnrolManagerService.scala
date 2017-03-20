@@ -45,7 +45,7 @@ class RosmAndEnrolManagerService @Inject()
 
   lazy val urlHeaderAuthorization: String = s"Bearer ${appConfig.desToken}"
 
-  val feRequestToAuditMap: FERequest => Map[String, String] = (feRequest: FERequest) =>
+  val feRequestToAuditMap: FERequest => Map[String, String] = feRequest =>
     Map(
       "nino" -> feRequest.nino,
       "sourceOfIncome" -> feRequest.incomeSource.toString,
@@ -64,20 +64,21 @@ class RosmAndEnrolManagerService @Inject()
   def rosmAndEnrol(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, FESuccessResponse]] = {
 
     // Splunk the request for Transaction Monitoring
-    lazy val auditRequest = logging.auditFor(Logging.AuditSubscribeRequest.transactionName, feRequestToAuditMap(request))
-    auditRequest(Logging.AuditSubscribeRequest.auditType)
+    val auditDetails = feRequestToAuditMap(request)
+    lazy val auditSubscription = logging.auditFor(Logging.AuditSubscribeRequest.transactionName, auditDetails)(hc)
+    auditSubscription(Logging.AuditSubscribeRequest.auditType)
 
     orchestrateROSM(request).flatMap {
       case Right(rosmSuccess) =>
-
-        // Splunk the MTD Reference Number returned for Transaction Monitoring
-        lazy val auditResponse = logging.auditFor(Logging.AuditReferenceNumber.transactionName, auditResponseMap(rosmSuccess))
-        auditResponse(Logging.AuditReferenceNumber.auditType)
-
         orchestrateEnrolment(request.nino, rosmSuccess.mtditId).flatMap {
           case Right(enrolSuccess) =>
             authenticatorConnector.refreshProfile.map {
-              case RefreshSuccessful => FESuccessResponse(rosmSuccess.mtditId)
+              case RefreshSuccessful =>
+                // Splunk the MTD Reference Number returned for Transaction Monitoring
+                val auditDetails = auditResponseMap(rosmSuccess)
+                lazy val auditReference = logging.auditFor(Logging.AuditReferenceNumber.transactionName, auditDetails)(hc)
+                auditReference(Logging.AuditReferenceNumber.auditType)
+                FESuccessResponse(rosmSuccess.mtditId)
               case RefreshFailure => ErrorModel(INTERNAL_SERVER_ERROR, "Authenticator Refresh Profile Failed")
             }
           case Left(enrolFailure) => Future.successful(enrolFailure)
