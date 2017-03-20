@@ -62,22 +62,14 @@ class RosmAndEnrolManagerService @Inject()
     )
 
   def rosmAndEnrol(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, FESuccessResponse]] = {
-
-    // Splunk the request for Transaction Monitoring
-    val auditDetails = feRequestToAuditMap(request)
-    lazy val auditSubscription = logging.auditFor(Logging.AuditSubscribeRequest.transactionName, auditDetails)(hc)
-    auditSubscription(Logging.AuditSubscribeRequest.auditType)
-
+    logging.audit(Logging.AuditSubscribeRequest.transactionName, feRequestToAuditMap(request), Logging.AuditSubscribeRequest.auditType)(hc)
     orchestrateROSM(request).flatMap {
       case Right(rosmSuccess) =>
         orchestrateEnrolment(request.nino, rosmSuccess.mtditId).flatMap {
           case Right(enrolSuccess) =>
             authenticatorConnector.refreshProfile.map {
               case RefreshSuccessful =>
-                // Splunk the MTD Reference Number returned for Transaction Monitoring
-                val auditDetails = auditResponseMap(rosmSuccess)
-                lazy val auditReference = logging.auditFor(Logging.AuditReferenceNumber.transactionName, auditDetails)(hc)
-                auditReference(Logging.AuditReferenceNumber.auditType)
+                logging.audit(Logging.AuditReferenceNumber.transactionName, auditResponseMap(rosmSuccess), Logging.AuditReferenceNumber.auditType)(hc)
                 FESuccessResponse(rosmSuccess.mtditId)
               case RefreshFailure => ErrorModel(INTERNAL_SERVER_ERROR, "Authenticator Refresh Profile Failed")
             }
