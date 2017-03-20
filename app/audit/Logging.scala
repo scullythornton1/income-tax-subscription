@@ -119,9 +119,6 @@ object Logging {
     val transactionName = "Customer-subscribed-mtd-itsa-reference-number"
   }
 
-
-//  val auditRegistrationTxName: String = "Registration"
-
   val eventTypeRequest: String = "Request"
   val eventTypeSuccess: String = "Success"
   val eventTypeFailure: String = "Failure"
