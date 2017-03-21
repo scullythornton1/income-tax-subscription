@@ -56,8 +56,9 @@ class RosmAndEnrolManagerService @Inject()
       "Authorization" -> urlHeaderAuthorization
     )
 
-  val auditResponseMap: FESuccessResponse => Map[String, String] = response =>
+  val auditResponseMap: (FERequest, FESuccessResponse) => Map[String, String] = (feRequest, response) =>
     Map(
+      "nino" -> feRequest.nino,
       "mtdItsaReferenceNumber" -> response.mtditId
     )
 
@@ -69,7 +70,7 @@ class RosmAndEnrolManagerService @Inject()
           case Right(enrolSuccess) =>
             authenticatorConnector.refreshProfile.map {
               case RefreshSuccessful =>
-                logging.audit(Logging.AuditReferenceNumber.transactionName, auditResponseMap(rosmSuccess), Logging.AuditReferenceNumber.auditType)(hc)
+                logging.audit(Logging.AuditReferenceNumber.transactionName, auditResponseMap(request, rosmSuccess), Logging.AuditReferenceNumber.auditType)(hc)
                 FESuccessResponse(rosmSuccess.mtditId)
               case RefreshFailure => ErrorModel(INTERNAL_SERVER_ERROR, "Authenticator Refresh Profile Failed")
             }
