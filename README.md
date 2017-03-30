@@ -1,48 +1,63 @@
 Income Tax Subscription MicroService
 ====================================
-[![Apache-2.0 license](http://img.shields.io/badge/license-Apache-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)[
-![Build Status](https://travis-ci.org/hmrc/income-tax-subscription.svg?branch=master)](https://travis-ci.org/hmrc/income-tax-subscription) [ ![Download](https://api.bintray.com/packages/hmrc/releases/income-tax-subscription/images/download.svg) ](https://bintray.com/hmrc/releases/income-tax-subscription/_latestVersion)
+[![Apache-2.0 license](http://img.shields.io/badge/license-Apache-brightgreen.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
+[![Build Status](https://travis-ci.org/hmrc/income-tax-subscription.svg?branch=master)](https://travis-ci.org/hmrc/income-tax-subscription) [ ![Download](https://api.bintray.com/packages/hmrc/releases/income-tax-subscription/images/download.svg) ](https://bintray.com/hmrc/releases/income-tax-subscription/_latestVersion)
 
-This MicroService provides Third Party Applications with RESTful APIs to allow a User to Subscribe for the Making Tax Digital - Income Tax (MTD-IT) Service.
+This is the protected backend MicroService for the Sign Up to Report your Income and Expenses Quarterly (MTD ITSA) service.
 
-## API Sandbox Endpoints
-It currently supports the following end-points:
+This service provides the backend interactions with other backend MicroServices
 
-#### POST /sandbox/subscription
-This resource requires user token as well as the 'Accept' header.
-```
-Authorization: Bearer {OAuth2.0 bearer token}
-Accept: application/vnd.hmrc.1.0+json
-```
+### Running the subscription services locally
 
-request:
-```
-POST /sandbox/subscription
-{
-  "email": "test@test.com",
-  "acceptsTermsAndConditions": true
-}
-```
+You will need [sbt](http://www.scala-sbt.org/)
 
-response:
-```
-CREATED (201)
-```
+1) **[Install Service-Manager](https://github.com/hmrc/service-manager/wiki/Install#install-service-manager)**
 
-## API Definition
-API definition for the service will be available under `/api/definition` endpoint.
-See definition in `/conf/api-definition.json` for the format.
 
-## API Version
-Version of API is 1.0 and needs to be provided in `Accept` request header
-```
-Accept: application/vnd.hmrc.1.0+json
-```
+2) **Start the ITSA subscription dependencies:**
 
-## Requirements
+   `sm --start ITSA_SUBSC_DEP -f`
 
-This service is written in [Scala](http://www.scala-lang.org/) and [Play](http://playframework.com/), so needs at least a [JRE] to run.
 
-## License
+3) **Clone the frontend service:**
+
+  - SSH 
+  
+    `git clone git@github.com:hmrc/income-tax-subscription-frontend.git`
+  
+  - HTTPS 
+  
+    `git clone https://github.com/hmrc/income-tax-subscription-frontend.git`
+  
+  
+4) **Start the frontend service:**
+
+   `sbt "run 9561" -Dapplication.router=testOnlyDoNotUseInAppConf.Routes`
+   
+  
+5) **Clone the protected service:**
+
+  - SSH 
+  
+     `git clone git@github.com:hmrc/income-tax-subscription.git`
+  
+  - HTTPS 
+  
+     `git clone https://github.com/hmrc/income-tax-subscription.git`
+  
+   
+6) **Start the protected service:**
+
+   `sbt "run 9560" -Dapplication.router=testOnlyDoNotUseInAppConf.Routes`
+
+7) **Start the stubbed services:**
+
+   `sm --start INCOME_TAX_SUBSCRIPTION_STUBS -f`
+
+8) **Go to the homepage:**
+
+   http://localhost:9561/report-quarterly/income-and-expenses/sign-up
+
+### License
 
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html")
