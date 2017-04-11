@@ -20,15 +20,13 @@ import audit.Logging
 import config.AppConfig
 import connectors.GGAdminConnector
 import models.gg.KnownFactsRequest
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
-import play.api.http.Status._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.{HttpGet, HttpPost}
 import utils.Implicits._
-import utils.TestConstants.GG.KnownFactsResponse
 
-trait MockGGAdminConnector extends MockHttp with OneAppPerSuite {
+trait MockGGAdminConnector extends MockHttp with GuiceOneAppPerSuite {
 
   lazy val config: Configuration = app.injector.instanceOf[Configuration]
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]

@@ -44,7 +44,7 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
       mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
       mockRefreshProfile(refreshSuccess)
-      call(fePropertyRequest).right.get.mtditId shouldBe testMtditId
+      call(fePropertyRequest).right.get.mtditId.get shouldBe testMtditId
     }
 
     "return the mtditId when reg, subscribe, known facts, enrol and refresh is successful (business only)" in {
@@ -53,7 +53,7 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
       mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
       mockRefreshProfile(refreshSuccess)
-      call(feBusinessRequest).right.get.mtditId shouldBe testMtditId
+      call(feBusinessRequest).right.get.mtditId.get shouldBe testMtditId
     }
 
     "return the mtditId when reg, subscribe, known facts, enrol and refresh is successful (both business and property)" in {
@@ -63,7 +63,7 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
       mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
       mockRefreshProfile(refreshSuccess)
-      call(feBothRequest).right.get.mtditId shouldBe testMtditId
+      call(feBothRequest).right.get.mtditId.get shouldBe testMtditId
     }
 
     "return an error when reg, subscribe, known facts, enrol is successful but refresh fails" in {
@@ -120,20 +120,20 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
     "return the mtditID when registration and subscription for property is successful" in {
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
-      call(fePropertyRequest).right.get.mtditId shouldBe testMtditId
+      call(fePropertyRequest).right.get.mtditId.get shouldBe testMtditId
     }
 
     "return the mtditID when registration and subscription for business is successful" in {
       mockRegister(registerRequestPayload)(regSuccess)
       mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
-      call(feBusinessRequest).right.get.mtditId shouldBe testMtditId
+      call(feBusinessRequest).right.get.mtditId.get shouldBe testMtditId
     }
 
     "return the mtditID when registration and subscription for both Property and Business is successful" in {
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
       mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
-      call(feBothRequest).right.get.mtditId shouldBe testMtditId
+      call(feBothRequest).right.get.mtditId.get shouldBe testMtditId
     }
 
     "return the error if registration fails" in {

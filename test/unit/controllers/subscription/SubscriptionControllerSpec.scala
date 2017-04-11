@@ -48,7 +48,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerSe
       mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
       mockRefreshProfile(refreshSuccess)
       val result = call(fakeRequest)
-      jsonBodyOf(result).as[FESuccessResponse].mtditId shouldBe testMtditId
+      jsonBodyOf(result).as[FESuccessResponse].mtditId.get shouldBe testMtditId
     }
 
     "return failure when it's unsuccessful" in {

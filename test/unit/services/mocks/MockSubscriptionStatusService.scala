@@ -16,11 +16,11 @@
 
 package unit.services.mocks
 
-import services.CheckEnrolmentService
+import services.SubscriptionStatusService
 import unit.connectors.mocks.MockBusinessDetailsConnector
 
-trait MockCheckEnrolmentService extends MockBusinessDetailsConnector {
+trait MockSubscriptionStatusService extends MockBusinessDetailsConnector {
 
-  object TestCheckEnrolmentService extends CheckEnrolmentService(TestBusinessDetailsConnector, logging)
+  object TestSubscriptionStatusService extends SubscriptionStatusService(TestBusinessDetailsConnector, logging)
 
 }
