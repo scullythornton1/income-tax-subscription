@@ -41,7 +41,7 @@ trait MockBusinessDetailsConnector extends MockHttp with GuiceOneAppPerSuite {
   val getBusinessDetailsSuccess = (OK, GetBusinessDetailsResponse.successResponse(testNino, testSafeId, testMtditId))
   val getBusinessDetailsNotFound = (NOT_FOUND, GetBusinessDetailsResponse.failureResponse("NOT_FOUND_NINO", "The remote endpoint has indicated that no data can be found"))
   val getBusinessDetailsBadRequest = (BAD_REQUEST, GetBusinessDetailsResponse.failureResponse("INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO."))
-  val getBusinessDetailsServerError = (SERVER_ERROR, GetBusinessDetailsResponse.failureResponse("SERVER_ERROR", "DES is currently experiencing problems that require live service intervention"))
+  val getBusinessDetailsServerError = (INTERNAL_SERVER_ERROR, GetBusinessDetailsResponse.failureResponse("SERVER_ERROR", "DES is currently experiencing problems that require live service intervention"))
   val getBusinessDetailsServiceUnavailable = (SERVICE_UNAVAILABLE, GetBusinessDetailsResponse.failureResponse("SERVICE_UNAVAILABLE", "Dependent systems are currently not responding"))
 
   def setupMockBusinessDetails(nino: String)(status: Int, response: JsValue): Unit =
