@@ -21,7 +21,6 @@ import config.AppConfig
 import connectors.AuthenticatorConnector
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.Configuration
-import play.api.http.Status._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.HttpPost
 import utils.Implicits._
@@ -39,5 +38,8 @@ trait MockAuthenticatorConnector extends MockHttp with OneAppPerSuite {
 
   def setupRefreshProfile(status: Int, response: Option[JsValue]): Unit =
     setupMockHttpPostEmpty(url = TestAuthenticatorConnector.refreshProfileURI)(status, response)
+
+  def verifyRefreshProfile(count: Int): Unit =
+    verifyMockHttpPostEmpty(url = TestAuthenticatorConnector.refreshProfileURI)(count)
 
 }

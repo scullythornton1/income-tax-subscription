@@ -25,10 +25,11 @@ import utils.TestConstants
 class FERequestSpec extends UnitSpec {
 
   "FERequest" should {
-    "Provide the correct reader for FERequest" in {
+    "Provide the correct reader for FERequest, set enrolUser to true if it is not provided" in {
       val feRequest = FERequest(
         nino = TestConstants.testNino,
-        incomeSource = Business
+        incomeSource = Business,
+        enrolUser = true
       )
 
       val request: JsValue = Json.toJson(feRequest)
@@ -36,6 +37,24 @@ class FERequestSpec extends UnitSpec {
         s"""{"nino" : "${TestConstants.testNino}",
            | "isAgent" : false,
            | "incomeSource":"${IncomeSourceType.business}"}""".stripMargin).get
+      val actual = Json.fromJson[FERequest](request).get
+      actual shouldBe expected
+    }
+
+    "Provide the correct reader for FERequest, set enrolUser to the supplied value if it is provided" in {
+      val feRequest = FERequest(
+        nino = TestConstants.testNino,
+        incomeSource = Business,
+        enrolUser = false
+      )
+
+      val request: JsValue = Json.toJson(feRequest)
+      val expected = Json.fromJson[FERequest](
+        s"""{"nino" : "${TestConstants.testNino}",
+           | "isAgent" : false,
+           | "incomeSource":"${IncomeSourceType.business}",
+           | "enrolUser" : false
+           |}""".stripMargin).get
       val actual = Json.fromJson[FERequest](request).get
       actual shouldBe expected
     }

@@ -45,9 +45,21 @@ trait MockHttp extends UnitSpec with MockitoSugar with BeforeAndAfterEach {
     )(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(HttpResponse(status, Some(response))))
   }
 
+  def verifyHttpPost[I](url: Option[String] = None, body: Option[I] = None)(count: Int): Unit = {
+    lazy val urlMatcher = url.fold(ArgumentMatchers.any[String]())(x => ArgumentMatchers.eq(x))
+    lazy val bodyMatcher = body.fold(ArgumentMatchers.any[I]())(x => ArgumentMatchers.eq(x))
+    verify(mockHttpPost, times(count)).POST[I, HttpResponse](urlMatcher, bodyMatcher, ArgumentMatchers.any()
+    )(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any())
+  }
+
   def setupMockHttpPostEmpty(url: Option[String] = None)(status: Int, response: Option[JsValue]): Unit = {
     lazy val urlMatcher = url.fold(ArgumentMatchers.any[String]())(x => ArgumentMatchers.eq(x))
     when(mockHttpPost.POSTEmpty[HttpResponse](urlMatcher)(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Future.successful(HttpResponse(status, response)))
+  }
+
+  def verifyMockHttpPostEmpty(url: Option[String] = None)(count: Int): Unit = {
+    lazy val urlMatcher = url.fold(ArgumentMatchers.any[String]())(x => ArgumentMatchers.eq(x))
+    verify(mockHttpPost, times(count)).POSTEmpty[HttpResponse](urlMatcher)(ArgumentMatchers.any(), ArgumentMatchers.any())
   }
 
   def setupMockHttpGet(url: Option[String] = None)(status: Int, response: JsValue): Unit = {
