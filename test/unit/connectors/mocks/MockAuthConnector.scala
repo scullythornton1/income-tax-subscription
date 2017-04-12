@@ -27,7 +27,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
-
+import utils.Implicits._
 
 trait MockAuthConnector extends UnitSpec with MockitoSugar with BeforeAndAfterEach with GuiceOneAppPerSuite {
 
@@ -36,6 +36,9 @@ trait MockAuthConnector extends UnitSpec with MockitoSugar with BeforeAndAfterEa
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockAuthConnector)
+    // default it so that the user is valid
+    // need to override this method if we want to test conditions where users may not be valid
+    setupMockCurrentAuthority(validAuthority)
   }
 
   def setupMockCurrentAuthority(authority: Option[Authority]): Unit = {

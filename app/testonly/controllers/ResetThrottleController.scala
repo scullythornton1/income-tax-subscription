@@ -20,17 +20,23 @@ package testonly.controllers
 
 import javax.inject.Inject
 
+import connectors.AuthConnector
+import controllers.AuthenticatedController
 import play.api.mvc.{Action, AnyContent}
 import services.UserAccessService
-import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class ResetThrottleController @Inject()(val userAccessService: UserAccessService) extends BaseController {
+class ResetThrottleController @Inject()(val userAccessService: UserAccessService,
+                                        override val auth: AuthConnector
+                                       ) extends AuthenticatedController {
 
   def resetThrottle(): Action[AnyContent] = Action.async { implicit request =>
-    userAccessService.dropDb.map(_ => Ok)
+    authenticated {
+      userAccessService.dropDb.map(_ => Ok)
+    }
   }
 
 }
+
 // $COVERAGE-ON$

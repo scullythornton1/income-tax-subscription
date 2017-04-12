@@ -18,6 +18,7 @@ package unit.auth
 
 import auth.{Authenticated, AuthenticationResult, LoggedIn, NotLoggedIn}
 import connectors.AuthConnector
+import org.mockito.Mockito.reset
 import play.api.http.Status._
 import play.api.mvc.Result
 import play.api.mvc.Results._
@@ -35,14 +36,22 @@ class AuthenticatedSpec extends MockAuthConnector {
     override lazy val auth: AuthConnector = mockAuthConnector
   }
 
-  val testFunc: AuthenticationResult => Future[Result] = {
-    case NotLoggedIn => Future.successful(BadRequest(""))
-    case LoggedIn(_) => Future.successful(Ok(""))
+
+  // overriding the default so we can test with users that are not valid
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockAuthConnector)
   }
 
-  def call: Future[Result] = TestAuthenticated.authenticated(testFunc)
 
-  "Authenticated.authenticated" should {
+  "Authenticated.authenticatedCustom" should {
+    val testFunc: AuthenticationResult => Future[Result] = {
+      case NotLoggedIn => Future.successful(BadRequest(""))
+      case LoggedIn(_) => Future.successful(Ok(""))
+    }
+
+    def call: Future[Result] = TestAuthenticated.authenticatedCustom(testFunc)
+
     "return NotLoggedIn" in {
       setupMockCurrentAuthority(None)
       val r = call
@@ -50,6 +59,25 @@ class AuthenticatedSpec extends MockAuthConnector {
     }
 
     "return LoggedIn" in {
+      setupMockCurrentAuthority(validAuthority)
+      val r = call
+      status(r) shouldBe OK
+    }
+  }
+
+  "Authenticated.authenticated" should {
+
+    val testFunc: Future[Result] = Future.successful(Ok(""))
+
+    def call: Future[Result] = TestAuthenticated.authenticated(testFunc)
+
+    "return UNAUTHORIZED for users who are not logged in" in {
+      setupMockCurrentAuthority(None)
+      val r = call
+      status(r) shouldBe UNAUTHORIZED
+    }
+
+    "return OK for users who are LoggedIn" in {
       setupMockCurrentAuthority(validAuthority)
       val r = call
       status(r) shouldBe OK

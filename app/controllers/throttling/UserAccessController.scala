@@ -18,12 +18,12 @@ package controllers.throttling
 
 import javax.inject.Inject
 
-import auth.{Authenticated, LoggedIn, NotLoggedIn}
+import auth.{LoggedIn, NotLoggedIn}
 import connectors.AuthConnector
+import controllers.AuthenticatedController
 import models.throttling.{CanAccess, LimitReached}
 import play.api.mvc.{Action, AnyContent}
 import services.{MetricsService, UserAccessService}
-import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -32,13 +32,12 @@ import scala.concurrent.Future
 class UserAccessController @Inject()(val metricsService: MetricsService,
                                      val userAccessService: UserAccessService,
                                      override val auth: AuthConnector)
-  extends BaseController
-    with Authenticated {
+  extends AuthenticatedController {
 
   def checkUserAccess(nino: String): Action[AnyContent] = Action.async {
     implicit request =>
       val timer = metricsService.userAccessCRTimer.time()
-      authenticated {
+      authenticatedCustom {
         case NotLoggedIn => Future.successful(Forbidden)
         case LoggedIn(context) =>
           userAccessService.checkUserAccess(context.ids.internalId) flatMap {

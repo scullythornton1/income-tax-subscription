@@ -22,6 +22,7 @@ import play.api.http.Status._
 import play.api.mvc.{AnyContentAsJson, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
+import unit.connectors.mocks.MockAuthConnector
 import unit.services.mocks.MockSubscriptionManagerService
 import utils.JsonUtils._
 import utils.MaterializerSupport
@@ -33,9 +34,9 @@ import utils.TestConstants._
 
 import scala.concurrent.Future
 
-class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerService with MaterializerSupport {
+class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerService with MaterializerSupport with MockAuthConnector {
 
-  object TestController extends SubscriptionController(logging, TestSubscriptionManagerService)
+  object TestController extends SubscriptionController(logging, TestSubscriptionManagerService, mockAuthConnector)
 
   def call(request: Request[AnyContentAsJson]): Future[Result] = TestController.subscribe(testNino)(request)
 

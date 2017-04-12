@@ -19,38 +19,43 @@ package controllers.subscription
 import javax.inject.Inject
 
 import audit.{Logging, LoggingConfig}
+import connectors.AuthConnector
+import controllers.AuthenticatedController
 import models.frontend.{FEFailureResponse, FERequest}
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import services.RosmAndEnrolManagerService
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.microservice.controller.BaseController
 import utils.JsonUtils._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SubscriptionController @Inject()(logging: Logging,
-                                       subManService: RosmAndEnrolManagerService) extends BaseController {
+                                       subManService: RosmAndEnrolManagerService,
+                                       override val auth: AuthConnector
+                                      ) extends AuthenticatedController {
 
   def subscribe(nino: String): Action[AnyContent] = Action.async { implicit request =>
     implicit val loggingConfig = SubscriptionController.subscribeLoggingConfig
     logging.debug(s"Request received for $nino")
     lazy val parseError: Future[Result] = BadRequest(toJsValue(FEFailureResponse("Request is invalid")))
-
-    parseRequest(request).fold(parseError) { feRequest =>
-      createSubscription(feRequest)
+    authenticated {
+      parseRequest(request).fold(parseError) { feRequest =>
+        createSubscription(feRequest)
+      }
     }
   }
 
   private def parseRequest(request: Request[AnyContent]): Option[FERequest] = request.body.asJson.fold[Option[FERequest]](None) {
     implicit val loggingConfig = SubscriptionController.parseRequestLoggingConfig
-    jsonBody => parseUtil(jsonBody)(FERequest.format).fold(
-      invalid => {
-        logging.err(s"Request is invalid:\n${invalid.toString}\n${request.body.toString}")
-        None
-      },
-      valid => Some(valid)
-    )
+    jsonBody =>
+      parseUtil(jsonBody)(FERequest.format).fold(
+        invalid => {
+          logging.err(s"Request is invalid:\n${invalid.toString}\n${request.body.toString}")
+          None
+        },
+        valid => Some(valid)
+      )
   }
 
   private def createSubscription(feRequest: FERequest)(implicit hc: HeaderCarrier): Future[Result] = subManService.rosmAndEnrol(feRequest).map {
