@@ -31,11 +31,16 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class SubscriptionStatusService @Inject()(businessDetailsConnector: BusinessDetailsConnector,
                                           logging: Logging) {
-
-  def checkMtditsaEnrolment(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, Option[FESuccessResponse]]] = {
+  /*
+  * This method will check to see if a user with the supplied nino has an MTD IT SA subscription
+  * if will return OK with the reference if it is found, or OK with {} if it is not found
+  * it will return all other errors as they were
+  **/
+  def checkMtditsaSubscription(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, Option[FESuccessResponse]]] = {
     logging.debug(s"Request: NINO=$nino")
     implicit val checkAlreadyEnrolledLoggingConfig = SubscriptionStatusService.checkMtditsaEnrolmentLoggingConfig
     businessDetailsConnector.getBusinessDetails(nino).flatMap {
+      // if the subscription is not found, convert it to OK with {}
       case Left(error: ErrorModel) if error.status == NOT_FOUND =>
         logging.debug(s"No mtditsa enrolment for nino=$nino")
         Right(None)

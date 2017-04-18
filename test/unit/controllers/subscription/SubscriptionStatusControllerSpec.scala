@@ -36,14 +36,14 @@ class SubscriptionStatusControllerSpec extends UnitSpec with MockSubscriptionSta
   def call: Future[Result] = TestController.checkSubscriptionStatus(testNino)(FakeRequest())
 
   "SubscriptionStatusController" should {
-    "when the queried person has no prior mtditsa enrolment return OK with an empty body" in {
+    "when the queried person has no prior mtditsa subscription return OK with an empty body" in {
       mockBusinessDetails(getBusinessDetailsNotFound)
       val result = call
       status(result) shouldBe OK
       jsonBodyOf(result).as[FESuccessResponse].mtditId shouldBe None
     }
 
-    "when the queried person has a prior mtditsa enrolment return OK with the id" in {
+    "when the queried person has a prior mtditsa subscription return OK with the id" in {
       mockBusinessDetails(getBusinessDetailsSuccess)
       val result = call
       status(result) shouldBe OK

@@ -21,6 +21,7 @@ import javax.inject.Inject
 import audit.{Logging, LoggingConfig}
 import config.AppConfig
 import connectors.utils.ConnectorUtils
+import models.ErrorModel
 import models.registration.{GetBusinessDetailsFailureResponseModel, GetBusinessDetailsSuccessResponseModel}
 import play.api.http.Status._
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -66,14 +67,18 @@ class BusinessDetailsConnector @Inject()(appConfig: AppConfig,
 
         status match {
           case OK =>
-            audit(auditGetBusinessDetails + "-" + eventTypeSuccess)
             parseSuccess(response.body)
           case BAD_REQUEST =>
             audit(auditGetBusinessDetails + "-" + eventTypeBadRequest)
             parseFailure(BAD_REQUEST, response.body)
           case NOT_FOUND =>
-            audit(auditGetBusinessDetails + "-" + eventTypeNotFound)
-            parseFailure(NOT_FOUND, response.body)
+            val notFound = parseFailure(NOT_FOUND, response.body)
+            // only audit if it's an unexpected error, since NOT_FOUND is something we expect on most occasions
+            notFound match {
+              case Left(ErrorModel(NOT_FOUND, Some("NOT_FOUND_NINO"), _)) => // expected case, do not audit
+              case _ => audit(auditGetBusinessDetails + "-" + eventTypeNotFound)
+            }
+            notFound
           case INTERNAL_SERVER_ERROR =>
             audit(auditGetBusinessDetails + "-" + eventTypeInternalServerError)
             parseFailure(INTERNAL_SERVER_ERROR, response.body)

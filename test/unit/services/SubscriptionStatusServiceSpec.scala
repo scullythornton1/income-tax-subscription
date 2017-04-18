@@ -29,16 +29,16 @@ class SubscriptionStatusServiceSpec extends MockSubscriptionStatusService {
 
   implicit val hc = HeaderCarrier()
 
-  "SubscriptionStatusService.checkMtditsaEnrolment" should {
+  "SubscriptionStatusService.checkMtditsaSubscroption" should {
 
-    def call = await(TestSubscriptionStatusService.checkMtditsaEnrolment(testNino))
+    def call = await(TestSubscriptionStatusService.checkMtditsaSubscription(testNino))
 
-    "return the Right(NONE) when the person does not have a mtditsa enrolment" in {
+    "return the Right(NONE) when the person does not have a mtditsa subscription" in {
       mockBusinessDetails(getBusinessDetailsNotFound)
       call.right.get shouldBe None
     }
 
-    "return the Right(Some(FESuccessResponse)) when the person already have a mtditsa enrolment" in {
+    "return the Right(Some(FESuccessResponse)) when the person already have a mtditsa subscription" in {
       mockBusinessDetails(getBusinessDetailsSuccess)
       // testMtditId must be the same value defined in getBusinessDetailsSuccess
       call.right.get shouldBe Some(FESuccessResponse(testMtditId))

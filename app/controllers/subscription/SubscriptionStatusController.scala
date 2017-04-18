@@ -33,7 +33,7 @@ class SubscriptionStatusController @Inject()(logging: Logging,
 
   def checkSubscriptionStatus(nino: String): Action[AnyContent] = Action.async { implicit request =>
     implicit val loggingConfig = SubscriptionStatusController.checkSubscriptionStatusLoggingConfig
-    subscriptionStatusService.checkMtditsaEnrolment(nino).map {
+    subscriptionStatusService.checkMtditsaSubscription(nino).map {
       case Right(r) =>
         logging.debug(s"successful, responding with\n$r")
         Ok(toJsValue(r))
