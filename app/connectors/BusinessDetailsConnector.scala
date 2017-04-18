@@ -56,7 +56,6 @@ class BusinessDetailsConnector @Inject()(appConfig: AppConfig,
     val updatedHc = createHeaderCarrierGet(hc)
 
     lazy val auditRequest = logging.auditFor(auditGetBusinessDetails, requestDetails)(updatedHc)
-    auditRequest(eventTypeRequest)
 
     logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
     httpGet.GET[HttpResponse](getBusinessDetailsUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc)
@@ -69,6 +68,7 @@ class BusinessDetailsConnector @Inject()(appConfig: AppConfig,
           case OK =>
             parseSuccess(response.body)
           case BAD_REQUEST =>
+            auditRequest(eventTypeRequest)
             audit(auditGetBusinessDetails + "-" + eventTypeBadRequest)
             parseFailure(BAD_REQUEST, response.body)
           case NOT_FOUND =>
@@ -76,16 +76,21 @@ class BusinessDetailsConnector @Inject()(appConfig: AppConfig,
             // only audit if it's an unexpected error, since NOT_FOUND is something we expect on most occasions
             notFound match {
               case Left(ErrorModel(NOT_FOUND, Some("NOT_FOUND_NINO"), _)) => // expected case, do not audit
-              case _ => audit(auditGetBusinessDetails + "-" + eventTypeNotFound)
+              case _ =>
+                auditRequest(eventTypeRequest)
+                audit(auditGetBusinessDetails + "-" + eventTypeNotFound)
             }
             notFound
           case INTERNAL_SERVER_ERROR =>
+            auditRequest(eventTypeRequest)
             audit(auditGetBusinessDetails + "-" + eventTypeInternalServerError)
             parseFailure(INTERNAL_SERVER_ERROR, response.body)
           case SERVICE_UNAVAILABLE =>
+            auditRequest(eventTypeRequest)
             audit(auditGetBusinessDetails + "-" + eventTypeServerUnavailable)
             parseFailure(SERVICE_UNAVAILABLE, response.body)
           case x =>
+            auditRequest(eventTypeRequest)
             audit(auditGetBusinessDetails + "-" + eventTypeUnexpectedError)
             parseFailure(x, response.body)
         }
