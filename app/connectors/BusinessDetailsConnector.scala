@@ -41,7 +41,7 @@ class BusinessDetailsConnector @Inject()(appConfig: AppConfig,
   lazy val urlHeaderAuthorization: String = s"Bearer ${appConfig.desToken}"
 
   // API 5
-  val getBusinessDetailsUrl: String => String = (nino: String) => s"${appConfig.desURL}/registration/business-details/nino/$nino"
+  lazy val getBusinessDetailsUrl: String => String = (nino: String) => s"${appConfig.desURL}/registration/business-details/nino/$nino"
 
   def createHeaderCarrierGet(headerCarrier: HeaderCarrier): HeaderCarrier =
     headerCarrier.withExtraHeaders("Environment" -> appConfig.desEnvironment)
