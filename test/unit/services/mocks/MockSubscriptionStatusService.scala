@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package models.frontend
+package unit.services.mocks
 
-import play.api.libs.json.Json
+import services.SubscriptionStatusService
+import unit.connectors.mocks.MockBusinessDetailsConnector
 
+trait MockSubscriptionStatusService extends MockBusinessDetailsConnector {
 
-sealed trait FEResponse
+  object TestSubscriptionStatusService extends SubscriptionStatusService(TestBusinessDetailsConnector, logging)
 
-case class FESuccessResponse(mtditId: Option[String]) extends FEResponse
-
-case class FEFailureResponse(reason: String) extends FEResponse
-
-object FESuccessResponse{
-  implicit val format = Json.format[FESuccessResponse]
-}
-
-object FEFailureResponse {
-  implicit val format = Json.format[FEFailureResponse]
 }

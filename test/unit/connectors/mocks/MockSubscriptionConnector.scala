@@ -20,20 +20,21 @@ import audit.Logging
 import config.AppConfig
 import connectors.SubscriptionConnector
 import models.subscription.business.BusinessSubscriptionRequestModel
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.HttpPost
 import utils.JsonUtils._
 import utils.TestConstants.{BusinessSubscriptionResponse, PropertySubscriptionResponse, _}
 
-trait MockSubscriptionConnector extends MockHttp with OneAppPerSuite {
+trait MockSubscriptionConnector extends MockHttp with GuiceOneAppPerSuite {
 
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val httpPost: HttpPost = mockHttpPost
   lazy val logging: Logging = app.injector.instanceOf[Logging]
 
   val mockPropertySubscribe = (setupMockPropertySubscribe(testNino) _).tupled
+
   def mockBusinessSubscribe(payload: BusinessSubscriptionRequestModel) = (setupMockBusinessSubscribe(testNino, payload) _).tupled
 
   val propertySubscribeSuccess = (OK, PropertySubscriptionResponse.successResponse(testSafeId, testMtditId, testSourceId))

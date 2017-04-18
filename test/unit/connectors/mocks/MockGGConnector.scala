@@ -20,13 +20,13 @@ import audit.Logging
 import config.AppConfig
 import connectors.GGConnector
 import models.gg.EnrolRequest
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.HttpPost
 import utils.Implicits._
 
-trait MockGGConnector extends MockHttp with OneAppPerSuite {
+trait MockGGConnector extends MockHttp with GuiceOneAppPerSuite {
 
   lazy val config: Configuration = app.injector.instanceOf[Configuration]
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
