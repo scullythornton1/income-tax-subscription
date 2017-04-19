@@ -61,7 +61,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerSe
       mockPropertySubscribe(propertySubscribeSuccess)
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
       val result = call(fakeRequest)
-      jsonBodyOf(result).as[FESuccessResponse].mtditId shouldBe testMtditId
+      jsonBodyOf(result).as[FESuccessResponse].mtditId.get shouldBe testMtditId
 
       verifyMockGovernmentGatewayEnrol()(0)
       verifyRefreshProfile(0)
