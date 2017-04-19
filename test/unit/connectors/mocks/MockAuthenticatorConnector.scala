@@ -19,13 +19,13 @@ package unit.connectors.mocks
 import audit.Logging
 import config.AppConfig
 import connectors.AuthenticatorConnector
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.HttpPost
 import utils.Implicits._
 
-trait MockAuthenticatorConnector extends MockHttp with OneAppPerSuite {
+trait MockAuthenticatorConnector extends MockHttp with GuiceOneAppPerSuite {
 
   lazy val config: Configuration = app.injector.instanceOf[Configuration]
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]

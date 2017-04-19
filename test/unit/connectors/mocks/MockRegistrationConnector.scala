@@ -20,15 +20,14 @@ import audit.Logging
 import config.AppConfig
 import connectors.RegistrationConnector
 import models.registration.RegistrationRequestModel
-import org.scalatestplus.play.OneAppPerSuite
-import play.api.Configuration
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.{HttpGet, HttpPost}
 import utils.Implicits._
 import utils.TestConstants.{GetRegistrationResponse, NewRegistrationResponse, _}
 
-trait MockRegistrationConnector extends MockHttp with OneAppPerSuite {
+trait MockRegistrationConnector extends MockHttp with GuiceOneAppPerSuite {
 
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val logging: Logging = app.injector.instanceOf[Logging]
@@ -36,6 +35,7 @@ trait MockRegistrationConnector extends MockHttp with OneAppPerSuite {
   lazy val httpGet: HttpGet = mockHttpGet
 
   def mockRegister(payload: RegistrationRequestModel) = (setupMockRegister(testNino, payload) _).tupled
+
   val mockGetRegistration = (setupMockGetRegistration(testNino) _).tupled
 
   object TestRegistrationConnector extends RegistrationConnector(appConfig, logging, httpPost, httpGet)

@@ -59,7 +59,7 @@ class RosmAndEnrolManagerService @Inject()
   val auditResponseMap: (FERequest, FESuccessResponse) => Map[String, String] = (feRequest, response) =>
     Map(
       "nino" -> feRequest.nino,
-      "mtdItsaReferenceNumber" -> response.mtditId
+      "mtdItsaReferenceNumber" -> response.mtditId.get
     )
 
   def rosmAndEnrol(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, FESuccessResponse]] = {
@@ -69,7 +69,7 @@ class RosmAndEnrolManagerService @Inject()
         request.enrolUser match {
           case false => Future.successful(FESuccessResponse(rosmSuccess.mtditId))
           case true =>
-            orchestrateEnrolment(request.nino, rosmSuccess.mtditId).flatMap {
+            orchestrateEnrolment(request.nino, rosmSuccess.mtditId.get).flatMap {
               case Right(enrolSuccess) =>
                 authenticatorConnector.refreshProfile.map {
                   case RefreshSuccessful =>
