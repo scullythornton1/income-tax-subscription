@@ -22,6 +22,7 @@ import play.api.http.Status._
 import play.api.mvc.{AnyContentAsJson, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
+import unit.connectors.mocks.MockAuthConnector
 import unit.services.mocks.MockSubscriptionManagerService
 import utils.JsonUtils._
 import utils.MaterializerSupport
@@ -33,15 +34,15 @@ import utils.TestConstants._
 
 import scala.concurrent.Future
 
-class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerService with MaterializerSupport {
+class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerService with MaterializerSupport with MockAuthConnector {
 
-  object TestController extends SubscriptionController(logging, TestSubscriptionManagerService)
+  object TestController extends SubscriptionController(logging, TestSubscriptionManagerService, mockAuthConnector)
 
   def call(request: Request[AnyContentAsJson]): Future[Result] = TestController.subscribe(testNino)(request)
 
   "SubscriptionController" should {
-    "return the id when successful" in {
-      val fakeRequest: FakeRequest[AnyContentAsJson] = FakeRequest().withJsonBody(fePropertyRequest)
+    "return the id when successful, call enrol user if it is set to true" in {
+      val fakeRequest: FakeRequest[AnyContentAsJson] = FakeRequest().withJsonBody(fePropertyRequest.copy(enrolUser = true))
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
@@ -49,6 +50,21 @@ class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerSe
       mockRefreshProfile(refreshSuccess)
       val result = call(fakeRequest)
       jsonBodyOf(result).as[FESuccessResponse].mtditId.get shouldBe testMtditId
+
+      verifyMockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(1)
+      verifyRefreshProfile(1)
+    }
+
+    "return the id when successful, do not call enrol user if it is set to false" in {
+      val fakeRequest: FakeRequest[AnyContentAsJson] = FakeRequest().withJsonBody(fePropertyRequest.copy(enrolUser = false))
+      mockRegister(registerRequestPayload)(regSuccess)
+      mockPropertySubscribe(propertySubscribeSuccess)
+      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
+      val result = call(fakeRequest)
+      jsonBodyOf(result).as[FESuccessResponse].mtditId.get shouldBe testMtditId
+
+      verifyMockGovernmentGatewayEnrol()(0)
+      verifyRefreshProfile(0)
     }
 
     "return failure when it's unsuccessful" in {

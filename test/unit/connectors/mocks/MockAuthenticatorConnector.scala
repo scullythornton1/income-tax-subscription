@@ -39,4 +39,7 @@ trait MockAuthenticatorConnector extends MockHttp with GuiceOneAppPerSuite {
   def setupRefreshProfile(status: Int, response: Option[JsValue]): Unit =
     setupMockHttpPostEmpty(url = TestAuthenticatorConnector.refreshProfileURI)(status, response)
 
+  def verifyRefreshProfile(count: Int): Unit =
+    verifyMockHttpPostEmpty(url = TestAuthenticatorConnector.refreshProfileURI)(count)
+
 }

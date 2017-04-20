@@ -20,7 +20,9 @@ import connectors.AuthConnector
 import models.auth.Authority
 import play.api.Logger
 import play.api.mvc.Result
+import play.api.mvc.Results._
 import uk.gov.hmrc.play.http.HeaderCarrier
+import utils.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -35,7 +37,16 @@ trait Authenticated {
 
   val auth: AuthConnector
 
-  def authenticated(f: => AuthenticationResult => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
+  def authenticated(f: => Future[Result])(implicit hc: HeaderCarrier): Future[Result] =
+    auth.getCurrentAuthority().flatMap { authority =>
+      Logger.debug(s"Got authority = $authority")
+      mapToAuthResult(authority) match {
+        case NotLoggedIn => Unauthorized
+        case _ => f
+      }
+    }
+
+  def authenticatedCustom(f: => AuthenticationResult => Future[Result])(implicit hc: HeaderCarrier): Future[Result] = {
     Logger.debug(s"Current user id is ${hc.userId}") // always outputs NONE :-(
 
     for {

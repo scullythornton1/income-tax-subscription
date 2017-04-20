@@ -40,4 +40,7 @@ trait MockGGConnector extends MockHttp with GuiceOneAppPerSuite {
   def setupMockGovernmentGatewayEnrol(payload: EnrolRequest)(status: Int, response: JsValue): Unit =
     setupMockHttpPost(url = TestGovernmentGatewayEnrolConnector.enrolUrl, payload)(status, response)
 
+  def verifyMockGovernmentGatewayEnrol(payload: Option[EnrolRequest]=None)(count: Int): Unit =
+    verifyHttpPost(url = TestGovernmentGatewayEnrolConnector.enrolUrl, payload)(count)
+
 }

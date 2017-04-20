@@ -66,15 +66,19 @@ class RosmAndEnrolManagerService @Inject()
     logging.audit(Logging.AuditSubscribeRequest.transactionName, feRequestToAuditMap(request), Logging.AuditSubscribeRequest.auditType)(hc)
     orchestrateROSM(request).flatMap {
       case Right(rosmSuccess) =>
-        orchestrateEnrolment(request.nino, rosmSuccess.mtditId.get).flatMap {
-          case Right(enrolSuccess) =>
-            authenticatorConnector.refreshProfile.map {
-              case RefreshSuccessful =>
-                logging.audit(Logging.AuditReferenceNumber.transactionName, auditResponseMap(request, rosmSuccess), Logging.AuditReferenceNumber.auditType)(hc)
-                FESuccessResponse(rosmSuccess.mtditId)
-              case RefreshFailure => ErrorModel(INTERNAL_SERVER_ERROR, "Authenticator Refresh Profile Failed")
+        request.enrolUser match {
+          case false => Future.successful(FESuccessResponse(rosmSuccess.mtditId))
+          case true =>
+            orchestrateEnrolment(request.nino, rosmSuccess.mtditId.get).flatMap {
+              case Right(enrolSuccess) =>
+                authenticatorConnector.refreshProfile.map {
+                  case RefreshSuccessful =>
+                    logging.audit(Logging.AuditReferenceNumber.transactionName, auditResponseMap(request, rosmSuccess), Logging.AuditReferenceNumber.auditType)(hc)
+                    FESuccessResponse(rosmSuccess.mtditId)
+                  case RefreshFailure => ErrorModel(INTERNAL_SERVER_ERROR, "Authenticator Refresh Profile Failed")
+                }
+              case Left(enrolFailure) => Future.successful(enrolFailure)
             }
-          case Left(enrolFailure) => Future.successful(enrolFailure)
         }
       case Left(rosmFailure) => Future.successful(rosmFailure)
     }
