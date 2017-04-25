@@ -23,15 +23,16 @@ import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.UnitSpec
+import unit.connectors.mocks.MockAuthConnector
 import unit.services.mocks.MockSubscriptionStatusService
 import utils.MaterializerSupport
 import utils.TestConstants._
 
 import scala.concurrent.Future
 
-class SubscriptionStatusControllerSpec extends UnitSpec with MockSubscriptionStatusService with MaterializerSupport {
+class SubscriptionStatusControllerSpec extends UnitSpec with MockSubscriptionStatusService with MaterializerSupport with MockAuthConnector {
 
-  object TestController extends SubscriptionStatusController(logging, TestSubscriptionStatusService)
+  object TestController extends SubscriptionStatusController(logging, mockAuthConnector, TestSubscriptionStatusService)
 
   def call: Future[Result] = TestController.checkSubscriptionStatus(testNino)(FakeRequest())
 
