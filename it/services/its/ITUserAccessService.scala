@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package it.repositories.its
+package services.its
 
-import it.repositories.TestThrottleMongoRepository
-import it.services.its.ITTrait
-import play.modules.reactivemongo.ReactiveMongoComponent
-import repositories.Repositories
-import uk.gov.hmrc.lock.LockRepository
+import services.UserAccessService
 
-trait ITRepositories extends ITTrait {
+trait ITUserAccessService extends ITThrottleService {
 
-  object TestRepositories extends Repositories(app.injector.instanceOf[ReactiveMongoComponent]) {
-    override lazy val throttleRepository = new TestThrottleMongoRepository
-    override lazy val lockRepository = new LockRepository
-  }
+  lazy val TestUserAccessService = new UserAccessService(throttleService = TestThrottleService, logging = logging)
 
 }
-
-
-

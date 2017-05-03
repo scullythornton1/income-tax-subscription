@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package it.services
+package services
 
-import it.services.its.ITUserAccessService
+import services.its.ITUserAccessService
 import models.throttling.{CanAccess, LimitReached}
 import uk.gov.hmrc.play.http.HeaderCarrier
 

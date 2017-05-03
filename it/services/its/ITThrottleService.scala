@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package it.services.its
+package services.its
 
-import it.repositories.its.ITRepositories
+import repositories.its.ITRepositories
 import services.ThrottleServiceImp
 
 trait ITThrottleService extends ITRepositories {

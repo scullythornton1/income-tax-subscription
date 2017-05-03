@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package it.repositories
+package repositories
 
 import models.throttling.UserCount
 import reactivemongo.api.DB

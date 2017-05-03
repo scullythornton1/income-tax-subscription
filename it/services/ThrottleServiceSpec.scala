@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package it.services
+package services
 
-import it.services.its.ITThrottleService
+import services.its.ITThrottleService
 
 class ThrottleServiceSpec extends ITThrottleService {
 

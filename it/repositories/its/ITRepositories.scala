@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package it.services.its
+package repositories.its
 
-import audit.Logging
-import config.AppConfig
-import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Configuration
-import uk.gov.hmrc.play.test.UnitSpec
+import repositories.TestThrottleMongoRepository
+import services.its.ITTrait
+import play.modules.reactivemongo.ReactiveMongoComponent
+import repositories.Repositories
+import uk.gov.hmrc.lock.LockRepository
 
+trait ITRepositories extends ITTrait {
 
-trait ITTrait extends UnitSpec
-  with MockitoSugar
-  with BeforeAndAfterEach
-  with GuiceOneAppPerSuite {
+  object TestRepositories extends Repositories(app.injector.instanceOf[ReactiveMongoComponent]) {
+    override lazy val throttleRepository = new TestThrottleMongoRepository
+    override lazy val lockRepository = new LockRepository
+  }
 
-  lazy val config = app.injector.instanceOf[Configuration]
-  lazy val appConfig = app.injector.instanceOf[AppConfig]
-  lazy val logging = app.injector.instanceOf[Logging]
 }
+
+
+
