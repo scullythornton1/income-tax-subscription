@@ -31,6 +31,8 @@ private object AppDependencies {
   private val mongoLockVersion = "4.1.0"
   private val reactiveMongoVersion = "5.2.0"
 
+  private val wiremockVersion = "2.5.1"
+
 
   val compile = Seq(
     ws,
@@ -82,7 +84,8 @@ private object AppDependencies {
         "info.cukes" %% "cucumber-scala" % cucumberVersion % scope,
         "info.cukes" % "cucumber-junit" % cucumberVersion % scope,
         "org.mockito" % "mockito-core" % mockitoVersion % scope,
-        "com.github.fge" % "json-schema-validator" % "2.2.6" % scope
+        "com.github.fge" % "json-schema-validator" % "2.2.6" % scope,
+        "com.github.tomakehurst" % "wiremock" % wiremockVersion % scope
       )
     }.test
   }
