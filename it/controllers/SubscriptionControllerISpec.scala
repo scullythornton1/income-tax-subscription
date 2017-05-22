@@ -38,5 +38,13 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       res.status shouldBe Status.OK
       res.json.as[FESuccessResponse] shouldBe FESuccessResponse(Some(testMtditId))
     }
+    "fail when get authority fails" in {
+      AuthStub.stubGetAuthorityFailure()
+
+      val res = IncomeTaxSubscription.createSubscription(testNino)
+
+      res.status shouldBe Status.UNAUTHORIZED
+      res.body shouldBe empty
+    }
   }
 }
