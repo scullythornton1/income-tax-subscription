@@ -16,16 +16,15 @@
 
 package helpers.servicemocks
 
-import helpers.WiremockHelper
+import helpers.{IntegrationTestConstants, WiremockHelper}
 import play.api.http.Status
-import utils.TestConstants
 
 object AuthStub {
   val idsLink = "/uri/to/ids"
   val getAuthorityURI = "/auth/authority"
 
   def stubGetAuthoritySuccess(): Unit = {
-    val authBody = TestConstants.Auth.authResponseJson("/auth/oid/58a2e8c82e00008c005d4699", "/uri/to/user-details", "12345", idsLink).toString()
+    val authBody = IntegrationTestConstants.Auth.authResponseJson("/auth/oid/58a2e8c82e00008c005d4699", "/uri/to/user-details", "12345", idsLink).toString()
 
     WiremockHelper.stubGet(getAuthorityURI, Status.OK, authBody)
   }
@@ -35,7 +34,7 @@ object AuthStub {
   }
 
   def stubGetIDsSuccess(): Unit = {
-    val idsBody = TestConstants.Auth.idsResponseJson("foo", "bar").toString()
+    val idsBody = IntegrationTestConstants.Auth.idsResponseJson("foo", "bar").toString()
 
     WiremockHelper.stubGet(idsLink, Status.OK, idsBody)
   }

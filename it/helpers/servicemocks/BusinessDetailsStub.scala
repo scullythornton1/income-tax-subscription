@@ -17,14 +17,13 @@
 package helpers.servicemocks
 
 import connectors.BusinessDetailsConnector._
-import helpers.WiremockHelper
+import helpers.IntegrationTestConstants._
+import helpers.{IntegrationTestConstants, WiremockHelper}
 import play.api.http.Status
-import utils.TestConstants
-import utils.TestConstants._
 
 object BusinessDetailsStub {
   def stubGetBusinessDetailsSuccess(nino: String): Unit = {
-    val registrationResponse = TestConstants.GetBusinessDetailsResponse.successResponse(testNino, testSafeId, testMtditId).toString()
+    val registrationResponse = IntegrationTestConstants.GetBusinessDetailsResponse.successResponse(testNino, testSafeId, testMtditId).toString()
 
     WiremockHelper.stubGet(getBusinessDetailsUri(nino), Status.OK, registrationResponse)
   }

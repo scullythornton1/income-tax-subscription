@@ -17,10 +17,10 @@
 package controllers
 
 import helpers.ComponentSpecBase
+import helpers.IntegrationTestConstants._
 import helpers.servicemocks.{AuthStub, BusinessDetailsStub}
 import models.frontend.FESuccessResponse
 import play.api.http.Status
-import utils.TestConstants._
 
 class SubscriptionControllerISpec extends ComponentSpecBase {
   "subscribe" should {
