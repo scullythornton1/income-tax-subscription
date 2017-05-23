@@ -43,10 +43,10 @@ class RegistrationConnector @Inject()( appConfig: AppConfig,
 
   // DES API numbering [MTD API numbering]
   // API4 [API 9]
-  val newRegistrationUrl: String => String = (nino: String) => s"${appConfig.desURL}/registration/individual/nino/$nino"
+  def newRegistrationUrl(nino: String): String = s"${appConfig.desURL}${RegistrationConnector.newRegistrationUri(nino)}"
 
   // API 1(b) [API 1 (b)]
-  val getRegistrationUrl: String => String = (nino: String) => s"${appConfig.desURL}/registration/details?nino=$nino"
+  def getRegistrationUrl(nino: String): String = s"${appConfig.desURL}${RegistrationConnector.getRegistrationUri(nino)}"
 
   def createHeaderCarrierPost(headerCarrier: HeaderCarrier): HeaderCarrier =
     headerCarrier.withExtraHeaders("Environment" -> appConfig.desEnvironment, "Content-Type" -> "application/json")
@@ -156,6 +156,12 @@ object RegistrationConnector {
 
   val getRegistrationLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "RegistrationConnector.getRegistration")
 
+  // DES API numbering [MTD API numbering]
+  // API4 [API 9]
+  def newRegistrationUri(nino: String): String = s"/registration/individual/nino/$nino"
+
+  // API 1(b) [API 1 (b)]
+  def getRegistrationUri(nino: String): String = s"/registration/details?nino=$nino"
 }
 
 

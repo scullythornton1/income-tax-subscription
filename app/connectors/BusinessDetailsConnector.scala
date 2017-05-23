@@ -41,7 +41,7 @@ class BusinessDetailsConnector @Inject()(appConfig: AppConfig,
   lazy val urlHeaderAuthorization: String = s"Bearer ${appConfig.desToken}"
 
   // API 5
-  lazy val getBusinessDetailsUrl: String => String = (nino: String) => s"${appConfig.desURL}/registration/business-details/nino/$nino"
+  def getBusinessDetailsUrl(nino: String): String = s"${appConfig.desURL}${BusinessDetailsConnector.getBusinessDetailsUri(nino)}"
 
   def createHeaderCarrierGet(headerCarrier: HeaderCarrier): HeaderCarrier =
     headerCarrier.withExtraHeaders("Environment" -> appConfig.desEnvironment)
@@ -106,6 +106,7 @@ object BusinessDetailsConnector {
 
   val getRegistrationLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "BusinessDetailsConnector.getBusinessDetails")
 
+  def getBusinessDetailsUri(nino: String): String = s"/registration/business-details/nino/$nino"
 }
 
 object GetBusinessDetailsUtil extends ConnectorUtils[GetBusinessDetailsFailureResponseModel, GetBusinessDetailsSuccessResponseModel]

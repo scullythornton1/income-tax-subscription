@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package utils
+package helpers
 
 import models.frontend.{Both, Business, FERequest, Property}
 import models.gg.{EnrolRequest, KnownFactsRequest, TypeValuePair}
@@ -26,7 +26,7 @@ import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.domain.Generator
 import utils.JsonUtils._
 
-object TestConstants {
+object IntegrationTestConstants {
 
   lazy val testNino = new Generator().nextNino.nino
   lazy val testSafeId = "XE0001234567890"
