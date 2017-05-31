@@ -31,7 +31,6 @@ import play.api.libs.ws.WSClient
 object WiremockHelper extends Eventually with IntegrationPatience {
   val wiremockPort = 11111
   val wiremockHost = "localhost"
-  val url = s"http://$wiremockHost:$wiremockPort"
 
   def verifyPost(uri: String, xmlBody: String): Unit = {
       verify(postRequestedFor(urlEqualTo(uri)).withRequestBody(equalToXml(xmlBody)))

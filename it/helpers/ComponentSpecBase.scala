@@ -27,7 +27,8 @@ import uk.gov.hmrc.play.test.UnitSpec
 trait ComponentSpecBase extends UnitSpec
   with GivenWhenThen with TestSuite
   with GuiceOneServerPerSuite with ScalaFutures with IntegrationPatience with Matchers
-  with WiremockHelper with BeforeAndAfterEach with BeforeAndAfterAll with Eventually {
+  with WiremockHelper with BeforeAndAfterEach with BeforeAndAfterAll with Eventually
+  with CustomMatchers {
 
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort.toString

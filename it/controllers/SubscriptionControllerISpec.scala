@@ -16,35 +16,39 @@
 
 package controllers
 
+import connectors.BusinessDetailsConnector._
 import helpers.ComponentSpecBase
 import helpers.IntegrationTestConstants._
+import helpers.WireMockDSL.HTTPVerbMapping.Get
 import helpers.servicemocks.{AuthStub, BusinessDetailsStub}
 import models.frontend.FESuccessResponse
-import play.api.http.Status
+import play.api.http.Status._
+import helpers.WireMockDSL._
+import helpers.servicemocks.AuthStub._
+import BusinessDetailsStub._
 
 class SubscriptionControllerISpec extends ComponentSpecBase {
   "subscribe" should {
     "call the subscription service successfully when auth succeeds" in {
-      AuthStub.stubGetAuthoritySuccess()
+      stub when Get(authority) thenReturn stubbedAuthResponse
+      stub when Get(authIDs) thenReturn stubbedIDs
+      stub when Get(getBusinessDetailsUri(testNino)) thenReturn registrationResponse
 
-      AuthStub.stubGetIDsSuccess()
-
-      BusinessDetailsStub.stubGetBusinessDetailsSuccess(testNino)
-
-      val res = IncomeTaxSubscription.createSubscription(testNino)
+      IncomeTaxSubscription.createSubscription(testNino) should have(
+        httpStatus(OK),
+        jsonBodyAs[FESuccessResponse](FESuccessResponse(Some(testMtditId)))
+      )
 
       BusinessDetailsStub.verifyGetBusinessDetails(testNino)
-
-      res.status shouldBe Status.OK
-      res.json.as[FESuccessResponse] shouldBe FESuccessResponse(Some(testMtditId))
     }
+
     "fail when get authority fails" in {
-      AuthStub.stubGetAuthorityFailure()
+      stubGetAuthorityFailure()
 
-      val res = IncomeTaxSubscription.createSubscription(testNino)
-
-      res.status shouldBe Status.UNAUTHORIZED
-      res.body shouldBe empty
+      IncomeTaxSubscription.createSubscription(testNino) should have(
+        httpStatus(UNAUTHORIZED),
+        emptyBody
+      )
     }
   }
 }

@@ -19,14 +19,10 @@ package helpers.servicemocks
 import connectors.BusinessDetailsConnector._
 import helpers.IntegrationTestConstants._
 import helpers.{IntegrationTestConstants, WiremockHelper}
-import play.api.http.Status
+import play.api.libs.json.JsValue
 
 object BusinessDetailsStub {
-  def stubGetBusinessDetailsSuccess(nino: String): Unit = {
-    val registrationResponse = IntegrationTestConstants.GetBusinessDetailsResponse.successResponse(testNino, testSafeId, testMtditId).toString()
-
-    WiremockHelper.stubGet(getBusinessDetailsUri(nino), Status.OK, registrationResponse)
-  }
+  val registrationResponse: JsValue = IntegrationTestConstants.GetBusinessDetailsResponse.successResponse(testNino, testSafeId, testMtditId)
 
   def verifyGetBusinessDetails(nino: String): Unit = {
     WiremockHelper.verifyGet(getBusinessDetailsUri(nino))
