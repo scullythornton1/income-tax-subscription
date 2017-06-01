@@ -25,20 +25,21 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.libs.ws.WSClient
 
-/**
-  * Created by rob on 05/04/17.
-  */
 object WiremockHelper extends Eventually with IntegrationPatience {
   val wiremockPort = 11111
   val wiremockHost = "localhost"
-  val url = s"http://$wiremockHost:$wiremockPort"
 
-  def verifyPost(uri: String, xmlBody: String): Unit = {
-      verify(postRequestedFor(urlEqualTo(uri)).withRequestBody(equalToXml(xmlBody)))
+  def verifyPost(uri: String, optBody: Option[String] = None): Unit = {
+    val uriMapping = postRequestedFor(urlEqualTo(uri))
+    val postRequest = optBody match {
+      case Some(body) => uriMapping.withRequestBody(equalTo(body))
+      case None => uriMapping
+    }
+    verify(postRequest)
   }
 
   def verifyGet(uri: String): Unit = {
-     verify(getRequestedFor(urlEqualTo(uri)))
+    verify(getRequestedFor(urlEqualTo(uri)))
   }
 
   def stubGet(url: String, status: Integer, body: String): StubMapping =

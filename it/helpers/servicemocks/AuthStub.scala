@@ -17,25 +17,40 @@
 package helpers.servicemocks
 
 import helpers.{IntegrationTestConstants, WiremockHelper}
+import models.auth.{Authority, UserIds}
 import play.api.http.Status
+import play.api.libs.json.{JsObject, Json}
 
 object AuthStub {
-  val idsLink = "/uri/to/ids"
-  val getAuthorityURI = "/auth/authority"
+  val authIDs = "/uri/to/ids"
+  val authority = "/auth/authority"
+
+  val stubbedAuthResponse: JsObject = {
+    Json.obj(
+      "uri" -> "/auth/oid/58a2e8c82e00008c005d4699",
+      "userDetailsLink" -> "/uri/to/user-details",
+      "credentials" -> Json.obj(
+        "gatewayId" -> "12345"
+      ),
+      "ids" -> authIDs
+    )
+  }
+
+  val stubbedIDs = UserIds(internalId = "internal", externalId = "external")
 
   def stubGetAuthoritySuccess(): Unit = {
-    val authBody = IntegrationTestConstants.Auth.authResponseJson("/auth/oid/58a2e8c82e00008c005d4699", "/uri/to/user-details", "12345", idsLink).toString()
+    val authBody = IntegrationTestConstants.Auth.authResponseJson("/auth/oid/58a2e8c82e00008c005d4699", "/uri/to/user-details", "12345", authIDs).toString()
 
-    WiremockHelper.stubGet(getAuthorityURI, Status.OK, authBody)
+    WiremockHelper.stubGet(authority, Status.OK, authBody)
   }
 
   def stubGetAuthorityFailure(): Unit = {
-    WiremockHelper.stubGet(getAuthorityURI, Status.UNAUTHORIZED, "")
+    WiremockHelper.stubGet(authority, Status.UNAUTHORIZED, "")
   }
 
   def stubGetIDsSuccess(): Unit = {
     val idsBody = IntegrationTestConstants.Auth.idsResponseJson("foo", "bar").toString()
 
-    WiremockHelper.stubGet(idsLink, Status.OK, idsBody)
+    WiremockHelper.stubGet(authIDs, Status.OK, idsBody)
   }
 }

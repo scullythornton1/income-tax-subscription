@@ -16,15 +16,8 @@
 
 package helpers.servicemocks
 
-import connectors.BusinessDetailsConnector._
-import helpers.IntegrationTestConstants._
-import helpers.{IntegrationTestConstants, WiremockHelper}
-import play.api.libs.json.JsValue
+import models.gg.KnownFactsSuccessResponseModel
 
-object BusinessDetailsStub {
-  val registrationResponse: JsValue = IntegrationTestConstants.GetBusinessDetailsResponse.successResponse(testNino, testSafeId, testMtditId)
-
-  def verifyGetBusinessDetails(nino: String): Unit = {
-    WiremockHelper.verifyGet(getBusinessDetailsUri(nino))
-  }
+object GGAdminStub {
+ val testAddKnownFactsResponse: KnownFactsSuccessResponseModel = KnownFactsSuccessResponseModel(1)
 }

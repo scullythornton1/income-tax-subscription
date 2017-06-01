@@ -56,6 +56,10 @@ trait MicroService {
     .settings(publishingSettings: _*)
     .settings(defaultSettings(): _*)
     .settings(
+      Keys.fork in Test := true,
+      javaOptions in Test += "-Dlogger.resource=logback-test.xml"
+    )
+    .settings(
       resolvers += Resolver.bintrayRepo("hmrc", "releases"),
       resolvers += Resolver.jcenterRepo,
       libraryDependencies ++= appDependencies,
@@ -77,6 +81,6 @@ private object TestPhases {
 
   def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Tests.Group] =
     tests map {
-      test => new Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
+      test => new Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name,"-Dlogger.resource=logback-test.xml"))))
     }
 }

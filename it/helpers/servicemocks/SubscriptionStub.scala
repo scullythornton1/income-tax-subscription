@@ -16,15 +16,23 @@
 
 package helpers.servicemocks
 
-import connectors.BusinessDetailsConnector._
+import models.subscription.IncomeSourceModel
+import models.subscription.business.BusinessSubscriptionSuccessResponseModel
 import helpers.IntegrationTestConstants._
-import helpers.{IntegrationTestConstants, WiremockHelper}
-import play.api.libs.json.JsValue
+import models.subscription.property.PropertySubscriptionResponseModel
 
-object BusinessDetailsStub {
-  val registrationResponse: JsValue = IntegrationTestConstants.GetBusinessDetailsResponse.successResponse(testNino, testSafeId, testMtditId)
+object SubscriptionStub {
+  val testBusinessSubscriptionResponse: BusinessSubscriptionSuccessResponseModel =
+    BusinessSubscriptionSuccessResponseModel(
+      testSafeId,
+      testMtditId,
+      List(IncomeSourceModel(testSourceId))
+    )
 
-  def verifyGetBusinessDetails(nino: String): Unit = {
-    WiremockHelper.verifyGet(getBusinessDetailsUri(nino))
-  }
+  val testPropertySubscriptionResponse: PropertySubscriptionResponseModel =
+    PropertySubscriptionResponseModel(
+      testSafeId,
+      testMtditId,
+      IncomeSourceModel(testSourceId)
+    )
 }

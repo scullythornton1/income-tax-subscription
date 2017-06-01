@@ -22,6 +22,7 @@ import audit.{Logging, LoggingConfig}
 import connectors.AuthConnector
 import controllers.AuthenticatedController
 import models.frontend.{FEFailureResponse, FERequest}
+import play.api.libs.json.{JsError, JsSuccess}
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import services.RosmAndEnrolManagerService
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -46,17 +47,15 @@ class SubscriptionController @Inject()(logging: Logging,
     }
   }
 
-  private def parseRequest(request: Request[AnyContent]): Option[FERequest] = request.body.asJson.fold[Option[FERequest]](None) {
-    implicit val loggingConfig = SubscriptionController.parseRequestLoggingConfig
-    jsonBody =>
-      parseUtil(jsonBody)(FERequest.format).fold(
-        invalid => {
-          logging.err(s"Request is invalid:\n${invalid.toString}\n${request.body.toString}")
-          None
-        },
-        valid => Some(valid)
-      )
-  }
+  private def parseRequest(request: Request[AnyContent]): Option[FERequest] = for {
+    jsonBody <- request.body.asJson
+    parsedBody <- jsonBody.validate[FERequest] match {
+      case JsSuccess(body, _) => Some(body)
+      case JsError(errors) =>
+        logging.err(s"Request is invalid:\n${errors.toString}\n${request.body.toString}")
+        None
+    }
+  } yield parsedBody
 
   private def createSubscription(feRequest: FERequest)(implicit hc: HeaderCarrier): Future[Result] = subManService.rosmAndEnrol(feRequest).map {
     case Right(r) =>

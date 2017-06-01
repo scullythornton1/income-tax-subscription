@@ -29,6 +29,7 @@ import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK}
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
+import GGAdminConnector._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -41,9 +42,8 @@ class GGAdminConnector @Inject()(config: Configuration,
                                 ) extends ServicesConfig with RawResponseReads {
 
   private lazy val ggAdminUrl: String = applicationConfig.ggAdminURL
-  private lazy val serviceName: String = GovernmentGateway.ggServiceName
 
-  val addKnownFactsUrl: String = s"$ggAdminUrl/government-gateway-admin/service/$serviceName/known-facts"
+  val addKnownFactsUrl: String = ggAdminUrl + addKnownFactsUri
 
   def createHeaderCarrierPost(headerCarrier: HeaderCarrier): HeaderCarrier =
     headerCarrier.withExtraHeaders("Content-Type" -> "application/json")
@@ -84,6 +84,7 @@ class GGAdminConnector @Inject()(config: Configuration,
 }
 
 object GGAdminConnector {
+  private lazy val serviceName: String = GovernmentGateway.ggServiceName
 
   val auditAddKnownFactsName = "ggAdmin-addKnownFacts"
 
@@ -91,7 +92,7 @@ object GGAdminConnector {
 
   val addKnownFactsLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "GGAdminConnector.addKnownFacts")
 
-
+  val addKnownFactsUri: String = s"/government-gateway-admin/service/$serviceName/known-facts"
 }
 
 object AddKnownFactsUtil extends ConnectorUtils[KnownFactsFailureResponseModel, KnownFactsSuccessResponseModel]

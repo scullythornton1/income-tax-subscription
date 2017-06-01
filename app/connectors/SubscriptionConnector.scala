@@ -29,6 +29,7 @@ import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.Authorization
+import SubscriptionConnector._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,8 +40,8 @@ class SubscriptionConnector @Inject()
   logging: Logging
 ) extends ServicesConfig with RawResponseReads {
 
-  val businessSubscribeUrl: String => String = nino => s"${applicationConfig.desURL}/income-tax-self-assessment/nino/$nino/business"
-  val propertySubscribeUrl: String => String = nino => s"${applicationConfig.desURL}/income-tax-self-assessment/nino/$nino/properties"
+  val businessSubscribeUrl: String => String = nino => applicationConfig.desURL + businessSubscribeUri(nino)
+  val propertySubscribeUrl: String => String = nino => applicationConfig.desURL + propertySubscribeUri(nino)
 
   lazy val urlHeaderAuthorization: String = s"Bearer ${applicationConfig.desToken}"
 
@@ -105,6 +106,9 @@ object SubscriptionConnector {
 
   val auditPropertySubscribeName = "property-subscribe-api-35"
   val propertySubscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionConnector.propertySubscribe")
+
+  def businessSubscribeUri(nino: String): String = s"/income-tax-self-assessment/nino/$nino/business"
+  def propertySubscribeUri(nino: String): String = s"/income-tax-self-assessment/nino/$nino/properties"
 }
 
 object PropertyConnectorUtil extends ConnectorUtils[PropertySubscriptionFailureModel, PropertySubscriptionResponseModel]
