@@ -19,7 +19,7 @@ package helpers
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.client.{MappingBuilder, ResponseDefinitionBuilder}
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import helpers.WireMockDSL.HTTPVerbMapping.HTTPVerbStub
+import helpers.WireMockDSL.HTTPVerbMapping.{Get, HTTPVerbStub}
 import play.api.http.Status
 import play.api.libs.json.{JsValue, Writes}
 
@@ -49,6 +49,11 @@ object WireMockDSL {
 
   object WireMockStub {
     def when(verbStub: HTTPVerbStub): WireMockStub = new WireMockStub(verbStub.mapping)
+
+    def verify(verbStub: HTTPVerbStub): Unit = verbStub match{
+      case Get(uri) => WiremockHelper.verifyGet(uri)
+      case _ => ()
+    }
   }
 
   object HTTPVerbMapping {

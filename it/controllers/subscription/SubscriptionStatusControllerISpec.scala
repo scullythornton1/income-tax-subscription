@@ -14,32 +14,31 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.subscription
 
 import connectors.BusinessDetailsConnector._
 import helpers.ComponentSpecBase
 import helpers.IntegrationTestConstants._
 import helpers.WireMockDSL.HTTPVerbMapping.Get
-import helpers.servicemocks.{AuthStub, BusinessDetailsStub}
-import models.frontend.FESuccessResponse
-import play.api.http.Status._
 import helpers.WireMockDSL._
 import helpers.servicemocks.AuthStub._
-import BusinessDetailsStub._
+import helpers.servicemocks.BusinessDetailsStub._
+import models.frontend.FESuccessResponse
+import play.api.http.Status._
 
-class SubscriptionControllerISpec extends ComponentSpecBase {
+class SubscriptionStatusControllerISpec extends ComponentSpecBase {
   "subscribe" should {
     "call the subscription service successfully when auth succeeds" in {
       stub when Get(authority) thenReturn stubbedAuthResponse
       stub when Get(authIDs) thenReturn stubbedIDs
       stub when Get(getBusinessDetailsUri(testNino)) thenReturn registrationResponse
 
-      IncomeTaxSubscription.createSubscription(testNino) should have(
+      IncomeTaxSubscription.getSubscriptionStatus(testNino) should have(
         httpStatus(OK),
         jsonBodyAs[FESuccessResponse](FESuccessResponse(Some(testMtditId)))
       )
 
-      BusinessDetailsStub.verifyGetBusinessDetails(testNino)
+      stub verify Get(getBusinessDetailsUri(testNino))
     }
 
     "fail when get authority fails" in {

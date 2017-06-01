@@ -20,6 +20,7 @@ import org.scalatest._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Writes
 import play.api.libs.ws.WSResponse
 import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.play.test.UnitSpec
@@ -58,6 +59,10 @@ trait ComponentSpecBase extends UnitSpec
   object IncomeTaxSubscription {
     def get(uri: String): WSResponse = await(buildClient(uri).get())
 
-    def createSubscription(nino: String): WSResponse = get(s"/subscription/$nino")
+    def post[T](uri: String, body: T)(implicit writes: Writes[T]): WSResponse = await(buildClient(uri).post(writes.writes(body).toString()))
+
+    def getSubscriptionStatus(nino: String): WSResponse = get(s"/subscription/$nino")
+
+    def createSubscription(nino: String): WSResponse = post(s"/subscription/$nino", "")
   }
 }
