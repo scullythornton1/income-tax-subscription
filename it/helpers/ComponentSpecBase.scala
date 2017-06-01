@@ -17,6 +17,7 @@
 package helpers
 
 import models.frontend.FERequest
+import models.throttling.UserCount
 import org.scalatest._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -24,7 +25,11 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Writes
 import play.api.libs.ws.WSResponse
 import play.api.{Application, Environment, Mode}
+import reactivemongo.api.commands.WriteResult
+import repositories.{Repositories, ThrottleMongoRepository}
 import uk.gov.hmrc.play.test.UnitSpec
+
+import scala.concurrent.ExecutionContext
 
 trait ComponentSpecBase extends UnitSpec
   with GivenWhenThen with TestSuite
@@ -49,7 +54,8 @@ trait ComponentSpecBase extends UnitSpec
     "microservice.services.government-gateway.host" -> mockHost,
     "microservice.services.government-gateway.port" -> mockPort,
     "microservice.services.authenticator.host" -> mockHost,
-    "microservice.services.authenticator.port" -> mockPort
+    "microservice.services.authenticator.port" -> mockPort,
+    "microservice.services.throttle-threshold" -> "2"
   )
 
   override def beforeAll(): Unit = {
@@ -57,10 +63,17 @@ trait ComponentSpecBase extends UnitSpec
     startWiremock()
   }
 
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    await(throttleMongoRepository.dropDb)
+  }
+
   override def afterAll(): Unit = {
     stopWiremock()
     super.afterAll()
   }
+
+  lazy val throttleMongoRepository = app.injector.instanceOf[Repositories].throttleRepository
 
   object IncomeTaxSubscription {
     def getSubscriptionStatus(nino: String): WSResponse = get(s"/subscription/$nino")
@@ -69,6 +82,8 @@ trait ComponentSpecBase extends UnitSpec
 
     def createSubscription(body: FERequest): WSResponse = post(s"/subscription/${body.nino}", body)
 
+    def checkUserAccess(nino: String): WSResponse = get(s"/throttle/$nino")
+
     def post[T](uri: String, body: T)(implicit writes: Writes[T]): WSResponse = {
       await(
         buildClient(uri)
@@ -76,6 +91,8 @@ trait ComponentSpecBase extends UnitSpec
           .post(writes.writes(body).toString())
       )
     }
+
+    def insertUserCount(userCount: UserCount)(implicit ec: ExecutionContext): WriteResult = await(throttleMongoRepository.insert(userCount))
   }
 
 }

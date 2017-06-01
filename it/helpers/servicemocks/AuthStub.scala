@@ -25,18 +25,22 @@ object AuthStub {
   val authIDs = "/uri/to/ids"
   val authority = "/auth/authority"
 
+  val gatewayID = "12345"
+  val internalID = "internal"
+  val externalID = "external"
+
   val stubbedAuthResponse: JsObject = {
     Json.obj(
       "uri" -> "/auth/oid/58a2e8c82e00008c005d4699",
       "userDetailsLink" -> "/uri/to/user-details",
       "credentials" -> Json.obj(
-        "gatewayId" -> "12345"
+        "gatewayId" -> gatewayID
       ),
       "ids" -> authIDs
     )
   }
 
-  val stubbedIDs = UserIds(internalId = "internal", externalId = "external")
+  val stubbedIDs = UserIds(internalId = internalID, externalId = externalID)
 
   def stubGetAuthoritySuccess(): Unit = {
     val authBody = IntegrationTestConstants.Auth.authResponseJson("/auth/oid/58a2e8c82e00008c005d4699", "/uri/to/user-details", "12345", authIDs).toString()
