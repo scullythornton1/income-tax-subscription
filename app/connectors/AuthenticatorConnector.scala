@@ -24,6 +24,7 @@ import models.authenticator.{RefreshFailure, RefreshProfileResult, RefreshSucces
 import play.api.Configuration
 import play.api.http.Status._
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpResponse}
+import AuthenticatorConnector._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -34,10 +35,10 @@ class AuthenticatorConnector @Inject()(configuration: Configuration,
                                        httpPost: HttpPost
                                       ) extends RawResponseReads {
 
-  lazy val refreshProfileURI = s"${appConfig.authenticatorURL}/authenticator/refresh-profile"
+  lazy val refreshProfileUrl = appConfig.authenticatorURL + refreshProfileUri
 
   def refreshProfile(implicit hc: HeaderCarrier): Future[RefreshProfileResult] =
-    httpPost.POSTEmpty[HttpResponse](refreshProfileURI).map {
+    httpPost.POSTEmpty[HttpResponse](refreshProfileUrl).map {
       response =>
         implicit lazy val loggingConfig = AuthenticatorConnector.refreshProfileLoggingConfig
         response.status match {
@@ -53,6 +54,8 @@ class AuthenticatorConnector @Inject()(configuration: Configuration,
 object AuthenticatorConnector {
 
   import _root_.utils.Implicits.OptionUtl
+
+  val refreshProfileUri = "/authenticator/refresh-profile"
 
   val refreshProfileLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "RegistrationConnector.register")
 

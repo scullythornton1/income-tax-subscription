@@ -44,7 +44,7 @@ class SubscriptionStatusControllerISpec extends ComponentSpecBase {
     "fail when get authority fails" in {
       stubGetAuthorityFailure()
 
-      IncomeTaxSubscription.createSubscription(testNino) should have(
+      IncomeTaxSubscription.getSubscriptionStatus(testNino) should have(
         httpStatus(UNAUTHORIZED),
         emptyBody
       )

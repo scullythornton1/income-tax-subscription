@@ -18,14 +18,21 @@ package helpers
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.client.{MappingBuilder, ResponseDefinitionBuilder}
+import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import helpers.WireMockDSL.HTTPVerbMapping.{Get, HTTPVerbStub}
+import helpers.WireMockDSL.HTTPVerbMapping.{Get, HTTPVerbStub, Post}
 import play.api.http.Status
 import play.api.libs.json.{JsValue, Writes}
+
+import scala.reflect.ClassTag
 
 
 object WireMockDSL {
   val stub = WireMockStub
+
+  def multiline(stub: StubMapping): StubMapping = stub
+
+  def when(verbStub: HTTPVerbStub): WireMockStub = stub.when(verbStub)
 
   class WireMockStub(mapping: => MappingBuilder) {
     def thenReturn[T](value: T)(implicit writes: Writes[T]): StubMapping = thenReturn(writes.writes(value))
@@ -50,8 +57,9 @@ object WireMockDSL {
   object WireMockStub {
     def when(verbStub: HTTPVerbStub): WireMockStub = new WireMockStub(verbStub.mapping)
 
-    def verify(verbStub: HTTPVerbStub): Unit = verbStub match{
+    def verify(verbStub: HTTPVerbStub): Unit = verbStub match {
       case Get(uri) => WiremockHelper.verifyGet(uri)
+      case req @ Post(uri, _) => WiremockHelper.verifyPost(uri, req.jsonString)
       case _ => ()
     }
   }
@@ -70,6 +78,24 @@ object WireMockDSL {
 
     case class Put(uri: String) extends HTTPVerbStub {
       override val mapping = put(urlMatching(uri))
+    }
+
+    case class Post[T] private(uri: String, optBody: Option[T])(implicit writes: Writes[T]) extends HTTPVerbStub {
+      override val mapping = {
+        val uriMapping = post(urlMatching(uri))
+        optBody match {
+          case Some(body) => uriMapping.withRequestBody(new EqualToPattern(writes.writes(body).toString()))
+          case None => uriMapping
+        }
+      }
+
+      val jsonString = optBody map (writes.writes(_).toString)
+    }
+
+    object Post {
+      def apply(uri: String): Post[String] = new Post[String](uri, None)
+
+      def apply[T](uri: String, body: T)(implicit writes: Writes[T]): Post[T] = new Post[T](uri, Some(body))
     }
 
   }

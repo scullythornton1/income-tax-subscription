@@ -28,6 +28,7 @@ import play.api.http.Status.OK
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
+import GGConnector._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -41,7 +42,7 @@ class GGConnector @Inject()
 
   lazy val governmentGatewayURL = applicationConfig.ggURL
 
-  val enrolUrl: String = s"$governmentGatewayURL/enrol"
+  val enrolUrl: String = governmentGatewayURL + enrolUri
 
   def createHeaderCarrierPost(hc: HeaderCarrier): HeaderCarrier = hc.withExtraHeaders("Content-Type" -> "application/json")
 
@@ -73,6 +74,7 @@ class GGConnector @Inject()
 }
 
 object GGConnector {
+  val enrolUri = "/enrol"
 
   val auditEnrolName = "gg-enrol"
 

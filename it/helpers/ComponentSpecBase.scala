@@ -16,6 +16,7 @@
 
 package helpers
 
+import models.frontend.FERequest
 import org.scalatest._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -31,6 +32,10 @@ trait ComponentSpecBase extends UnitSpec
   with WiremockHelper with BeforeAndAfterEach with BeforeAndAfterAll with Eventually
   with CustomMatchers {
 
+  override implicit lazy val app: Application = new GuiceApplicationBuilder()
+    .in(Environment.simple(mode = Mode.Dev))
+    .configure(config)
+    .build
   val mockHost = WiremockHelper.wiremockHost
   val mockPort = WiremockHelper.wiremockPort.toString
   val mockUrl = s"http://$mockHost:$mockPort"
@@ -38,13 +43,14 @@ trait ComponentSpecBase extends UnitSpec
   def config: Map[String, String] = Map(
     "microservice.services.auth.host" -> mockHost,
     "microservice.services.auth.port" -> mockPort,
-    "microservice.services.des.url" -> mockUrl
+    "microservice.services.des.url" -> mockUrl,
+    "microservice.services.gg-admin.host" -> mockHost,
+    "microservice.services.gg-admin.port" -> mockPort,
+    "microservice.services.government-gateway.host" -> mockHost,
+    "microservice.services.government-gateway.port" -> mockPort,
+    "microservice.services.authenticator.host" -> mockHost,
+    "microservice.services.authenticator.port" -> mockPort
   )
-
-  override implicit lazy val app: Application = new GuiceApplicationBuilder()
-    .in(Environment.simple(mode = Mode.Dev))
-    .configure(config)
-    .build
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -57,12 +63,19 @@ trait ComponentSpecBase extends UnitSpec
   }
 
   object IncomeTaxSubscription {
-    def get(uri: String): WSResponse = await(buildClient(uri).get())
-
-    def post[T](uri: String, body: T)(implicit writes: Writes[T]): WSResponse = await(buildClient(uri).post(writes.writes(body).toString()))
-
     def getSubscriptionStatus(nino: String): WSResponse = get(s"/subscription/$nino")
 
-    def createSubscription(nino: String): WSResponse = post(s"/subscription/$nino", "")
+    def get(uri: String): WSResponse = await(buildClient(uri).get())
+
+    def createSubscription(body: FERequest): WSResponse = post(s"/subscription/${body.nino}", body)
+
+    def post[T](uri: String, body: T)(implicit writes: Writes[T]): WSResponse = {
+      await(
+        buildClient(uri)
+          .withHeaders("Content-Type" -> "application/json")
+          .post(writes.writes(body).toString())
+      )
+    }
   }
+
 }
