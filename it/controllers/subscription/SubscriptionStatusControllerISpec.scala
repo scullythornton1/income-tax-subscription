@@ -18,8 +18,7 @@ package controllers.subscription
 
 import helpers.ComponentSpecBase
 import helpers.IntegrationTestConstants._
-import helpers.servicemocks.AuthStub
-import helpers.servicemocks.BusinessDetailsStub._
+import helpers.servicemocks.{AuthStub, BusinessDetailsStub}
 import models.frontend.FESuccessResponse
 import play.api.http.Status._
 
@@ -28,7 +27,7 @@ class SubscriptionStatusControllerISpec extends ComponentSpecBase {
     "call the subscription service successfully when auth succeeds" in {
       Given("I setup the wiremock stubs")
       AuthStub.stubAuthSuccess()
-      stubGetBusinessDetailsSuccess()
+      BusinessDetailsStub.stubGetBusinessDetailsSuccess()
 
       When("I call GET /subscription/:nino where nino is the test nino")
       val res = IncomeTaxSubscription.getSubscriptionStatus(testNino)
@@ -40,7 +39,7 @@ class SubscriptionStatusControllerISpec extends ComponentSpecBase {
       )
 
       Then("Get business details should have been called")
-      verifyGetBusinessDetails()
+      BusinessDetailsStub.verifyGetBusinessDetails()
     }
   }
 }
