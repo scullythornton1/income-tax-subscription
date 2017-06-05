@@ -17,14 +17,15 @@
 package helpers.servicemocks
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import connectors.GGAdminConnector
-import models.gg.KnownFactsSuccessResponseModel
+import connectors.RegistrationConnector
+import helpers.IntegrationTestConstants._
+import models.registration.RegistrationSuccessResponseModel
 import play.api.http.Status._
 
-object GGAdminStub extends WireMockMethods {
- val testAddKnownFactsResponse: KnownFactsSuccessResponseModel = KnownFactsSuccessResponseModel(1)
+object RegistrationStub extends WireMockMethods {
+  val successfulRegistrationResponse: RegistrationSuccessResponseModel = RegistrationSuccessResponseModel(testMtditId)
 
- def stubAddKnownFactsSuccess(): StubMapping =
-   when(method = POST, uri = GGAdminConnector.addKnownFactsUri)
-    .thenReturn(status = OK, body = testAddKnownFactsResponse)
+  def stubNewRegistrationSuccess(): StubMapping =
+    when(method = POST, uri = RegistrationConnector.newRegistrationUri(testNino), body = registerRequestPayload)
+      .thenReturn(status = OK, body = successfulRegistrationResponse)
 }

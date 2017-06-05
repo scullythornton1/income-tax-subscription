@@ -29,8 +29,8 @@ import play.api.http.Status._
 class SubscriptionStatusControllerISpec extends ComponentSpecBase {
   "subscribe" should {
     "call the subscription service successfully when auth succeeds" in {
-      stub when Get(authority) thenReturn stubbedAuthResponse
-      stub when Get(authIDs) thenReturn stubbedIDs
+      stub when Get(authority) thenReturn successfulAuthResponse
+      stub when Get(authIDs) thenReturn userIDs
       stub when Get(getBusinessDetailsUri(testNino)) thenReturn registrationResponse
 
       IncomeTaxSubscription.getSubscriptionStatus(testNino) should have(

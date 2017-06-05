@@ -16,6 +16,7 @@
 
 package helpers
 
+import helpers.servicemocks.WireMockMethods
 import models.frontend.FERequest
 import models.throttling.UserCount
 import org.scalatest._
@@ -35,7 +36,7 @@ trait ComponentSpecBase extends UnitSpec
   with GivenWhenThen with TestSuite
   with GuiceOneServerPerSuite with ScalaFutures with IntegrationPatience with Matchers
   with WiremockHelper with BeforeAndAfterEach with BeforeAndAfterAll with Eventually
-  with CustomMatchers {
+  with CustomMatchers with WireMockMethods {
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
     .in(Environment.simple(mode = Mode.Dev))

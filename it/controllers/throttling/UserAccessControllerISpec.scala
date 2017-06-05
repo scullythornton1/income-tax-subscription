@@ -28,8 +28,8 @@ import play.api.libs.concurrent.Execution.Implicits._
 class UserAccessControllerISpec extends ComponentSpecBase {
   "GET /throttle/:nino" should {
     "return OK when the service has not received any requests" in {
-      stub when Get(authority) thenReturn stubbedAuthResponse
-      stub when Get(authIDs) thenReturn stubbedIDs
+      stub when Get(authority) thenReturn successfulAuthResponse
+      stub when Get(authIDs) thenReturn userIDs
 
       IncomeTaxSubscription.checkUserAccess(testNino) should have (
         httpStatus(OK)
@@ -39,8 +39,8 @@ class UserAccessControllerISpec extends ComponentSpecBase {
     "return OK when the service has not received too many requests" in {
       IncomeTaxSubscription.insertUserCount(nonFullUserCount)
 
-      stub when Get(authority) thenReturn stubbedAuthResponse
-      stub when Get(authIDs) thenReturn stubbedIDs
+      stub when Get(authority) thenReturn successfulAuthResponse
+      stub when Get(authIDs) thenReturn userIDs
 
       IncomeTaxSubscription.checkUserAccess(testNino) should have (
         httpStatus(OK)
@@ -50,8 +50,8 @@ class UserAccessControllerISpec extends ComponentSpecBase {
     "return OK for a returning user" in {
       IncomeTaxSubscription.insertUserCount(matchingUserCount)
 
-      stub when Get(authority) thenReturn stubbedAuthResponse
-      stub when Get(authIDs) thenReturn stubbedIDs
+      stub when Get(authority) thenReturn successfulAuthResponse
+      stub when Get(authIDs) thenReturn userIDs
 
       IncomeTaxSubscription.checkUserAccess(testNino) should have (
         httpStatus(OK)
@@ -61,8 +61,8 @@ class UserAccessControllerISpec extends ComponentSpecBase {
     "return TOO_MANY_REQUESTS when the service has received too many requests and it is a new userID" in {
       IncomeTaxSubscription.insertUserCount(maxUserCount)
 
-      stub when Get(authority) thenReturn stubbedAuthResponse
-      stub when Get(authIDs) thenReturn stubbedIDs
+      stub when Get(authority) thenReturn successfulAuthResponse
+      stub when Get(authIDs) thenReturn userIDs
 
       IncomeTaxSubscription.checkUserAccess(testNino) should have (
         httpStatus(TOO_MANY_REQUESTS)

@@ -16,20 +16,32 @@
 
 package helpers.servicemocks
 
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import helpers.{IntegrationTestConstants, WiremockHelper}
-import models.auth.{Authority, UserIds}
+import models.auth.UserIds
 import play.api.http.Status
+import play.api.http.Status._
 import play.api.libs.json.{JsObject, Json}
 
-object AuthStub {
+object AuthStub extends WireMockMethods {
   val authIDs = "/uri/to/ids"
   val authority = "/auth/authority"
 
   val gatewayID = "12345"
   val internalID = "internal"
   val externalID = "external"
+  val userIDs = UserIds(internalId = internalID, externalId = externalID)
 
-  val stubbedAuthResponse: JsObject = {
+  def stubAuthSuccess(): StubMapping = {
+    stubAuthoritySuccess()
+    stubAuthorityUserIDsSuccess()
+  }
+
+  def stubAuthoritySuccess(): StubMapping =
+    when(method = GET, uri = authority)
+      .thenReturn(status = OK, body = successfulAuthResponse)
+
+  def successfulAuthResponse: JsObject = {
     Json.obj(
       "uri" -> "/auth/oid/58a2e8c82e00008c005d4699",
       "userDetailsLink" -> "/uri/to/user-details",
@@ -40,7 +52,9 @@ object AuthStub {
     )
   }
 
-  val stubbedIDs = UserIds(internalId = internalID, externalId = externalID)
+  def stubAuthorityUserIDsSuccess(): StubMapping =
+    when(method = GET, uri = authIDs)
+      .thenReturn(status = OK, body = userIDs)
 
   def stubGetAuthoritySuccess(): Unit = {
     val authBody = IntegrationTestConstants.Auth.authResponseJson("/auth/oid/58a2e8c82e00008c005d4699", "/uri/to/user-details", "12345", authIDs).toString()
