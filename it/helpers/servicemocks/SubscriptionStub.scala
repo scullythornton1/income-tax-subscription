@@ -18,11 +18,15 @@ package helpers.servicemocks
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connectors.SubscriptionConnector
+import connectors.SubscriptionConnector._
 import models.subscription.IncomeSourceModel
 import models.subscription.business.BusinessSubscriptionSuccessResponseModel
 import helpers.IntegrationTestConstants._
+import helpers.WireMockDSL.HTTPVerbMapping.Post
+import helpers.WireMockDSL._
 import models.subscription.property.PropertySubscriptionResponseModel
 import play.api.http.Status._
+import play.api.libs.json.Json
 
 object SubscriptionStub extends WireMockMethods {
   val testBusinessSubscriptionResponse: BusinessSubscriptionSuccessResponseModel =
@@ -42,4 +46,11 @@ object SubscriptionStub extends WireMockMethods {
   def stubBusinessSubscribeSuccess(): StubMapping =
     when(method = POST, uri = SubscriptionConnector.businessSubscribeUri(testNino), body = businessSubscriptionRequestPayload)
     .thenReturn(status = OK, body = testBusinessSubscriptionResponse)
+
+  def stubPropertySubscribeSuccess(): StubMapping =
+    when(method = POST, uri = SubscriptionConnector.propertySubscribeUri(testNino), body = Json.obj())
+      .thenReturn(status = OK, body = testPropertySubscriptionResponse)
+
+  def verifyBusinessSubscribe(): Unit = verify(method = POST, uri = businessSubscribeUri(testNino), businessSubscriptionRequestPayload)
+  def verifyPropertySubscribe(): Unit = verify(method = POST, uri = propertySubscribeUri(testNino), Json.obj())
 }
