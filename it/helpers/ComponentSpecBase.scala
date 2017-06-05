@@ -29,6 +29,7 @@ import play.api.{Application, Environment, Mode}
 import reactivemongo.api.commands.WriteResult
 import repositories.{Repositories, ThrottleMongoRepository}
 import uk.gov.hmrc.play.test.UnitSpec
+import play.api.libs.concurrent.Execution.Implicits._
 
 import scala.concurrent.ExecutionContext
 
@@ -66,7 +67,7 @@ trait ComponentSpecBase extends UnitSpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    await(throttleMongoRepository.dropDb)
+    await(IncomeTaxSubscription.dropThrottleRepo())
   }
 
   override def afterAll(): Unit = {
@@ -93,7 +94,8 @@ trait ComponentSpecBase extends UnitSpec
       )
     }
 
-    def insertUserCount(userCount: UserCount)(implicit ec: ExecutionContext): WriteResult = await(throttleMongoRepository.insert(userCount))
+    def insertUserCount(userCount: UserCount): WriteResult = await(throttleMongoRepository.insert(userCount))
+    def dropThrottleRepo(): Unit = await(throttleMongoRepository.drop)
   }
 
 }

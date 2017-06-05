@@ -22,8 +22,7 @@ import connectors.SubscriptionConnector._
 import models.subscription.IncomeSourceModel
 import models.subscription.business.BusinessSubscriptionSuccessResponseModel
 import helpers.IntegrationTestConstants._
-import helpers.WireMockDSL.HTTPVerbMapping.Post
-import helpers.WireMockDSL._
+import .HTTPVerbMapping.Post
 import models.subscription.property.PropertySubscriptionResponseModel
 import play.api.http.Status._
 import play.api.libs.json.Json

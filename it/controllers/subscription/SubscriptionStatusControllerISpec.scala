@@ -16,12 +16,9 @@
 
 package controllers.subscription
 
-import connectors.BusinessDetailsConnector._
 import helpers.ComponentSpecBase
 import helpers.IntegrationTestConstants._
-import helpers.WireMockDSL.HTTPVerbMapping.Get
-import helpers.WireMockDSL._
-import helpers.servicemocks.AuthStub._
+import helpers.servicemocks.AuthStub
 import helpers.servicemocks.BusinessDetailsStub._
 import models.frontend.FESuccessResponse
 import play.api.http.Status._
@@ -29,25 +26,21 @@ import play.api.http.Status._
 class SubscriptionStatusControllerISpec extends ComponentSpecBase {
   "subscribe" should {
     "call the subscription service successfully when auth succeeds" in {
-      stub when Get(authority) thenReturn successfulAuthResponse
-      stub when Get(authIDs) thenReturn userIDs
-      stub when Get(getBusinessDetailsUri(testNino)) thenReturn registrationResponse
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      stubGetBusinessDetailsSuccess()
 
-      IncomeTaxSubscription.getSubscriptionStatus(testNino) should have(
+      When("I call GET /subscription/:nino where nino is the test nino")
+      val res = IncomeTaxSubscription.getSubscriptionStatus(testNino)
+
+      Then("The result should have a HTTP status of OK and a body containing the MTDID")
+      res should have(
         httpStatus(OK),
         jsonBodyAs[FESuccessResponse](FESuccessResponse(Some(testMtditId)))
       )
 
-      stub verify Get(getBusinessDetailsUri(testNino))
-    }
-
-    "fail when get authority fails" in {
-      stubGetAuthorityFailure()
-
-      IncomeTaxSubscription.getSubscriptionStatus(testNino) should have(
-        httpStatus(UNAUTHORIZED),
-        emptyBody
-      )
+      Then("Get business details should have been called")
+      verifyGetBusinessDetails()
     }
   }
 }

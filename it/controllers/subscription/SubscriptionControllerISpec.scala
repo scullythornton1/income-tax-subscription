@@ -33,7 +33,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       GGConnectorStub.stubEnrolSuccess()
       AuthenticatorStub.stubRefreshProfileSuccess()
 
-      When("I call /subscription/:nino where nino is the test nino with a Business Request")
+      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
       val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
 
       Then("The result should have a HTTP status of OK and a body containing the MTDID")
@@ -51,7 +51,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       GGConnectorStub.stubEnrolSuccess()
       AuthenticatorStub.stubRefreshProfileSuccess()
 
-      When("I call /subscription/:nino where nino is the test nino with a Property Request")
+      When("I call POST /subscription/:nino where nino is the test nino with a Property Request")
       val res = IncomeTaxSubscription.createSubscription(fePropertyRequest)
 
       Then("The result should have a HTTP status of OK and a body containing the MTDID")
@@ -71,7 +71,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       GGConnectorStub.stubEnrolSuccess()
       AuthenticatorStub.stubRefreshProfileSuccess()
 
-      When("I call /subscription/:nino where nino is the test nino with both a property request and a business request")
+      When("I call POST /subscription/:nino where nino is the test nino with both a property request and a business request")
       val res = IncomeTaxSubscription.createSubscription(feBothRequest)
 
       Then("The result should have a HTTP status of OK and a body containing the MTDID")
