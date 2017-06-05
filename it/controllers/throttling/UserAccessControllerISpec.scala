@@ -17,54 +17,73 @@
 package controllers.throttling
 
 import helpers.ComponentSpecBase
-import helpers.WireMockDSL.HTTPVerbMapping.Get
-import helpers.WireMockDSL._
-import helpers.servicemocks.AuthStub._
-import helpers.IntegrationTestConstants._
-import play.api.http.Status._
 import helpers.DatabaseHelpers._
-import play.api.libs.concurrent.Execution.Implicits._
+import helpers.IntegrationTestConstants._
+import helpers.servicemocks.AuthStub
+import play.api.http.Status._
 
 class UserAccessControllerISpec extends ComponentSpecBase {
   "GET /throttle/:nino" should {
     "return OK when the service has not received any requests" in {
-      stub when Get(authority) thenReturn stubbedAuthResponse
-      stub when Get(authIDs) thenReturn stubbedIDs
+      Given("The database is empty")
+      IncomeTaxSubscription.dropThrottleRepo()
 
-      IncomeTaxSubscription.checkUserAccess(testNino) should have (
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+
+      When("I call the endpoint")
+      val res = IncomeTaxSubscription.checkUserAccess(testNino)
+
+      Then("The result should have a HTTP status of OK")
+      res should have (
         httpStatus(OK)
       )
     }
 
     "return OK when the service has not received too many requests" in {
+      Given("The database contains a non full user count record")
       IncomeTaxSubscription.insertUserCount(nonFullUserCount)
 
-      stub when Get(authority) thenReturn stubbedAuthResponse
-      stub when Get(authIDs) thenReturn stubbedIDs
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
 
-      IncomeTaxSubscription.checkUserAccess(testNino) should have (
+      When("I call the endpoint")
+      val res = IncomeTaxSubscription.checkUserAccess(testNino)
+
+      Then("The result should have a HTTP status of OK")
+      res should have (
         httpStatus(OK)
       )
     }
 
     "return OK for a returning user" in {
+      Given("The database contains a full user count record which contains the matching user")
       IncomeTaxSubscription.insertUserCount(matchingUserCount)
 
-      stub when Get(authority) thenReturn stubbedAuthResponse
-      stub when Get(authIDs) thenReturn stubbedIDs
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
 
-      IncomeTaxSubscription.checkUserAccess(testNino) should have (
+      When("I call the endpoint")
+      val res = IncomeTaxSubscription.checkUserAccess(testNino)
+
+      Then("The result should have a HTTP status of OK")
+      res should have (
         httpStatus(OK)
       )
     }
 
     "return TOO_MANY_REQUESTS when the service has received too many requests and it is a new userID" in {
+      Given("The database contains a full user count record which contains the matching user")
       IncomeTaxSubscription.insertUserCount(maxUserCount)
 
-      stub when Get(authority) thenReturn stubbedAuthResponse
-      stub when Get(authIDs) thenReturn stubbedIDs
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
 
-      IncomeTaxSubscription.checkUserAccess(testNino) should have (
+      When("I call the endpoint")
+      val res = IncomeTaxSubscription.checkUserAccess(testNino)
+
+      Then("The result should have a HTTP status of TOO_MANY_REQUESTS")
+      res should have (
         httpStatus(TOO_MANY_REQUESTS)
       )
     }

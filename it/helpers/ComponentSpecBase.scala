@@ -16,6 +16,7 @@
 
 package helpers
 
+import helpers.servicemocks.WireMockMethods
 import models.frontend.FERequest
 import models.throttling.UserCount
 import org.scalatest._
@@ -28,6 +29,7 @@ import play.api.{Application, Environment, Mode}
 import reactivemongo.api.commands.WriteResult
 import repositories.{Repositories, ThrottleMongoRepository}
 import uk.gov.hmrc.play.test.UnitSpec
+import play.api.libs.concurrent.Execution.Implicits._
 
 import scala.concurrent.ExecutionContext
 
@@ -35,7 +37,7 @@ trait ComponentSpecBase extends UnitSpec
   with GivenWhenThen with TestSuite
   with GuiceOneServerPerSuite with ScalaFutures with IntegrationPatience with Matchers
   with WiremockHelper with BeforeAndAfterEach with BeforeAndAfterAll with Eventually
-  with CustomMatchers {
+  with CustomMatchers with WireMockMethods {
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
     .in(Environment.simple(mode = Mode.Dev))
@@ -65,7 +67,7 @@ trait ComponentSpecBase extends UnitSpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    await(throttleMongoRepository.dropDb)
+    await(IncomeTaxSubscription.dropThrottleRepo())
   }
 
   override def afterAll(): Unit = {
@@ -92,7 +94,8 @@ trait ComponentSpecBase extends UnitSpec
       )
     }
 
-    def insertUserCount(userCount: UserCount)(implicit ec: ExecutionContext): WriteResult = await(throttleMongoRepository.insert(userCount))
+    def insertUserCount(userCount: UserCount): WriteResult = await(throttleMongoRepository.insert(userCount))
+    def dropThrottleRepo(): Unit = await(throttleMongoRepository.drop)
   }
 
 }

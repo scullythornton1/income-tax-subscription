@@ -17,21 +17,11 @@
 package helpers.servicemocks
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import connectors.BusinessDetailsConnector._
-import helpers.IntegrationTestConstants._
-import helpers.{IntegrationTestConstants, WiremockHelper}
+import connectors.AuthenticatorConnector
 import play.api.http.Status._
-import play.api.libs.json.JsValue
 
-object BusinessDetailsStub extends WireMockMethods {
-  val registrationResponse: JsValue = IntegrationTestConstants.GetBusinessDetailsResponse.successResponse(testNino, testSafeId, testMtditId)
-
-  def verifyGetBusinessDetails(): Unit = {
-    verify(method = GET, uri = getBusinessDetailsUri(testNino))
-  }
-
-  def stubGetBusinessDetailsSuccess(): StubMapping = when(method = GET, uri = getBusinessDetailsUri(testNino))
-    .thenReturn(status = OK, body = registrationResponse)
-
-
+object AuthenticatorStub extends WireMockMethods {
+  def stubRefreshProfileSuccess(): StubMapping =
+    when(method = POST, uri = AuthenticatorConnector.refreshProfileUri)
+      .thenReturn(status = NO_CONTENT)
 }
