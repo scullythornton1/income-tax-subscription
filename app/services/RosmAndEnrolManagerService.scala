@@ -48,10 +48,12 @@ class RosmAndEnrolManagerService @Inject()
   val feRequestToAuditMap: FERequest => Map[String, String] = feRequest =>
     Map(
       "nino" -> feRequest.nino,
+      "isAgent" -> feRequest.isAgent.toString,
+      "arn" -> feRequest.arn.fold("-")(identity),
       "sourceOfIncome" -> feRequest.incomeSource.toString,
       "acccountingPeriodStartDate" -> feRequest.accountingPeriodStart.fold("-")(x => x.toDesDateFormat),
       "acccountingPeriodEndDate" -> feRequest.accountingPeriodEnd.fold("-")(x => x.toDesDateFormat),
-      "tradingName" -> feRequest.tradingName.fold("-")(x => x),
+      "tradingName" -> feRequest.tradingName.fold("-")(identity),
       "cashOrAccruals" -> feRequest.cashOrAccruals.fold("-")(x => x.toLowerCase),
       "Authorization" -> urlHeaderAuthorization
     )

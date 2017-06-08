@@ -62,6 +62,7 @@ class Logging @Inject()(application: Application,
       detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(detail.toSeq: _*)
     )
     val pjs = packet: JsValue
+    println(pjs)
     audit.sendDataEvent(packet)
   }
 
