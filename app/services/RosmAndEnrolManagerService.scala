@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import audit.Logging
 import config.AppConfig
-import connectors.AuthenticatorConnector
+import connectors.GGAuthenticationConnector
 import models.ErrorModel
 import models.authenticator.{RefreshFailure, RefreshSuccessful}
 import models.frontend._
@@ -40,7 +40,7 @@ class RosmAndEnrolManagerService @Inject()
   registrationService: RegistrationService,
   subscriptionService: SubscriptionService,
   enrolmentService: EnrolmentService,
-  authenticatorConnector: AuthenticatorConnector
+  authenticatorConnector: GGAuthenticationConnector
 ) {
 
   lazy val urlHeaderAuthorization: String = s"Bearer ${appConfig.desToken}"
@@ -48,10 +48,12 @@ class RosmAndEnrolManagerService @Inject()
   val feRequestToAuditMap: FERequest => Map[String, String] = feRequest =>
     Map(
       "nino" -> feRequest.nino,
+      "isAgent" -> feRequest.isAgent.toString,
+      "arn" -> feRequest.arn.fold("-")(identity),
       "sourceOfIncome" -> feRequest.incomeSource.toString,
       "acccountingPeriodStartDate" -> feRequest.accountingPeriodStart.fold("-")(x => x.toDesDateFormat),
       "acccountingPeriodEndDate" -> feRequest.accountingPeriodEnd.fold("-")(x => x.toDesDateFormat),
-      "tradingName" -> feRequest.tradingName.fold("-")(x => x),
+      "tradingName" -> feRequest.tradingName.fold("-")(identity),
       "cashOrAccruals" -> feRequest.cashOrAccruals.fold("-")(x => x.toLowerCase),
       "Authorization" -> urlHeaderAuthorization
     )

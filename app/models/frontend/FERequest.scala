@@ -17,6 +17,7 @@
 package models.frontend
 
 import models.DateModel
+import play.api.data.validation.ValidationError
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -25,6 +26,7 @@ case class FERequest
   nino: String,
   incomeSource: IncomeSourceType,
   isAgent: Boolean = false,
+  arn: Option[String] = None,
   accountingPeriodStart: Option[DateModel] = None,
   accountingPeriodEnd: Option[DateModel] = None,
   tradingName: Option[String] = None,
@@ -34,17 +36,31 @@ case class FERequest
 )
 
 object FERequest {
+  val agentWithoutArnErrMsg = "The ARN must be supplied for an agent"
+  val noneAgentWithArnErrMsg = "The ARN must not be supplied for a none agent"
+
   // custom reader to set enrolUser with the default value of true if it wasn't specified
   val reads: Reads[FERequest] = (
     (JsPath \ "nino").read[String] and
       (JsPath \ "incomeSource").read[IncomeSourceType] and
       (JsPath \ "isAgent").read[Boolean] and
+      (JsPath \ "arn").readNullable[String] and
       (JsPath \ "accountingPeriodStart").readNullable[DateModel] and
       (JsPath \ "accountingPeriodEnd").readNullable[DateModel] and
       (JsPath \ "tradingName").readNullable[String] and
       (JsPath \ "cashOrAccruals").readNullable[String] and
       (JsPath \ "enrolUser").readNullable[Boolean].map(x => x.fold(true)(y => y))
     ) (FERequest.apply _)
+    .filter(ValidationError(agentWithoutArnErrMsg)) {
+      feRequest: FERequest =>
+        if (feRequest.isAgent) feRequest.arn.nonEmpty
+        else true
+    }
+    .filter(ValidationError(noneAgentWithArnErrMsg)) {
+      feRequest: FERequest =>
+        if (!feRequest.isAgent) feRequest.arn.isEmpty
+        else true
+    }
 
   val writes: OWrites[FERequest] = Json.writes[FERequest]
 

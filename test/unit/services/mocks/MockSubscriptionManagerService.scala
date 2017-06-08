@@ -37,7 +37,7 @@ trait MockSubscriptionManagerService extends MockRegistrationService with MockSu
     TestRegistrationService,
     TestSubscriptionService,
     TestEnrolmentService,
-    TestAuthenticatorConnector
+    TestGGAuthenticationConnector
   )
 
 }

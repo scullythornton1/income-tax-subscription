@@ -106,7 +106,6 @@ class Logging @Inject()(application: Application,
 
 object Logging {
 
-
   val splunkString = "SPLUNK AUDIT:\n"
 
   object AuditSubscribeRequest {
