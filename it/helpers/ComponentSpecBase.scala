@@ -55,8 +55,8 @@ trait ComponentSpecBase extends UnitSpec
     "microservice.services.gg-admin.port" -> mockPort,
     "microservice.services.government-gateway.host" -> mockHost,
     "microservice.services.government-gateway.port" -> mockPort,
-    "microservice.services.authenticator.host" -> mockHost,
-    "microservice.services.authenticator.port" -> mockPort,
+    "microservice.services.gg-authentication.host" -> mockHost,
+    "microservice.services.gg-authentication.port" -> mockPort,
     "microservice.services.throttle-threshold" -> "2"
   )
 

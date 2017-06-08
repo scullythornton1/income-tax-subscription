@@ -31,7 +31,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       SubscriptionStub.stubBusinessSubscribeSuccess()
       GGAdminStub.stubAddKnownFactsSuccess()
       GGConnectorStub.stubEnrolSuccess()
-      AuthenticatorStub.stubRefreshProfileSuccess()
+      GGAuthenticationStub.stubRefreshProfileSuccess()
 
       When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
       val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
@@ -49,7 +49,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       SubscriptionStub.stubPropertySubscribeSuccess()
       GGAdminStub.stubAddKnownFactsSuccess()
       GGConnectorStub.stubEnrolSuccess()
-      AuthenticatorStub.stubRefreshProfileSuccess()
+      GGAuthenticationStub.stubRefreshProfileSuccess()
 
       When("I call POST /subscription/:nino where nino is the test nino with a Property Request")
       val res = IncomeTaxSubscription.createSubscription(fePropertyRequest)
@@ -69,7 +69,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       SubscriptionStub.stubPropertySubscribeSuccess()
       GGAdminStub.stubAddKnownFactsSuccess()
       GGConnectorStub.stubEnrolSuccess()
-      AuthenticatorStub.stubRefreshProfileSuccess()
+      GGAuthenticationStub.stubRefreshProfileSuccess()
 
       When("I call POST /subscription/:nino where nino is the test nino with both a property request and a business request")
       val res = IncomeTaxSubscription.createSubscription(feBothRequest)

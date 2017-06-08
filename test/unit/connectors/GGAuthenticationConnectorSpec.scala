@@ -22,16 +22,16 @@ import unit.connectors.mocks.MockAuthenticatorConnector
 import utils.TestConstants.AuthenticatorResponse._
 
 
-class AuthenticatorConnectorSpec extends MockAuthenticatorConnector {
+class GGAuthenticationConnectorSpec extends MockAuthenticatorConnector {
 
   implicit val hc = HeaderCarrier()
 
-  "AuthenticatorConnector.refreshProfile" must {
+  "GGAuthenticationConnector.refreshProfile" must {
 
     "return RefreshSuccessful when successful" in {
       mockRefreshProfile(refreshSuccess)
 
-      val result = TestAuthenticatorConnector.refreshProfile
+      val result = TestGGAuthenticationConnector.refreshProfile
       val enrolResponse = await(result)
       enrolResponse shouldBe RefreshSuccessful
     }
@@ -39,7 +39,7 @@ class AuthenticatorConnectorSpec extends MockAuthenticatorConnector {
     "return RefreshSuccessful in case of failure" in {
       mockRefreshProfile(refreshFailure)
 
-      val result = TestAuthenticatorConnector.refreshProfile
+      val result = TestGGAuthenticationConnector.refreshProfile
       val enrolResponse = await(result)
       enrolResponse shouldBe RefreshFailure
     }

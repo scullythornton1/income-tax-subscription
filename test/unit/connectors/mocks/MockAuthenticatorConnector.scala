@@ -18,7 +18,7 @@ package unit.connectors.mocks
 
 import audit.Logging
 import config.AppConfig
-import connectors.AuthenticatorConnector
+import connectors.GGAuthenticationConnector
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 import play.api.libs.json.JsValue
@@ -34,12 +34,12 @@ trait MockAuthenticatorConnector extends MockHttp with GuiceOneAppPerSuite {
 
   val mockRefreshProfile = (setupRefreshProfile _).tupled
 
-  object TestAuthenticatorConnector extends AuthenticatorConnector(config, appConfig, logging, httpPost)
+  object TestGGAuthenticationConnector extends GGAuthenticationConnector(config, appConfig, logging, httpPost)
 
   def setupRefreshProfile(status: Int, response: Option[JsValue]): Unit =
-    setupMockHttpPostEmpty(url = TestAuthenticatorConnector.refreshProfileUrl)(status, response)
+    setupMockHttpPostEmpty(url = TestGGAuthenticationConnector.refreshProfileUrl)(status, response)
 
   def verifyRefreshProfile(count: Int): Unit =
-    verifyMockHttpPostEmpty(url = TestAuthenticatorConnector.refreshProfileUrl)(count)
+    verifyMockHttpPostEmpty(url = TestGGAuthenticationConnector.refreshProfileUrl)(count)
 
 }

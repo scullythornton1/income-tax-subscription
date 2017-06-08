@@ -17,11 +17,11 @@
 package helpers.servicemocks
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import connectors.AuthenticatorConnector
+import connectors.GGAuthenticationConnector
 import play.api.http.Status._
 
-object AuthenticatorStub extends WireMockMethods {
+object GGAuthenticationStub extends WireMockMethods {
   def stubRefreshProfileSuccess(): StubMapping =
-    when(method = POST, uri = AuthenticatorConnector.refreshProfileUri)
+    when(method = POST, uri = GGAuthenticationConnector.refreshProfileUri)
       .thenReturn(status = NO_CONTENT)
 }

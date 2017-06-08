@@ -24,7 +24,7 @@ trait AppConfig {
   val authURL: String
   val ggURL: String
   val ggAdminURL: String
-  val authenticatorURL: String
+  val ggAuthenticationURL: String
   val desURL: String
   val desEnvironment: String
   val desToken: String
@@ -36,7 +36,7 @@ class MicroserviceAppConfig @Inject()(val configuration: Configuration) extends 
   private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
   override lazy val authURL = baseUrl("auth")
-  override lazy val authenticatorURL = baseUrl("authenticator")
+  override lazy val ggAuthenticationURL = baseUrl("gg-authentication")
   override lazy val ggURL = baseUrl("government-gateway")
   override lazy val ggAdminURL = baseUrl("gg-admin")
 

@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import audit.Logging
 import config.AppConfig
-import connectors.AuthenticatorConnector
+import connectors.GGAuthenticationConnector
 import models.ErrorModel
 import models.authenticator.{RefreshFailure, RefreshSuccessful}
 import models.frontend._
@@ -40,7 +40,7 @@ class RosmAndEnrolManagerService @Inject()
   registrationService: RegistrationService,
   subscriptionService: SubscriptionService,
   enrolmentService: EnrolmentService,
-  authenticatorConnector: AuthenticatorConnector
+  authenticatorConnector: GGAuthenticationConnector
 ) {
 
   lazy val urlHeaderAuthorization: String = s"Bearer ${appConfig.desToken}"
