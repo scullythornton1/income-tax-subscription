@@ -28,7 +28,9 @@ import utils.JsonUtils._
 
 object TestConstants {
 
-  lazy val testNino = new Generator().nextNino.nino
+  lazy val testNino: String = new Generator().nextNino.nino
+  // for the purpose of unit tests we only need a random string for the ARN
+  lazy val testArn: String = new Generator().nextNino.nino
   lazy val testSafeId = "XE0001234567890"
   lazy val testMtditId = "mtditId001"
   lazy val testSourceId = "sourceId0001"
