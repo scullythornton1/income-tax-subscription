@@ -16,7 +16,7 @@
 
 package helpers
 
-import helpers.servicemocks.WireMockMethods
+import helpers.servicemocks.{AuditStub, WireMockMethods}
 import models.frontend.FERequest
 import models.throttling.UserCount
 import org.scalatest._
@@ -30,6 +30,7 @@ import reactivemongo.api.commands.WriteResult
 import repositories.{Repositories, ThrottleMongoRepository}
 import uk.gov.hmrc.play.test.UnitSpec
 import play.api.libs.concurrent.Execution.Implicits._
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext
 
@@ -57,7 +58,9 @@ trait ComponentSpecBase extends UnitSpec
     "microservice.services.government-gateway.port" -> mockPort,
     "microservice.services.gg-authentication.host" -> mockHost,
     "microservice.services.gg-authentication.port" -> mockPort,
-    "microservice.services.throttle-threshold" -> "2"
+    "microservice.services.throttle-threshold" -> "2",
+    "auditing.consumer.baseUri.host" -> mockHost,
+    "auditing.consumer.baseUri.port" -> mockPort
   )
 
   override def beforeAll(): Unit = {
@@ -68,6 +71,7 @@ trait ComponentSpecBase extends UnitSpec
   override def beforeEach(): Unit = {
     super.beforeEach()
     await(IncomeTaxSubscription.dropThrottleRepo())
+    AuditStub.stubAuditing()
   }
 
   override def afterAll(): Unit = {
@@ -76,6 +80,8 @@ trait ComponentSpecBase extends UnitSpec
   }
 
   lazy val throttleMongoRepository = app.injector.instanceOf[Repositories].throttleRepository
+
+  implicit val hc = HeaderCarrier()
 
   object IncomeTaxSubscription {
     def getSubscriptionStatus(nino: String): WSResponse = get(s"/subscription/$nino")

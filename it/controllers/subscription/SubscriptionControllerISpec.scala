@@ -41,6 +41,9 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
         httpStatus(OK),
         jsonBodyAs[FESuccessResponse](FESuccessResponse(Some(testMtditId)))
       )
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
     }
     "call the subscription service successfully when auth succeeds for a property registration" in {
       Given("I setup the wiremock stubs")
@@ -59,6 +62,9 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
         httpStatus(OK),
         jsonBodyAs[FESuccessResponse](FESuccessResponse(Some(testMtditId)))
       )
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
     }
 
     "call the subscription service successfully when auth succeeds for a business and property registration" in {
@@ -85,6 +91,9 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
 
       Then("Property subscription should have been called")
       SubscriptionStub.verifyPropertySubscribe()
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
     }
   }
 }
