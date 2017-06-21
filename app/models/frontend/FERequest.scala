@@ -36,8 +36,6 @@ case class FERequest
 )
 
 object FERequest {
-  val agentWithoutArnErrMsg = "The ARN must be supplied for an agent"
-  val noneAgentWithArnErrMsg = "The ARN must not be supplied for a none agent"
 
   // custom reader to set enrolUser with the default value of true if it wasn't specified
   val reads: Reads[FERequest] = (
@@ -51,16 +49,6 @@ object FERequest {
       (JsPath \ "cashOrAccruals").readNullable[String] and
       (JsPath \ "enrolUser").readNullable[Boolean].map(x => x.fold(true)(y => y))
     ) (FERequest.apply _)
-    .filter(ValidationError(agentWithoutArnErrMsg)) {
-      feRequest: FERequest =>
-        if (feRequest.isAgent) feRequest.arn.nonEmpty
-        else true
-    }
-    .filter(ValidationError(noneAgentWithArnErrMsg)) {
-      feRequest: FERequest =>
-        if (!feRequest.isAgent) feRequest.arn.isEmpty
-        else true
-    }
 
   val writes: OWrites[FERequest] = Json.writes[FERequest]
 
