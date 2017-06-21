@@ -60,44 +60,16 @@ class FERequestSpec extends UnitSpec {
       actual shouldBe expected
     }
 
-    "be be invalid if an agent does not have an arn" in {
-      val parsed = Json.fromJson[FERequest](
-        s"""{"nino" : "${TestConstants.testNino}",
-           | "isAgent" : true,
-           | "incomeSource":"${IncomeSourceType.business}",
-           | "enrolUser" : false
-           |}""".stripMargin)
-      parsed.isError shouldBe true
-      parsed match {
-        case e: JsError => JsError.toJson(e).toString should include(FERequest.agentWithoutArnErrMsg)
-      }
-    }
 
     "be be valid if an agent does have an arn" in {
       val parsed = Json.fromJson[FERequest](
         s"""{"nino" : "${TestConstants.testNino}",
-           | "isAgent" : true,
+           | "isAgent" : false,
            | "arn" : "${TestConstants.testArn}",
            | "incomeSource":"${IncomeSourceType.business}",
            | "enrolUser" : false
            |}""".stripMargin)
       parsed.isSuccess shouldBe true
     }
-
-    //n.b. the valid case for none agent is covered by the first couple of tests above
-    "be be invalid if a none agent has an arn" in {
-      val parsed = Json.fromJson[FERequest](
-        s"""{"nino" : "${TestConstants.testNino}",
-           | "isAgent" : false,
-           |  "arn" : "${TestConstants.testArn}",
-           | "incomeSource":"${IncomeSourceType.business}",
-           | "enrolUser" : false
-           |}""".stripMargin)
-      parsed.isError shouldBe true
-      parsed match {
-        case e: JsError => JsError.toJson(e).toString should include(FERequest.noneAgentWithArnErrMsg)
-      }
-    }
-
   }
 }
