@@ -28,8 +28,9 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.Authorization
 
-import scala.concurrent.Future
+import scala.annotation.switch
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class BusinessDetailsConnector @Inject()(appConfig: AppConfig,
                                          logging: Logging,
@@ -58,43 +59,35 @@ class BusinessDetailsConnector @Inject()(appConfig: AppConfig,
 
     httpGet.GET[HttpResponse](getBusinessDetailsUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc)
       .map { response =>
-        val status = response.status
-        lazy val audit = logging.auditFor(auditGetBusinessDetails, requestDetails + ("response" -> response.body))(updatedHc)
-        status match {
+        response.status match {
           case OK =>
             logging.info("Get Business Details responded with OK")
             parseSuccess(response.body)
-          case BAD_REQUEST =>
-            logging.warn("Get Business Details responded with a bad request error")
-            auditRequest(eventTypeRequest)
-            audit(auditGetBusinessDetails + "-" + eventTypeBadRequest)
-            parseFailure(BAD_REQUEST, response.body)
-          case NOT_FOUND =>
-            val notFound = parseFailure(NOT_FOUND, response.body)
-            // only audit if it's an unexpected error, since NOT_FOUND is something we expect on most occasions
-            notFound match {
-              case Left(ErrorModel(NOT_FOUND, Some("NOT_FOUND_NINO"), _)) => // expected case, do not audit
-              case _ =>
-                logging.warn("Get Business Details responded with a not found error")
-                auditRequest(eventTypeRequest)
-                audit(auditGetBusinessDetails + "-" + eventTypeNotFound)
+          case status =>
+            @switch
+            val suffix = status match {
+              case BAD_REQUEST => eventTypeBadRequest
+              case NOT_FOUND => eventTypeNotFound
+              case SERVICE_UNAVAILABLE => eventTypeServerUnavailable
+              case INTERNAL_SERVER_ERROR => eventTypeInternalServerError
+              case _ => eventTypeUnexpectedError
             }
-            notFound
-          case INTERNAL_SERVER_ERROR =>
-            logging.warn("Get Business Details responded with an internal server error")
-            auditRequest(eventTypeRequest)
-            audit(auditGetBusinessDetails + "-" + eventTypeInternalServerError)
-            parseFailure(INTERNAL_SERVER_ERROR, response.body)
-          case SERVICE_UNAVAILABLE =>
-            logging.warn("Get Business Details responded with a service unavailable error")
-            auditRequest(eventTypeRequest)
-            audit(auditGetBusinessDetails + "-" + eventTypeServerUnavailable)
-            parseFailure(SERVICE_UNAVAILABLE, response.body)
-          case x =>
-            logging.warn(s"Get Business Details responded with an unexpected error: status=$x")
-            auditRequest(eventTypeRequest)
-            audit(auditGetBusinessDetails + "-" + eventTypeUnexpectedError)
-            parseFailure(x, response.body)
+
+            val parseResponse@Left(ErrorModel(_, optCode, message)) = parseFailure(status, response.body)
+            val code: String = optCode.getOrElse("N/A")
+            (status, code) match {
+              case (NOT_FOUND, "NOT_FOUND_NINO") =>
+                // expected case, do not audit
+                logging.info(s"Get Business Details responded with nino not found")
+              case _ =>
+                logging.audit(
+                  transactionName = auditGetBusinessDetails,
+                  detail = requestDetails + ("response" -> response.body),
+                  auditType = auditGetBusinessDetails + "-" + suffix
+                )(updatedHc)
+                logging.warn(s"Get Business Details responded with an error, status=$status code=$code message=$message")
+            }
+            parseResponse
         }
       }
   }

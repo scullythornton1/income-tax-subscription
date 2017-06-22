@@ -45,8 +45,8 @@ class GGAuthenticationConnector @Inject()(configuration: Configuration,
           case NO_CONTENT =>
             logging.info(s"GGAuthentication refreshProfile responded with NO_CONTENT")
             RefreshSuccessful
-          case x =>
-            logging.warn(s"GGAuthentication refreshProfile responded with an unexpected error: status=$x")
+          case status =>
+            logging.warn(s"GGAuthentication refreshProfile responded with a error: status=$status body=${response.body}")
             RefreshFailure
         }
     }

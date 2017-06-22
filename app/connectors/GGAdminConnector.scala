@@ -18,19 +18,21 @@ package connectors
 
 import javax.inject.Inject
 
-import audit.Logging.{eventTypeBadRequest, eventTypeInternalServerError, eventTypeRequest, eventTypeUnexpectedError}
+import audit.Logging.{eventTypeBadRequest, eventTypeInternalServerError, eventTypeUnexpectedError}
 import audit.{Logging, LoggingConfig}
 import common.Constants.GovernmentGateway
 import config.AppConfig
+import connectors.GGAdminConnector._
 import connectors.utils.ConnectorUtils
+import models.ErrorModel
 import models.gg.{KnownFactsFailureResponseModel, KnownFactsRequest, KnownFactsSuccessResponseModel}
 import play.api.Configuration
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK}
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
-import GGAdminConnector._
 
+import scala.annotation.switch
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -61,24 +63,28 @@ class GGAdminConnector @Inject()(config: Configuration,
     httpPost.POST[KnownFactsRequest, HttpResponse](addKnownFactsUrl, knownFacts)(
       implicitly[Writes[KnownFactsRequest]], implicitly[HttpReads[HttpResponse]], updatedHc).map { response =>
 
-      lazy val audit = logging.auditFor(auditAddKnownFactsName, requestDetails + ("response" -> response.body))(updatedHc)
-      val status = response.status
-      status match {
+      response.status match {
         case OK =>
           logging.info("GG admin responded with OK")
           parseSuccess(response.body)
-        case BAD_REQUEST =>
-          logging.warn("GG admin responded with a bad request")
-          audit(auditAddKnownFactsName + "-" + eventTypeBadRequest)
-          parseFailure(BAD_REQUEST, response.body)
-        case INTERNAL_SERVER_ERROR =>
-          logging.warn("GG admin responded with an internal server error")
-          audit(auditAddKnownFactsName + "-" + eventTypeInternalServerError)
-          parseFailure(INTERNAL_SERVER_ERROR, response.body)
-        case x =>
-          logging.warn(s"GG admin responded with an unexpected error: status=$x")
-          audit(auditAddKnownFactsName + "-" + eventTypeUnexpectedError)
-          parseFailure(x, response.body)
+        case status =>
+          @switch
+          val suffix = status match {
+            case BAD_REQUEST => eventTypeBadRequest
+            case INTERNAL_SERVER_ERROR => eventTypeInternalServerError
+            case _ => eventTypeUnexpectedError
+          }
+          logging.audit(
+            transactionName = auditAddKnownFactsName,
+            detail = requestDetails + ("response" -> response.body),
+            auditType = auditAddKnownFactsName + "-" + suffix
+          )(updatedHc)
+
+          val parseResponse@Left(ErrorModel(_, optCode, message)) = parseFailure(status, response.body)
+          val code: String = optCode.getOrElse("N/A")
+          logging.warn(s"GG admin responded with an error, status=$status code=$code message=$message")
+
+          parseResponse
       }
     }
   }

@@ -70,40 +70,32 @@ class RegistrationConnector @Inject()(appConfig: AppConfig,
     httpPost.POST[RegistrationRequestModel, HttpResponse](newRegistrationUrl(nino), registration)(
       implicitly[Writes[RegistrationRequestModel]], implicitly[HttpReads[HttpResponse]], updatedHc)
       .map { response =>
-
-        lazy val audit = logging.auditFor(auditRegisterName, requestDetails + ("response" -> response.body))(updatedHc)
-        val status = response.status
-
-        status match {
+        response.status match {
           case OK =>
             logging.info("Registration responded with OK")
             parseSuccess(response.body)
-          case BAD_REQUEST =>
-            logging.warn("Registration responded with a bad request error")
-            audit(auditRegisterName + "-" + eventTypeBadRequest)
-            parseFailure(BAD_REQUEST, response.body)
-          case NOT_FOUND =>
-            logging.warn("Registration responded with a not found error")
-            audit(auditRegisterName + "-" + eventTypeNotFound)
-            parseFailure(NOT_FOUND, response.body)
-          case CONFLICT =>
-            logging.warn("Registration responded with a conflict error")
-            audit(auditRegisterName + "-" + eventTypeConflict)
-            parseFailure(CONFLICT, response.body)
-          case INTERNAL_SERVER_ERROR =>
-            logging.warn("Registration responded with an internal server error")
-            audit(auditRegisterName + "-" + eventTypeInternalServerError)
-            parseFailure(INTERNAL_SERVER_ERROR, response.body)
-          case SERVICE_UNAVAILABLE =>
-            logging.warn("Registration responded with a service unavailable error")
-            audit(auditRegisterName + "-" + eventTypeServerUnavailable)
-            parseFailure(SERVICE_UNAVAILABLE, response.body)
-          case x =>
-            logging.warn(s"Registration responded with an unexpected error: status=$x")
-            audit(auditRegisterName + "-" + eventTypeUnexpectedError)
-            parseFailure(x, response.body)
-        }
+          case status =>
+            @switch
+            val suffix = status match {
+              case BAD_REQUEST => eventTypeBadRequest
+              case NOT_FOUND => eventTypeNotFound
+              case CONFLICT => eventTypeConflict
+              case INTERNAL_SERVER_ERROR => eventTypeInternalServerError
+              case SERVICE_UNAVAILABLE => eventTypeServerUnavailable
+              case _ => eventTypeUnexpectedError
+            }
+            logging.audit(
+              transactionName = auditRegisterName,
+              detail = requestDetails + ("response" -> response.body),
+              auditType = auditRegisterName + "-" + suffix
+            )(updatedHc)
 
+            val parseResponse@Left(ErrorModel(_, optCode, message)) = parseFailure(status, response.body)
+            val code: String = optCode.getOrElse("N/A")
+            logging.warn(s"Registration responded with an error, status=$status code=$code message=$message")
+
+            parseResponse
+        }
       }
   }
 
@@ -140,7 +132,7 @@ class RegistrationConnector @Inject()(appConfig: AppConfig,
               auditType = auditGetRegistrationName + "-" + suffix
             )(updatedHc)
 
-            val parseResponse@ErrorModel(_, optCode, message) = parseFailure(status, response.body)
+            val parseResponse@Left(ErrorModel(_, optCode, message)) = parseFailure(status, response.body)
             val code: String = optCode.getOrElse("N/A")
             logging.warn(s"Get Registration responded with an error, status=$status code=$code message=$message")
 
