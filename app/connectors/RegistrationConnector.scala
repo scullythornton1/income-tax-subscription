@@ -21,6 +21,7 @@ import javax.inject.Inject
 import audit.{Logging, LoggingConfig}
 import config.AppConfig
 import connectors.utils.ConnectorUtils
+import models.ErrorModel
 import models.registration._
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Writes}
@@ -28,6 +29,7 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.Authorization
 
+import scala.annotation.switch
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -119,32 +121,30 @@ class RegistrationConnector @Inject()(appConfig: AppConfig,
     logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
     httpGet.GET[HttpResponse](getRegistrationUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc)
       .map { response =>
+        response.status match {
+          case OK =>
+            logging.info("Get Registration responded with an OK")
+            parseSuccess(response.body)
+          case status =>
+            @switch
+            val suffix = status match {
+              case BAD_REQUEST => eventTypeBadRequest
+              case NOT_FOUND => eventTypeNotFound
+              case INTERNAL_SERVER_ERROR => eventTypeInternalServerError
+              case SERVICE_UNAVAILABLE => eventTypeServerUnavailable
+              case _ => eventTypeUnexpectedError
+            }
+            logging.audit(
+              transactionName = auditGetRegistrationName,
+              detail = requestDetails + ("response" -> response.body),
+              auditType = auditGetRegistrationName + "-" + suffix
+            )(updatedHc)
 
-        val status = response.status
-        lazy val audit = logging.auditFor(auditGetRegistrationName, requestDetails + ("response" -> response.body))(updatedHc)
+            val parseResponse@ErrorModel(_, optCode, message) = parseFailure(status, response.body)
+            val code: String = optCode.getOrElse("N/A")
+            logging.warn(s"Get Registration responded with an error, status=$status code=$code message=$message")
 
-        status match {
-          case OK => parseSuccess(response.body)
-          case BAD_REQUEST =>
-            logging.warn("Get Registration responded with a bad request error")
-            audit(auditGetRegistrationName + "-" + eventTypeBadRequest)
-            parseFailure(BAD_REQUEST, response.body)
-          case NOT_FOUND =>
-            logging.warn("Get Registration responded with a not found error")
-            audit(auditGetRegistrationName + "-" + eventTypeNotFound)
-            parseFailure(NOT_FOUND, response.body)
-          case INTERNAL_SERVER_ERROR =>
-            logging.warn("Get Registration responded with an internal server error")
-            audit(auditGetRegistrationName + "-" + eventTypeInternalServerError)
-            parseFailure(INTERNAL_SERVER_ERROR, response.body)
-          case SERVICE_UNAVAILABLE =>
-            logging.warn("Get Registration responded with a service unavailable error")
-            audit(auditGetRegistrationName + "-" + eventTypeServerUnavailable)
-            parseFailure(SERVICE_UNAVAILABLE, response.body)
-          case x =>
-            logging.warn(s"Get Registration responded with an unexpected error: status=$x")
-            audit(auditGetRegistrationName + "-" + eventTypeUnexpectedError)
-            parseFailure(x, response.body)
+            parseResponse
         }
       }
   }
