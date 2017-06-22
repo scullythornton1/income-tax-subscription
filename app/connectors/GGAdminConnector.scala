@@ -64,7 +64,9 @@ class GGAdminConnector @Inject()(config: Configuration,
       lazy val audit = logging.auditFor(auditAddKnownFactsName, requestDetails + ("response" -> response.body))(updatedHc)
       val status = response.status
       status match {
-        case OK => parseSuccess(response.body)
+        case OK =>
+          logging.info("GG admin responded with OK")
+          parseSuccess(response.body)
         case BAD_REQUEST =>
           logging.warn("GG admin responded with a bad request")
           audit(auditAddKnownFactsName + "-" + eventTypeBadRequest)
@@ -74,7 +76,7 @@ class GGAdminConnector @Inject()(config: Configuration,
           audit(auditAddKnownFactsName + "-" + eventTypeInternalServerError)
           parseFailure(INTERNAL_SERVER_ERROR, response.body)
         case x =>
-          logging.warn(s"GG admin responded with an unexpected status code ($x)")
+          logging.warn(s"GG admin responded with an unexpected error: status=$x")
           audit(auditAddKnownFactsName + "-" + eventTypeUnexpectedError)
           parseFailure(x, response.body)
       }

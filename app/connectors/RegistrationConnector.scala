@@ -31,10 +31,10 @@ import uk.gov.hmrc.play.http.logging.Authorization
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class RegistrationConnector @Inject()( appConfig: AppConfig,
-                                       logging: Logging,
-                                       httpPost: HttpPost,
-                                       httpGet: HttpGet
+class RegistrationConnector @Inject()(appConfig: AppConfig,
+                                      logging: Logging,
+                                      httpPost: HttpPost,
+                                      httpGet: HttpGet
                                      ) extends ServicesConfig with RawResponseReads {
 
   import Logging._
@@ -73,7 +73,9 @@ class RegistrationConnector @Inject()( appConfig: AppConfig,
         val status = response.status
 
         status match {
-          case OK => parseSuccess(response.body)
+          case OK =>
+            logging.info("Registration responded with OK")
+            parseSuccess(response.body)
           case BAD_REQUEST =>
             logging.warn("Registration responded with a bad request error")
             audit(auditRegisterName + "-" + eventTypeBadRequest)
@@ -87,7 +89,7 @@ class RegistrationConnector @Inject()( appConfig: AppConfig,
             audit(auditRegisterName + "-" + eventTypeConflict)
             parseFailure(CONFLICT, response.body)
           case INTERNAL_SERVER_ERROR =>
-            logging.warn("Registration responded with a internal server error")
+            logging.warn("Registration responded with an internal server error")
             audit(auditRegisterName + "-" + eventTypeInternalServerError)
             parseFailure(INTERNAL_SERVER_ERROR, response.body)
           case SERVICE_UNAVAILABLE =>
@@ -95,7 +97,7 @@ class RegistrationConnector @Inject()( appConfig: AppConfig,
             audit(auditRegisterName + "-" + eventTypeServerUnavailable)
             parseFailure(SERVICE_UNAVAILABLE, response.body)
           case x =>
-            logging.warn("Registration responded with a unexpected error")
+            logging.warn(s"Registration responded with an unexpected error: status=$x")
             audit(auditRegisterName + "-" + eventTypeUnexpectedError)
             parseFailure(x, response.body)
         }
@@ -124,18 +126,23 @@ class RegistrationConnector @Inject()( appConfig: AppConfig,
         status match {
           case OK => parseSuccess(response.body)
           case BAD_REQUEST =>
+            logging.warn("Get Registration responded with a bad request error")
             audit(auditGetRegistrationName + "-" + eventTypeBadRequest)
             parseFailure(BAD_REQUEST, response.body)
           case NOT_FOUND =>
+            logging.warn("Get Registration responded with a not found error")
             audit(auditGetRegistrationName + "-" + eventTypeNotFound)
             parseFailure(NOT_FOUND, response.body)
           case INTERNAL_SERVER_ERROR =>
+            logging.warn("Get Registration responded with an internal server error")
             audit(auditGetRegistrationName + "-" + eventTypeInternalServerError)
             parseFailure(INTERNAL_SERVER_ERROR, response.body)
           case SERVICE_UNAVAILABLE =>
+            logging.warn("Get Registration responded with a service unavailable error")
             audit(auditGetRegistrationName + "-" + eventTypeServerUnavailable)
             parseFailure(SERVICE_UNAVAILABLE, response.body)
           case x =>
+            logging.warn(s"Get Registration responded with an unexpected error: status=$x")
             audit(auditGetRegistrationName + "-" + eventTypeUnexpectedError)
             parseFailure(x, response.body)
         }

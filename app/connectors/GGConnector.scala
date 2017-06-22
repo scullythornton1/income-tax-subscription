@@ -62,9 +62,11 @@ class GGConnector @Inject()
       lazy val audit = logging.auditFor(auditEnrolName, requestDetails + ("response" -> response.body))(updatedHc)
 
       response.status match {
-        case OK => response
+        case OK =>
+          logging.info(s"GG enrol responded with OK")
+          response
         case x =>
-          logging.warn("GG enrol responded with a unexpected error")
+          logging.warn(s"GG enrol responded with an unexpected error: status=$x")
           audit(auditEnrolName + "-" + eventTypeUnexpectedError)
           response
       }

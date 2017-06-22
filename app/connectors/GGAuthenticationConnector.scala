@@ -33,7 +33,7 @@ class GGAuthenticationConnector @Inject()(configuration: Configuration,
                                           appConfig: AppConfig,
                                           logging: Logging,
                                           httpPost: HttpPost
-                                      ) extends RawResponseReads {
+                                         ) extends RawResponseReads {
 
   lazy val refreshProfileUrl = appConfig.ggAuthenticationURL + refreshProfileUri
 
@@ -42,9 +42,11 @@ class GGAuthenticationConnector @Inject()(configuration: Configuration,
       response =>
         implicit lazy val loggingConfig = GGAuthenticationConnector.refreshProfileLoggingConfig
         response.status match {
-          case NO_CONTENT => RefreshSuccessful
+          case NO_CONTENT =>
+            logging.info(s"GGAuthentication refreshProfile responded with NO_CONTENT")
+            RefreshSuccessful
           case x =>
-            logging.warn(s"Unexpected failure status (${response.status})\n${response.body}")
+            logging.warn(s"GGAuthentication refreshProfile responded with an unexpected error: status=$x")
             RefreshFailure
         }
     }

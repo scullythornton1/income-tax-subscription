@@ -50,24 +50,22 @@ class BusinessDetailsConnector @Inject()(appConfig: AppConfig,
   def getBusinessDetails(nino: String)(implicit hc: HeaderCarrier): Future[GetBusinessDetailsUtil.Response] = {
     import BusinessDetailsConnector.auditGetBusinessDetails
     import GetBusinessDetailsUtil._
-
     implicit val loggingConfig = RegistrationConnector.getRegistrationLoggingConfig
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
     val updatedHc = createHeaderCarrierGet(hc)
-
     lazy val auditRequest = logging.auditFor(auditGetBusinessDetails, requestDetails)(updatedHc)
-
     logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
+
     httpGet.GET[HttpResponse](getBusinessDetailsUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc)
       .map { response =>
-
         val status = response.status
         lazy val audit = logging.auditFor(auditGetBusinessDetails, requestDetails + ("response" -> response.body))(updatedHc)
-
         status match {
           case OK =>
+            logging.info("Get Business Details responded with OK")
             parseSuccess(response.body)
           case BAD_REQUEST =>
+            logging.warn("Get Business Details responded with a bad request error")
             auditRequest(eventTypeRequest)
             audit(auditGetBusinessDetails + "-" + eventTypeBadRequest)
             parseFailure(BAD_REQUEST, response.body)
@@ -77,19 +75,23 @@ class BusinessDetailsConnector @Inject()(appConfig: AppConfig,
             notFound match {
               case Left(ErrorModel(NOT_FOUND, Some("NOT_FOUND_NINO"), _)) => // expected case, do not audit
               case _ =>
+                logging.warn("Get Business Details responded with a not found error")
                 auditRequest(eventTypeRequest)
                 audit(auditGetBusinessDetails + "-" + eventTypeNotFound)
             }
             notFound
           case INTERNAL_SERVER_ERROR =>
+            logging.warn("Get Business Details responded with an internal server error")
             auditRequest(eventTypeRequest)
             audit(auditGetBusinessDetails + "-" + eventTypeInternalServerError)
             parseFailure(INTERNAL_SERVER_ERROR, response.body)
           case SERVICE_UNAVAILABLE =>
+            logging.warn("Get Business Details responded with a service unavailable error")
             auditRequest(eventTypeRequest)
             audit(auditGetBusinessDetails + "-" + eventTypeServerUnavailable)
             parseFailure(SERVICE_UNAVAILABLE, response.body)
           case x =>
+            logging.warn(s"Get Business Details responded with an unexpected error: status=$x")
             auditRequest(eventTypeRequest)
             audit(auditGetBusinessDetails + "-" + eventTypeUnexpectedError)
             parseFailure(x, response.body)
