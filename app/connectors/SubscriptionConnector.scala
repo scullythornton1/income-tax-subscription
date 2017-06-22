@@ -21,7 +21,9 @@ import javax.inject.Inject
 import audit.Logging._
 import audit.{Logging, LoggingConfig}
 import config.AppConfig
+import connectors.SubscriptionConnector._
 import connectors.utils.ConnectorUtils
+import models.ErrorModel
 import models.subscription.business._
 import models.subscription.property.{PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
 import play.api.http.Status._
@@ -29,7 +31,6 @@ import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.Authorization
-import SubscriptionConnector._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -62,14 +63,23 @@ class SubscriptionConnector @Inject()
       implicitly[Writes[BusinessSubscriptionRequestModel]], HttpReads.readRaw, createHeaderCarrierPost(hc)
     ).map { response =>
 
-      lazy val audit = logging.auditFor(auditBusinessSubscribeName, requestDetails + ("response" -> response.body))(updatedHc)
-
       response.status match {
-        case OK => parseSuccess(response.body)
-        case x =>
-          logging.warn("Business subscription responded with a unexpected error")
-          audit(auditBusinessSubscribeName + "-" + eventTypeUnexpectedError)
-          parseFailure(x, response.body)
+        case OK =>
+          logging.info(s"Business subscription responded with an OK")
+          parseSuccess(response.body)
+        case status =>
+
+          logging.audit(
+            transactionName = auditBusinessSubscribeName,
+            detail = requestDetails + ("response" -> response.body),
+            auditType = auditBusinessSubscribeName + "-" + eventTypeUnexpectedError
+          )(updatedHc)
+
+          val parseResponse@Left(ErrorModel(_, optCode, message)) = parseFailure(status, response.body)
+          val code: String = optCode.getOrElse("N/A")
+          logging.warn(s"Business subscription responded with an error, status=$status code=$code message=$message")
+
+          parseResponse
       }
     }
   }
@@ -81,17 +91,26 @@ class SubscriptionConnector @Inject()
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
     val updatedHc = createHeaderCarrierPost(hc)
     logging.debug(s"Request:\n$requestDetails\n\nHeader Carrier:\n$updatedHc")
-    httpPost.POST[JsValue, HttpResponse](propertySubscribeUrl(nino),"{}": JsValue)(implicitly[Writes[JsValue]], HttpReads.readRaw, updatedHc).map {
+    httpPost.POST[JsValue, HttpResponse](propertySubscribeUrl(nino), "{}": JsValue)(implicitly[Writes[JsValue]], HttpReads.readRaw, updatedHc).map {
       response =>
 
-        lazy val audit = logging.auditFor(auditPropertySubscribeName, requestDetails + ("response" -> response.body))(updatedHc)
-
         response.status match {
-          case OK => parseSuccess(response.body)
-          case x =>
-            logging.warn("Property subscription responded with a unexpected error")
-            audit(auditPropertySubscribeName + "-" + eventTypeUnexpectedError)
-            parseFailure(x, response.body)
+          case OK =>
+            logging.info(s"Property subscription responded with an OK")
+            parseSuccess(response.body)
+          case status =>
+
+            logging.audit(
+              transactionName = auditPropertySubscribeName,
+              detail = requestDetails + ("response" -> response.body),
+              auditType = auditPropertySubscribeName + "-" + eventTypeUnexpectedError
+            )(updatedHc)
+
+            val parseResponse@Left(ErrorModel(_, optCode, message)) = parseFailure(status, response.body)
+            val code: String = optCode.getOrElse("N/A")
+            logging.warn(s"Property subscription responded with an error, status=$status code=$code message=$message")
+
+            parseResponse
         }
     }
   }
@@ -108,6 +127,7 @@ object SubscriptionConnector {
   val propertySubscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionConnector.propertySubscribe")
 
   def businessSubscribeUri(nino: String): String = s"/income-tax-self-assessment/nino/$nino/business"
+
   def propertySubscribeUri(nino: String): String = s"/income-tax-self-assessment/nino/$nino/properties"
 }
 

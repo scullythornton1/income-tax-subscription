@@ -59,13 +59,17 @@ class GGConnector @Inject()
       implicitly[Writes[EnrolRequest]], HttpReads.readRaw, createHeaderCarrierPost(hc)
     ).map { response =>
 
-      lazy val audit = logging.auditFor(auditEnrolName, requestDetails + ("response" -> response.body))(updatedHc)
-
       response.status match {
-        case OK => response
-        case x =>
-          logging.warn("GG enrol responded with a unexpected error")
-          audit(auditEnrolName + "-" + eventTypeUnexpectedError)
+        case OK =>
+          logging.info(s"GG enrol responded with OK")
+          response
+        case status =>
+          logging.warn(s"GG enrol responded with an error, status=$status body=${response.body}")
+          logging.audit(
+            auditEnrolName,
+            requestDetails + ("response" -> response.body),
+            auditEnrolName + "-" + eventTypeUnexpectedError
+          )(updatedHc)
           response
       }
     }
