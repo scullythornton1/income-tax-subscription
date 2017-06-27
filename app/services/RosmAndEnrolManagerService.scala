@@ -66,23 +66,28 @@ class RosmAndEnrolManagerService @Inject()
 
   def rosmAndEnrol(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, FESuccessResponse]] = {
     logging.audit(Logging.AuditSubscribeRequest.transactionName, feRequestToAuditMap(request), Logging.AuditSubscribeRequest.auditType)(hc)
-    orchestrateROSM(request).flatMap {
+    val result: Future[Either[ErrorModel, FESuccessResponse]] = orchestrateROSM(request).flatMap {
       case Right(rosmSuccess) =>
         request.enrolUser match {
-          case false => Future.successful(FESuccessResponse(rosmSuccess.mtditId))
+          case false =>
+            Future.successful(FESuccessResponse(rosmSuccess.mtditId))
           case true =>
             orchestrateEnrolment(request.nino, rosmSuccess.mtditId.get).flatMap {
               case Right(enrolSuccess) =>
                 authenticatorConnector.refreshProfile.map {
-                  case RefreshSuccessful =>
-                    logging.audit(Logging.AuditReferenceNumber.transactionName, auditResponseMap(request, rosmSuccess), Logging.AuditReferenceNumber.auditType)(hc)
-                    FESuccessResponse(rosmSuccess.mtditId)
+                  case RefreshSuccessful => FESuccessResponse(rosmSuccess.mtditId)
                   case RefreshFailure => ErrorModel(INTERNAL_SERVER_ERROR, "Authenticator Refresh Profile Failed")
                 }
               case Left(enrolFailure) => Future.successful(enrolFailure)
             }
         }
       case Left(rosmFailure) => Future.successful(rosmFailure)
+    }
+    result.map {
+      case Right(rosmSuccess@FESuccessResponse(_)) =>
+        logging.audit(Logging.AuditReferenceNumber.transactionName, auditResponseMap(request, rosmSuccess), Logging.AuditReferenceNumber.auditType)(hc)
+        rosmSuccess
+      case x => x
     }
   }
 
