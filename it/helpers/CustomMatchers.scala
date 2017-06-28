@@ -43,7 +43,7 @@ trait CustomMatchers {
       )
   }
 
-  def emptyBody: HavePropertyMatcher[WSResponse, String] =
+  val emptyBody: HavePropertyMatcher[WSResponse, String] =
     new HavePropertyMatcher[WSResponse, String] {
       def apply(response: WSResponse) =
         HavePropertyMatchResult(

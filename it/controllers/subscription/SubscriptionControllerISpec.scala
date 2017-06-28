@@ -19,7 +19,7 @@ package controllers.subscription
 import helpers.ComponentSpecBase
 import helpers.IntegrationTestConstants._
 import helpers.servicemocks._
-import models.frontend.FESuccessResponse
+import models.frontend._
 import play.api.http.Status._
 
 class SubscriptionControllerISpec extends ComponentSpecBase {
@@ -95,5 +95,63 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       Then("The subscription should have been audited")
       AuditStub.verifyAudit()
     }
+
+    "fail when Auth returns an UNAUTHORISED response" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
+      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
+
+      Then("The result should have a HTTP status of UNAUTHORISED and an empty body")
+      res should have(
+        httpStatus(UNAUTHORIZED),
+        emptyBody
+      )
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+
+    }
+
+    "fail when Registration returns a BAD_REQUEST response" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
+      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
+
+      Then("The result should have a HTTP status of BAD_REQUEST and a reason code body")
+      res should have(
+        httpStatus(BAD_REQUEST),
+        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
+      )
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+
+    }
+
+//    "fail when Subscription returns a NOT_FOUND response" in {
+//      Given("I setup the wiremock stubs")
+//      AuthStub.stubAuthSuccess()
+//      RegistrationStub.stubNewRegistrationSuccess()
+//      SubscriptionStub.stubBusinessSubscribeFailure()
+//
+//      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
+//      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
+//
+//      Then("The result should have a HTTP status of NOT_FOUND_NINO and a reason code body")
+//      res should have(
+//        httpStatus(NOT_FOUND),
+//        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
+//      )
+//
+//      Then("The subscription should have been audited")
+//      AuditStub.verifyAudit()
+//
+//    }
+
   }
 }

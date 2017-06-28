@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connectors.SubscriptionConnector
 import connectors.SubscriptionConnector._
 import models.subscription.IncomeSourceModel
-import models.subscription.business.BusinessSubscriptionSuccessResponseModel
+import models.subscription.business._
 import helpers.IntegrationTestConstants._
 import models.subscription.property.PropertySubscriptionResponseModel
 import play.api.http.Status._
@@ -34,6 +34,9 @@ object SubscriptionStub extends WireMockMethods {
       List(IncomeSourceModel(testSourceId))
     )
 
+  val testBusinessSubscriptionFailedResponse: BusinessSubscriptionErrorResponseModel =
+    BusinessSubscriptionErrorResponseModel(Some("NOT_FOUND_NINO"), testErrorReason)
+
   val testPropertySubscriptionResponse: PropertySubscriptionResponseModel =
     PropertySubscriptionResponseModel(
       testSafeId,
@@ -44,6 +47,10 @@ object SubscriptionStub extends WireMockMethods {
   def stubBusinessSubscribeSuccess(): StubMapping =
     when(method = POST, uri = SubscriptionConnector.businessSubscribeUri(testNino), body = businessSubscriptionRequestPayload)
     .thenReturn(status = OK, body = testBusinessSubscriptionResponse)
+
+  def stubBusinessSubscribeFailure(): StubMapping =
+    when(method = POST, uri = SubscriptionConnector.businessSubscribeUri(testNino), body = businessSubscriptionRequestPayload)
+      .thenReturn(status = NOT_FOUND, body = testBusinessSubscriptionFailedResponse)
 
   def stubPropertySubscribeSuccess(): StubMapping =
     when(method = POST, uri = SubscriptionConnector.propertySubscribeUri(testNino), body = Json.obj())
