@@ -35,7 +35,7 @@ class UserAccessControllerISpec extends ComponentSpecBase {
       val res = IncomeTaxSubscription.checkUserAccess(testNino)
 
       Then("The result should have a HTTP status of OK")
-      res should have (
+      res should have(
         httpStatus(OK)
       )
     }
@@ -51,7 +51,7 @@ class UserAccessControllerISpec extends ComponentSpecBase {
       val res = IncomeTaxSubscription.checkUserAccess(testNino)
 
       Then("The result should have a HTTP status of OK")
-      res should have (
+      res should have(
         httpStatus(OK)
       )
     }
@@ -67,7 +67,7 @@ class UserAccessControllerISpec extends ComponentSpecBase {
       val res = IncomeTaxSubscription.checkUserAccess(testNino)
 
       Then("The result should have a HTTP status of OK")
-      res should have (
+      res should have(
         httpStatus(OK)
       )
     }
@@ -83,8 +83,21 @@ class UserAccessControllerISpec extends ComponentSpecBase {
       val res = IncomeTaxSubscription.checkUserAccess(testNino)
 
       Then("The result should have a HTTP status of TOO_MANY_REQUESTS")
-      res should have (
+      res should have(
         httpStatus(TOO_MANY_REQUESTS)
+      )
+    }
+
+    "return FORBIDDEN when auth fails" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthFailure()
+
+      When("I call the endpoint")
+      val res = IncomeTaxSubscription.checkUserAccess(testNino)
+
+      Then("The result should have a HTTP status of FORBIDDEN")
+      res should have(
+        httpStatus(FORBIDDEN)
       )
     }
   }
