@@ -22,7 +22,7 @@ import connectors.SubscriptionConnector._
 import models.subscription.IncomeSourceModel
 import models.subscription.business._
 import helpers.IntegrationTestConstants._
-import models.subscription.property.PropertySubscriptionResponseModel
+import models.subscription.property._
 import play.api.http.Status._
 import play.api.libs.json.Json
 
@@ -35,7 +35,7 @@ object SubscriptionStub extends WireMockMethods {
     )
 
   val testBusinessSubscriptionFailedResponse: BusinessSubscriptionErrorResponseModel =
-    BusinessSubscriptionErrorResponseModel(Some("NOT_FOUND_NINO"), testErrorReason)
+    BusinessSubscriptionErrorResponseModel(Some("NOT_FOUND"), testErrorReason)
 
   val testPropertySubscriptionResponse: PropertySubscriptionResponseModel =
     PropertySubscriptionResponseModel(
@@ -43,6 +43,9 @@ object SubscriptionStub extends WireMockMethods {
       testMtditId,
       IncomeSourceModel(testSourceId)
     )
+
+  val testPropertySubscriptionFailedResponse: PropertySubscriptionFailureModel =
+    PropertySubscriptionFailureModel(Some("NOT_FOUND"), testErrorReason)
 
   def stubBusinessSubscribeSuccess(): StubMapping =
     when(method = POST, uri = SubscriptionConnector.businessSubscribeUri(testNino), body = businessSubscriptionRequestPayload)
@@ -55,6 +58,10 @@ object SubscriptionStub extends WireMockMethods {
   def stubPropertySubscribeSuccess(): StubMapping =
     when(method = POST, uri = SubscriptionConnector.propertySubscribeUri(testNino), body = Json.obj())
       .thenReturn(status = OK, body = testPropertySubscriptionResponse)
+
+  def stubPropertySubscribeFailure(): StubMapping =
+    when(method = POST, uri = SubscriptionConnector.propertySubscribeUri(testNino), body = Json.obj())
+      .thenReturn(status = NOT_FOUND, body = testPropertySubscriptionFailedResponse)
 
   def verifyBusinessSubscribe(): Unit = verify(method = POST, uri = businessSubscribeUri(testNino), businessSubscriptionRequestPayload)
   def verifyPropertySubscribe(): Unit = verify(method = POST, uri = propertySubscribeUri(testNino), Json.obj())

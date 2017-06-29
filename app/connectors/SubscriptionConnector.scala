@@ -60,15 +60,13 @@ class SubscriptionConnector @Inject()
 
     logging.debug(s"Request:\n$requestDetails\n\nHeader Carrier:\n$updatedHc")
     httpPost.POST[BusinessSubscriptionRequestModel, HttpResponse](businessSubscribeUrl(nino), businessSubscriptionPayload)(
-      implicitly[Writes[BusinessSubscriptionRequestModel]], HttpReads.readRaw, createHeaderCarrierPost(hc)
+      implicitly[Writes[BusinessSubscriptionRequestModel]], implicitly[HttpReads[HttpResponse]], createHeaderCarrierPost(hc)
     ).map { response =>
-
       response.status match {
         case OK =>
           logging.info(s"Business subscription responded with an OK")
           parseSuccess(response.body)
         case status =>
-
           logging.audit(
             transactionName = auditBusinessSubscribeName,
             detail = requestDetails + ("response" -> response.body),
@@ -91,8 +89,8 @@ class SubscriptionConnector @Inject()
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
     val updatedHc = createHeaderCarrierPost(hc)
     logging.debug(s"Request:\n$requestDetails\n\nHeader Carrier:\n$updatedHc")
-    httpPost.POST[JsValue, HttpResponse](propertySubscribeUrl(nino), "{}": JsValue)(implicitly[Writes[JsValue]], HttpReads.readRaw, updatedHc).map {
-      response =>
+    httpPost.POST[JsValue, HttpResponse](propertySubscribeUrl(nino), "{}":JsValue)(implicitly[Writes[JsValue]],
+      implicitly[HttpReads[HttpResponse]], updatedHc).map {response =>
 
         response.status match {
           case OK =>

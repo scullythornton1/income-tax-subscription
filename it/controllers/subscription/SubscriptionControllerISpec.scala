@@ -133,25 +133,47 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
 
     }
 
-//    "fail when Subscription returns a NOT_FOUND response" in {
-//      Given("I setup the wiremock stubs")
-//      AuthStub.stubAuthSuccess()
-//      RegistrationStub.stubNewRegistrationSuccess()
-//      SubscriptionStub.stubBusinessSubscribeFailure()
-//
-//      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
-//      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
-//
-//      Then("The result should have a HTTP status of NOT_FOUND_NINO and a reason code body")
-//      res should have(
-//        httpStatus(NOT_FOUND),
-//        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
-//      )
-//
-//      Then("The subscription should have been audited")
-//      AuditStub.verifyAudit()
-//
-//    }
+    "fail when Business Subscription returns a NOT_FOUND response" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationSuccess()
+      SubscriptionStub.stubBusinessSubscribeFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
+      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
+
+      Then("The result should have a HTTP status of NOT_FOUND and a reason code body")
+      res should have(
+        httpStatus(NOT_FOUND),
+        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
+      )
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+
+    }
+
+    "fail when Property Subscription returns a NOT_FOUND response" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationSuccess()
+      SubscriptionStub.stubPropertySubscribeFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with a Property Request")
+      val res = IncomeTaxSubscription.createSubscription(fePropertyRequest)
+
+      Then("The result should have a HTTP status of NOT_FOUND and a reason code body")
+      res should have(
+        httpStatus(NOT_FOUND),
+        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
+      )
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+
+    }
+
+
 
   }
 }
