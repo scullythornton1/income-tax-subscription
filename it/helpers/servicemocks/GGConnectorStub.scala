@@ -21,7 +21,13 @@ import connectors.GGConnector
 import play.api.http.Status._
 
 object GGConnectorStub extends WireMockMethods {
+
   def stubEnrolSuccess(): StubMapping =
     when(method = POST, uri = GGConnector.enrolUri)
       .thenReturn(status = OK)
+
+  def stubEnrolFailure(): StubMapping =
+    when(method = POST, uri = GGConnector.enrolUri)
+      .thenReturn(status = FORBIDDEN)
+
 }

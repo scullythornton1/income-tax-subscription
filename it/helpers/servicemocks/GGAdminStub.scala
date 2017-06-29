@@ -18,13 +18,19 @@ package helpers.servicemocks
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connectors.GGAdminConnector
-import models.gg.KnownFactsSuccessResponseModel
+import models.gg._
+import helpers.IntegrationTestConstants._
 import play.api.http.Status._
 
 object GGAdminStub extends WireMockMethods {
- val testAddKnownFactsResponse: KnownFactsSuccessResponseModel = KnownFactsSuccessResponseModel(1)
+  val testAddKnownFactsResponse: KnownFactsSuccessResponseModel = KnownFactsSuccessResponseModel(1)
+  val testAddKnownFactsFailureResponse: KnownFactsFailureResponseModel = KnownFactsFailureResponseModel(BAD_REQUEST, testErrorReason)
 
- def stubAddKnownFactsSuccess(): StubMapping =
-   when(method = POST, uri = GGAdminConnector.addKnownFactsUri)
-    .thenReturn(status = OK, body = testAddKnownFactsResponse)
+  def stubAddKnownFactsSuccess(): StubMapping =
+    when(method = POST, uri = GGAdminConnector.addKnownFactsUri)
+      .thenReturn(status = OK, body = testAddKnownFactsResponse)
+
+  def stubAddKnownFactsFailure(): StubMapping =
+    when(method = POST, uri = GGAdminConnector.addKnownFactsUri)
+      .thenReturn(status = BAD_REQUEST, body = testAddKnownFactsFailureResponse)
 }

@@ -35,7 +35,7 @@ object SubscriptionStub extends WireMockMethods {
     )
 
   val testBusinessSubscriptionFailedResponse: BusinessSubscriptionErrorResponseModel =
-    BusinessSubscriptionErrorResponseModel(Some("NOT_FOUND"), testErrorReason)
+    BusinessSubscriptionErrorResponseModel(Some("BAD_REQUEST"), testErrorReason)
 
   val testPropertySubscriptionResponse: PropertySubscriptionResponseModel =
     PropertySubscriptionResponseModel(
@@ -53,7 +53,7 @@ object SubscriptionStub extends WireMockMethods {
 
   def stubBusinessSubscribeFailure(): StubMapping =
     when(method = POST, uri = SubscriptionConnector.businessSubscribeUri(testNino), body = businessSubscriptionRequestPayload)
-      .thenReturn(status = NOT_FOUND, body = testBusinessSubscriptionFailedResponse)
+      .thenReturn(status = BAD_REQUEST, body = testBusinessSubscriptionFailedResponse)
 
   def stubPropertySubscribeSuccess(): StubMapping =
     when(method = POST, uri = SubscriptionConnector.propertySubscribeUri(testNino), body = Json.obj())
