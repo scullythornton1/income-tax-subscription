@@ -256,7 +256,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
       val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
 
-      Then("The result should have a HTTP status of FORBIDDEN and return a reason code")
+      Then("The result should have a HTTP status of FORBIDDEN")
       res should have(
         httpStatus(FORBIDDEN)
       )
@@ -265,6 +265,26 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       AuditStub.verifyAudit()
     }
 
+    "when Business Subscription Refresh Profile fails" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationSuccess()
+      SubscriptionStub.stubBusinessSubscribeSuccess()
+      GGAdminStub.stubAddKnownFactsSuccess()
+      GGConnectorStub.stubEnrolSuccess()
+      GGAuthenticationStub.stubRefreshProfileFailure()
 
+      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
+      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
+
+      Then("The result should have a HTTP status of UNAUTHORISED")
+      res should have(
+        httpStatus(INTERNAL_SERVER_ERROR)
+      )
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+    }
   }
+
 }
