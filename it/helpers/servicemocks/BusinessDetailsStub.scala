@@ -18,13 +18,21 @@ package helpers.servicemocks
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connectors.BusinessDetailsConnector._
+import helpers.IntegrationTestConstants
 import helpers.IntegrationTestConstants._
-import helpers.{IntegrationTestConstants, WiremockHelper}
+import models.registration.GetBusinessDetailsFailureResponseModel
 import play.api.http.Status._
 import play.api.libs.json.JsValue
 
 object BusinessDetailsStub extends WireMockMethods {
   val registrationResponse: JsValue = IntegrationTestConstants.GetBusinessDetailsResponse.successResponse(testNino, testSafeId, testMtditId)
+
+  val errorReason = "Submission has not passed validation. Invalid parameter NINO."
+
+  val getBusinessDetailsFailureResponse: GetBusinessDetailsFailureResponseModel = GetBusinessDetailsFailureResponseModel(
+    code = Some("INVALID_NINO"),
+    reason = errorReason
+  )
 
   def verifyGetBusinessDetails(): Unit = {
     verify(method = GET, uri = getBusinessDetailsUri(testNino))
@@ -33,5 +41,10 @@ object BusinessDetailsStub extends WireMockMethods {
   def stubGetBusinessDetailsSuccess(): StubMapping = when(method = GET, uri = getBusinessDetailsUri(testNino))
     .thenReturn(status = OK, body = registrationResponse)
 
-
+  def stubGetBusinessDetailsFailure(): StubMapping =
+    when(method = GET, uri = getBusinessDetailsUri(testNino))
+      .thenReturn(
+        status = BAD_REQUEST,
+        body = getBusinessDetailsFailureResponse
+      )
 }
