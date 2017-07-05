@@ -251,7 +251,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       AuditStub.verifyAudit()
     }
 
-    "when a successful subscription Known Facts fail" in {
+    "when Known Facts fail then return BAD_REQUEST" in {
       Given("I setup the wiremock stubs")
       AuthStub.stubAuthSuccess()
       RegistrationStub.stubNewRegistrationSuccess()
@@ -271,7 +271,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       AuditStub.verifyAudit()
     }
 
-    "when a successful subscription Enrolment fails" in {
+    "when Enrolment fails then return FORBIDDEN" in {
       Given("I setup the wiremock stubs")
       AuthStub.stubAuthSuccess()
       RegistrationStub.stubNewRegistrationSuccess()
@@ -291,7 +291,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       AuditStub.verifyAudit()
     }
 
-    "when a successful subscription Refresh Profile fails" in {
+    "when Refresh Profile fails then return INTERNAL_SERVER_ERROR" in {
       Given("I setup the wiremock stubs")
       AuthStub.stubAuthSuccess()
       RegistrationStub.stubNewRegistrationSuccess()
