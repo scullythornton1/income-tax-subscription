@@ -19,7 +19,7 @@ package controllers.subscription
 import helpers.ComponentSpecBase
 import helpers.IntegrationTestConstants._
 import helpers.servicemocks._
-import models.frontend.FESuccessResponse
+import models.frontend._
 import play.api.http.Status._
 
 class SubscriptionControllerISpec extends ComponentSpecBase {
@@ -95,5 +95,218 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       Then("The subscription should have been audited")
       AuditStub.verifyAudit()
     }
+
+    "fail when Auth returns an UNAUTHORISED response" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
+      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
+
+      Then("The result should have a HTTP status of UNAUTHORISED and an empty body")
+      res should have(
+        httpStatus(UNAUTHORIZED),
+        emptyBody
+      )
+    }
+
+    "fail when Registration returns a BAD_REQUEST response" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
+      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
+
+      Then("The result should have a HTTP status of BAD_REQUEST and a reason code body")
+      res should have(
+        httpStatus(BAD_REQUEST),
+        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
+      )
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+
+    }
+
+    "fail when Business Subscription returns a BAD_REQUEST response" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationSuccess()
+      SubscriptionStub.stubBusinessSubscribeFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
+      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
+
+      Then("The result should have a HTTP status of BAD_REQUEST and a reason code body")
+      res should have(
+        httpStatus(BAD_REQUEST),
+        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
+      )
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+
+    }
+
+    "fail when Property Subscription returns a NOT_FOUND response" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationSuccess()
+      SubscriptionStub.stubPropertySubscribeFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with a Property Request")
+      val res = IncomeTaxSubscription.createSubscription(fePropertyRequest)
+
+      Then("The result should have a HTTP status of NOT_FOUND and a reason code body")
+      res should have(
+        httpStatus(NOT_FOUND),
+        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
+      )
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+
+    }
+
+    "fail when BOTH Subscriptions returns NOT_FOUND responses during a dual Subscription" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationSuccess()
+      SubscriptionStub.stubBusinessSubscribeFailure()
+      SubscriptionStub.stubPropertySubscribeFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with both a property request and a business request")
+      val res = IncomeTaxSubscription.createSubscription(feBothRequest)
+
+      Then("The result should have a HTTP status of NOT_FOUND and return a reason code")
+      res should have(
+        httpStatus(BAD_REQUEST),
+        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
+      )
+
+      Then("Business subscription should have been called")
+      SubscriptionStub.verifyBusinessSubscribe()
+
+      Then("Property subscription should have been called")
+      SubscriptionStub.verifyPropertySubscribe()
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+    }
+
+    "fail when Business Subscription returns BAD_REQUEST but Property Subscription has no errors during a BOTH Subscription" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationSuccess()
+      SubscriptionStub.stubBusinessSubscribeFailure()
+      SubscriptionStub.stubPropertySubscribeSuccess()
+
+      When("I call POST /subscription/:nino where nino is the test nino with both a property request and a business request")
+      val res = IncomeTaxSubscription.createSubscription(feBothRequest)
+
+      Then("The Business Subscription result should have a HTTP status of BAD_REQUEST and return a reason code")
+      res should have(
+        httpStatus(BAD_REQUEST),
+        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
+      )
+
+      Then("Business subscription should have been called")
+      SubscriptionStub.verifyBusinessSubscribe()
+
+      Then("Property subscription should have been called")
+      SubscriptionStub.verifyPropertySubscribe()
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+    }
+
+    "fail when Property Subscription returns BAD_REQUEST but Business Subscription has no errors during a BOTH Subscription" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationSuccess()
+      SubscriptionStub.stubBusinessSubscribeSuccess()
+      SubscriptionStub.stubPropertySubscribeFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with both a property request and a business request")
+      val res = IncomeTaxSubscription.createSubscription(feBothRequest)
+
+      Then("The Property Subscription result should have a HTTP status of NOT_FOUND and return a reason code")
+      res should have(
+        httpStatus(NOT_FOUND),
+        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
+      )
+
+      Then("Business subscription should have been called")
+      SubscriptionStub.verifyBusinessSubscribe()
+
+      Then("Property subscription should have been called")
+      SubscriptionStub.verifyPropertySubscribe()
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+    }
+
+    "when Known Facts fail then return BAD_REQUEST" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationSuccess()
+      SubscriptionStub.stubBusinessSubscribeSuccess()
+      GGAdminStub.stubAddKnownFactsFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
+      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
+
+      Then("The result should have a HTTP status of BAD REQUEST and return a reason code")
+      res should have(
+        httpStatus(BAD_REQUEST),
+        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
+      )
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+    }
+
+    "when Enrolment fails then return FORBIDDEN" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationSuccess()
+      SubscriptionStub.stubBusinessSubscribeSuccess()
+      GGAdminStub.stubAddKnownFactsSuccess()
+      GGConnectorStub.stubEnrolFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
+      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
+
+      Then("The result should have a HTTP status of FORBIDDEN")
+      res should have(
+        httpStatus(FORBIDDEN)
+      )
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+    }
+
+    "when Refresh Profile fails then return INTERNAL_SERVER_ERROR" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationSuccess()
+      SubscriptionStub.stubBusinessSubscribeSuccess()
+      GGAdminStub.stubAddKnownFactsSuccess()
+      GGConnectorStub.stubEnrolSuccess()
+      GGAuthenticationStub.stubRefreshProfileFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
+      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
+
+      Then("The result should have a HTTP status of UNAUTHORISED")
+      res should have(
+        httpStatus(INTERNAL_SERVER_ERROR)
+      )
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+    }
   }
+
 }

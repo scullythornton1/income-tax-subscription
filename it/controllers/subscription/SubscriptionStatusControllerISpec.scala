@@ -21,6 +21,7 @@ import helpers.IntegrationTestConstants._
 import helpers.servicemocks.{AuthStub, BusinessDetailsStub}
 import models.frontend.FESuccessResponse
 import play.api.http.Status._
+import play.api.libs.json.{JsObject, Json}
 
 class SubscriptionStatusControllerISpec extends ComponentSpecBase {
   "subscribe" should {
@@ -36,6 +37,38 @@ class SubscriptionStatusControllerISpec extends ComponentSpecBase {
       res should have(
         httpStatus(OK),
         jsonBodyAs[FESuccessResponse](FESuccessResponse(Some(testMtditId)))
+      )
+
+      Then("Get business details should have been called")
+      BusinessDetailsStub.verifyGetBusinessDetails()
+    }
+
+    "return UNAUTHORIZED when auth fails" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthFailure()
+
+      When("I call GET /subscription/:nino where nino is the test nino")
+      val res = IncomeTaxSubscription.getSubscriptionStatus(testNino)
+
+      Then("The result should have a HTTP status of OK and a body containing the MTDID")
+      res should have(
+        httpStatus(UNAUTHORIZED),
+        emptyBody
+      )
+    }
+
+    "return BAD_REQUEST when getBusinessDetails returns BAD_REQUEST" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      BusinessDetailsStub.stubGetBusinessDetailsFailure()
+
+      When("I call GET /subscription/:nino where nino is the test nino")
+      val res = IncomeTaxSubscription.getSubscriptionStatus(testNino)
+
+      Then("The result should have a HTTP status of OK and a body containing the MTDID")
+      res should have(
+        httpStatus(BAD_REQUEST),
+        jsonBodyAs(Json.obj("reason" -> BusinessDetailsStub.errorReason))
       )
 
       Then("Get business details should have been called")

@@ -20,12 +20,19 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connectors.RegistrationConnector
 import helpers.IntegrationTestConstants._
 import models.registration.RegistrationSuccessResponseModel
+import models.registration.NewRegistrationFailureResponseModel
 import play.api.http.Status._
 
 object RegistrationStub extends WireMockMethods {
   val successfulRegistrationResponse: RegistrationSuccessResponseModel = RegistrationSuccessResponseModel(testMtditId)
+  val failedRegistrationResponse: NewRegistrationFailureResponseModel = NewRegistrationFailureResponseModel(Some("BAD_REQUEST"), testErrorReason)
+
 
   def stubNewRegistrationSuccess(): StubMapping =
     when(method = POST, uri = RegistrationConnector.newRegistrationUri(testNino), body = registerRequestPayload)
       .thenReturn(status = OK, body = successfulRegistrationResponse)
+
+  def stubNewRegistrationFailure(): StubMapping =
+    when(method = POST, uri = RegistrationConnector.newRegistrationUri(testNino), body = registerRequestPayload)
+      .thenReturn(status = BAD_REQUEST, body = failedRegistrationResponse)
 }

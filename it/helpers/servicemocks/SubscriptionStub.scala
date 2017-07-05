@@ -20,9 +20,9 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import connectors.SubscriptionConnector
 import connectors.SubscriptionConnector._
 import models.subscription.IncomeSourceModel
-import models.subscription.business.BusinessSubscriptionSuccessResponseModel
+import models.subscription.business._
 import helpers.IntegrationTestConstants._
-import models.subscription.property.PropertySubscriptionResponseModel
+import models.subscription.property._
 import play.api.http.Status._
 import play.api.libs.json.Json
 
@@ -34,6 +34,9 @@ object SubscriptionStub extends WireMockMethods {
       List(IncomeSourceModel(testSourceId))
     )
 
+  val testBusinessSubscriptionFailedResponse: BusinessSubscriptionErrorResponseModel =
+    BusinessSubscriptionErrorResponseModel(Some("BAD_REQUEST"), testErrorReason)
+
   val testPropertySubscriptionResponse: PropertySubscriptionResponseModel =
     PropertySubscriptionResponseModel(
       testSafeId,
@@ -41,13 +44,24 @@ object SubscriptionStub extends WireMockMethods {
       IncomeSourceModel(testSourceId)
     )
 
+  val testPropertySubscriptionFailedResponse: PropertySubscriptionFailureModel =
+    PropertySubscriptionFailureModel(Some("NOT_FOUND"), testErrorReason)
+
   def stubBusinessSubscribeSuccess(): StubMapping =
     when(method = POST, uri = SubscriptionConnector.businessSubscribeUri(testNino), body = businessSubscriptionRequestPayload)
     .thenReturn(status = OK, body = testBusinessSubscriptionResponse)
 
+  def stubBusinessSubscribeFailure(): StubMapping =
+    when(method = POST, uri = SubscriptionConnector.businessSubscribeUri(testNino), body = businessSubscriptionRequestPayload)
+      .thenReturn(status = BAD_REQUEST, body = testBusinessSubscriptionFailedResponse)
+
   def stubPropertySubscribeSuccess(): StubMapping =
     when(method = POST, uri = SubscriptionConnector.propertySubscribeUri(testNino), body = Json.obj())
       .thenReturn(status = OK, body = testPropertySubscriptionResponse)
+
+  def stubPropertySubscribeFailure(): StubMapping =
+    when(method = POST, uri = SubscriptionConnector.propertySubscribeUri(testNino), body = Json.obj())
+      .thenReturn(status = NOT_FOUND, body = testPropertySubscriptionFailedResponse)
 
   def verifyBusinessSubscribe(): Unit = verify(method = POST, uri = businessSubscribeUri(testNino), businessSubscriptionRequestPayload)
   def verifyPropertySubscribe(): Unit = verify(method = POST, uri = propertySubscribeUri(testNino), Json.obj())

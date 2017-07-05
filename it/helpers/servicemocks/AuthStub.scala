@@ -37,9 +37,17 @@ object AuthStub extends WireMockMethods {
     stubAuthorityUserIDsSuccess()
   }
 
+  def stubAuthFailure(): StubMapping = {
+    stubAuthorityFailure()
+  }
+
   def stubAuthoritySuccess(): StubMapping =
     when(method = GET, uri = authority)
       .thenReturn(status = OK, body = successfulAuthResponse)
+
+  def stubAuthorityFailure(): StubMapping =
+    when(method = GET, uri = authority)
+      .thenReturn(status = UNAUTHORIZED)
 
   def successfulAuthResponse: JsObject = {
     Json.obj(
@@ -71,4 +79,5 @@ object AuthStub extends WireMockMethods {
 
     WiremockHelper.stubGet(authIDs, Status.OK, idsBody)
   }
+
 }

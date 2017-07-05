@@ -56,7 +56,7 @@ class GGConnector @Inject()
     logging.debug(s"Request:\n$requestDetails")
 
     httpPost.POST[EnrolRequest, HttpResponse](enrolUrl, enrolmentRequest)(
-      implicitly[Writes[EnrolRequest]], HttpReads.readRaw, createHeaderCarrierPost(hc)
+      implicitly[Writes[EnrolRequest]], implicitly[HttpReads[HttpResponse]], createHeaderCarrierPost(hc)
     ).map { response =>
 
       response.status match {

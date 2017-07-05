@@ -21,7 +21,13 @@ import connectors.GGAuthenticationConnector
 import play.api.http.Status._
 
 object GGAuthenticationStub extends WireMockMethods {
+
   def stubRefreshProfileSuccess(): StubMapping =
     when(method = POST, uri = GGAuthenticationConnector.refreshProfileUri)
       .thenReturn(status = NO_CONTENT)
+
+  def stubRefreshProfileFailure(): StubMapping =
+    when(method = POST, uri = GGAuthenticationConnector.refreshProfileUri)
+      .thenReturn(status = UNAUTHORIZED)
+
 }
