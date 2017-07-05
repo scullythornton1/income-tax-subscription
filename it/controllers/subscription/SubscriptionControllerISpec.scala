@@ -204,7 +204,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       AuthStub.stubAuthSuccess()
       RegistrationStub.stubNewRegistrationSuccess()
       SubscriptionStub.stubBusinessSubscribeFailure()
-      SubscriptionStub.stubPropertySubscribeSuccess()  // Same result if Business Succeeds and Property Fails
+      SubscriptionStub.stubPropertySubscribeSuccess()
 
       When("I call POST /subscription/:nino where nino is the test nino with both a property request and a business request")
       val res = IncomeTaxSubscription.createSubscription(feBothRequest)
@@ -225,7 +225,33 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       AuditStub.verifyAudit()
     }
 
-    "when Business Subscription Known Facts fail" in {
+    "fail when Property Subscription returns BAD_REQUEST but Business Subscription has no errors during a BOTH Subscription" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      RegistrationStub.stubNewRegistrationSuccess()
+      SubscriptionStub.stubBusinessSubscribeSuccess()
+      SubscriptionStub.stubPropertySubscribeFailure()
+
+      When("I call POST /subscription/:nino where nino is the test nino with both a property request and a business request")
+      val res = IncomeTaxSubscription.createSubscription(feBothRequest)
+
+      Then("The Property Subscription result should have a HTTP status of NOT_FOUND and return a reason code")
+      res should have(
+        httpStatus(NOT_FOUND),
+        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
+      )
+
+      Then("Business subscription should have been called")
+      SubscriptionStub.verifyBusinessSubscribe()
+
+      Then("Property subscription should have been called")
+      SubscriptionStub.verifyPropertySubscribe()
+
+      Then("The subscription should have been audited")
+      AuditStub.verifyAudit()
+    }
+
+    "when a successful subscription Known Facts fail" in {
       Given("I setup the wiremock stubs")
       AuthStub.stubAuthSuccess()
       RegistrationStub.stubNewRegistrationSuccess()
@@ -245,7 +271,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       AuditStub.verifyAudit()
     }
 
-    "when Business Subscription Enrolment fails" in {
+    "when a successful subscription Enrolment fails" in {
       Given("I setup the wiremock stubs")
       AuthStub.stubAuthSuccess()
       RegistrationStub.stubNewRegistrationSuccess()
@@ -265,7 +291,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       AuditStub.verifyAudit()
     }
 
-    "when Business Subscription Refresh Profile fails" in {
+    "when a successful subscription Refresh Profile fails" in {
       Given("I setup the wiremock stubs")
       AuthStub.stubAuthSuccess()
       RegistrationStub.stubNewRegistrationSuccess()
