@@ -108,10 +108,6 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
         httpStatus(UNAUTHORIZED),
         emptyBody
       )
-
-      Then("The subscription should have been audited")
-      AuditStub.verifyAudit()
-
     }
 
     "fail when Registration returns a BAD_REQUEST response" in {

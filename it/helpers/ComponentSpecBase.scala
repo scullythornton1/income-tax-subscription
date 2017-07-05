@@ -70,6 +70,7 @@ trait ComponentSpecBase extends UnitSpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
+    resetWiremock()
     await(IncomeTaxSubscription.dropThrottleRepo())
     AuditStub.stubAuditing()
   }
