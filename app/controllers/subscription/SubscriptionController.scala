@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 import audit.{Logging, LoggingConfig}
 import connectors.AuthConnector
-import controllers.AuthenticatedController
+import controllers.{AuthenticatedController, ITSASessionKeys}
 import models.frontend.{FEFailureResponse, FERequest}
 import play.api.libs.json.{JsError, JsSuccess}
 import play.api.mvc.{Action, AnyContent, Request, Result}
@@ -37,12 +37,14 @@ class SubscriptionController @Inject()(logging: Logging,
                                       ) extends AuthenticatedController {
 
   def subscribe(nino: String): Action[AnyContent] = Action.async { implicit request =>
+    val path = request.headers.get(ITSASessionKeys.RequestURI).get //Will fail if request uri is not included in headers
+
     implicit val loggingConfig = SubscriptionController.subscribeLoggingConfig
     logging.debug(s"Request received for $nino")
     lazy val parseError: Future[Result] = BadRequest(toJsValue(FEFailureResponse("Request is invalid")))
     authenticated {
       parseRequest(request).fold(parseError) { feRequest =>
-        createSubscription(feRequest)
+        createSubscription(feRequest, path)
       }
     }
   }
@@ -57,7 +59,8 @@ class SubscriptionController @Inject()(logging: Logging,
     }
   } yield parsedBody
 
-  private def createSubscription(feRequest: FERequest)(implicit hc: HeaderCarrier): Future[Result] = subManService.rosmAndEnrol(feRequest).map {
+  private def createSubscription(feRequest: FERequest, path: String)(implicit hc: HeaderCarrier): Future[Result] =
+    subManService.rosmAndEnrol(feRequest, path).map {
     case Right(r) =>
       logging.debug(s"Subscription successful, responding with\n$r")
       Ok(toJsValue(r))

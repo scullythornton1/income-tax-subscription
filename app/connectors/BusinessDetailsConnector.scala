@@ -54,7 +54,6 @@ class BusinessDetailsConnector @Inject()(appConfig: AppConfig,
     implicit val loggingConfig = RegistrationConnector.getRegistrationLoggingConfig
     lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
     val updatedHc = createHeaderCarrierGet(hc)
-    lazy val auditRequest = logging.auditFor(auditGetBusinessDetails, requestDetails)(updatedHc)
     logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
 
     httpGet.GET[HttpResponse](getBusinessDetailsUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc)
