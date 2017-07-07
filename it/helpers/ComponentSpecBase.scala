@@ -16,6 +16,7 @@
 
 package helpers
 
+import controllers.ITSASessionKeys
 import helpers.servicemocks.{AuditStub, WireMockMethods}
 import models.frontend.FERequest
 import models.throttling.UserCount
@@ -23,16 +24,14 @@ import org.scalatest._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Writes
 import play.api.libs.ws.WSResponse
 import play.api.{Application, Environment, Mode}
 import reactivemongo.api.commands.WriteResult
-import repositories.{Repositories, ThrottleMongoRepository}
-import uk.gov.hmrc.play.test.UnitSpec
-import play.api.libs.concurrent.Execution.Implicits._
+import repositories.Repositories
 import uk.gov.hmrc.play.http.HeaderCarrier
-
-import scala.concurrent.ExecutionContext
+import uk.gov.hmrc.play.test.UnitSpec
 
 trait ComponentSpecBase extends UnitSpec
   with GivenWhenThen with TestSuite
@@ -96,12 +95,16 @@ trait ComponentSpecBase extends UnitSpec
     def post[T](uri: String, body: T)(implicit writes: Writes[T]): WSResponse = {
       await(
         buildClient(uri)
-          .withHeaders("Content-Type" -> "application/json")
+          .withHeaders(
+            "Content-Type" -> "application/json",
+            ITSASessionKeys.RequestURI -> IntegrationTestConstants.requestUri
+          )
           .post(writes.writes(body).toString())
       )
     }
 
     def insertUserCount(userCount: UserCount): WriteResult = await(throttleMongoRepository.insert(userCount))
+
     def dropThrottleRepo(): Unit = await(throttleMongoRepository.drop)
   }
 

@@ -16,6 +16,7 @@
 
 package unit.controllers.subscription
 
+import controllers.ITSASessionKeys
 import controllers.subscription.SubscriptionController
 import models.frontend.FESuccessResponse
 import play.api.http.Status._
@@ -42,7 +43,11 @@ class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerSe
 
   "SubscriptionController" should {
     "return the id when successful, call enrol user if it is set to true" in {
-      val fakeRequest: FakeRequest[AnyContentAsJson] = FakeRequest().withJsonBody(fePropertyRequest.copy(enrolUser = true))
+      val fakeRequest: FakeRequest[AnyContentAsJson] =
+        FakeRequest()
+          .withJsonBody(fePropertyRequest.copy(enrolUser = true))
+          .withHeaders(ITSASessionKeys.RequestURI -> "")
+
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
@@ -56,7 +61,11 @@ class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerSe
     }
 
     "return the id when successful, do not call enrol user if it is set to false" in {
-      val fakeRequest: FakeRequest[AnyContentAsJson] = FakeRequest().withJsonBody(fePropertyRequest.copy(enrolUser = false))
+      val fakeRequest: FakeRequest[AnyContentAsJson] =
+        FakeRequest()
+          .withJsonBody(fePropertyRequest.copy(enrolUser = false))
+          .withHeaders(ITSASessionKeys.RequestURI -> "")
+
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
@@ -68,7 +77,11 @@ class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerSe
     }
 
     "return failure when it's unsuccessful" in {
-      val fakeRequest: FakeRequest[AnyContentAsJson] = FakeRequest().withJsonBody("{}")
+      val fakeRequest: FakeRequest[AnyContentAsJson] =
+        FakeRequest()
+          .withJsonBody("{}")
+          .withHeaders(ITSASessionKeys.RequestURI -> "")
+
       val result = call(fakeRequest)
       status(result) shouldBe BAD_REQUEST
     }

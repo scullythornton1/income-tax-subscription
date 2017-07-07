@@ -16,10 +16,11 @@
 
 package unit.services
 
-import models.frontend.FERequest
+import models.ErrorModel
+import models.frontend.{FERequest, FESuccessResponse}
 import play.api.http.Status._
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import unit.services.mocks.MockSubscriptionManagerService
 import utils.TestConstants.GG.KnownFactsResponse._
 import utils.TestConstants.GG.EnrolResponseExamples._
@@ -34,9 +35,11 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
   implicit val hc = HeaderCarrier()
   implicit val ec = ExecutionContext.Implicits.global
 
+  val path = ""
+
   "The RosmAndEnrolManagerService.rosmAndEnrol action" should {
 
-    def call(request: FERequest) = await(TestSubscriptionManagerService.rosmAndEnrol(request))
+    def call(request: FERequest): Either[ErrorModel, FESuccessResponse] = await(TestSubscriptionManagerService.rosmAndEnrol(request, path))
 
     "return the mtditId when reg, subscribe, known facts, enrol and refresh is successful (property only)" in {
       mockRegister(registerRequestPayload)(regSuccess)
@@ -115,7 +118,7 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
 
   "The RosmAndEnrolManagerService.orchestrateROSM action" should {
 
-    def call(request: FERequest) = await(TestSubscriptionManagerService.orchestrateROSM(request))
+    def call(request: FERequest): Either[ErrorModel, FESuccessResponse] = await(TestSubscriptionManagerService.orchestrateROSM(request))
 
     "return the mtditID when registration and subscription for property is successful" in {
       mockRegister(registerRequestPayload)(regSuccess)
@@ -173,7 +176,7 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
 
     val dummyResponse = Json.parse("{}")
 
-    def call = await(TestSubscriptionManagerService.orchestrateEnrolment(testNino, testMtditId))
+    def call: Either[ErrorModel, HttpResponse] = await(TestSubscriptionManagerService.orchestrateEnrolment(testNino, testMtditId))
 
     "return OK response correctly when both KnownFactsAdd and ggEnrol are successful" in {
       mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)

@@ -45,6 +45,8 @@ class RosmAndEnrolManagerService @Inject()
 
   lazy val urlHeaderAuthorization: String = s"Bearer ${appConfig.desToken}"
 
+  val pathKey = "path"
+
   val feRequestToAuditMap: FERequest => Map[String, String] = feRequest =>
     Map(
       "nino" -> feRequest.nino,
@@ -64,8 +66,13 @@ class RosmAndEnrolManagerService @Inject()
       "mtdItsaReferenceNumber" -> response.mtditId.get
     )
 
-  def rosmAndEnrol(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, FESuccessResponse]] = {
-    logging.audit(Logging.AuditSubscribeRequest.transactionName, feRequestToAuditMap(request), Logging.AuditSubscribeRequest.auditType)(hc)
+  def rosmAndEnrol(request: FERequest, path: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, FESuccessResponse]] = {
+    logging.audit(
+      Logging.AuditSubscribeRequest.transactionName,
+      feRequestToAuditMap(request) + (pathKey -> path),
+      Logging.AuditSubscribeRequest.auditType
+    )(hc)
+
     val result: Future[Either[ErrorModel, FESuccessResponse]] = orchestrateROSM(request).flatMap {
       case Right(rosmSuccess) =>
         request.enrolUser match {
@@ -85,7 +92,12 @@ class RosmAndEnrolManagerService @Inject()
     }
     result.map {
       case Right(rosmSuccess@FESuccessResponse(_)) =>
-        logging.audit(Logging.AuditReferenceNumber.transactionName, auditResponseMap(request, rosmSuccess), Logging.AuditReferenceNumber.auditType)(hc)
+        logging.audit(
+          Logging.AuditReferenceNumber.transactionName,
+          auditResponseMap(request, rosmSuccess) + (pathKey -> path),
+          Logging.AuditReferenceNumber.auditType
+        )(hc)
+
         rosmSuccess
       case x => x
     }
