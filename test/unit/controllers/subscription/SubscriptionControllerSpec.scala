@@ -85,14 +85,6 @@ class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerSe
       val result = call(fakeRequest)
       status(result) shouldBe BAD_REQUEST
     }
-
-    s"fail when there is no ${ITSASessionKeys.RequestURI} in the headers" in {
-      val fakeRequest: FakeRequest[AnyContentAsJson] =
-        FakeRequest()
-          .withJsonBody(fePropertyRequest.copy(enrolUser = false))
-
-      intercept[NoSuchElementException](call(fakeRequest)).getMessage shouldBe "None.get"
-    }
   }
 
 }

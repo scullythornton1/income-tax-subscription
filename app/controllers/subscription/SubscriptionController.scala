@@ -37,7 +37,13 @@ class SubscriptionController @Inject()(logging: Logging,
                                       ) extends AuthenticatedController {
 
   def subscribe(nino: String): Action[AnyContent] = Action.async { implicit request =>
-    val path = request.headers.get(ITSASessionKeys.RequestURI).get //Will fail if request uri is not included in headers
+    val path = request.headers.get(ITSASessionKeys.RequestURI) match {
+      case Some(value) => value
+      case None =>
+        val noAuditPath = "-"
+        logging.err(s"Expected ${ITSASessionKeys.RequestURI} in HeaderCarrier, using '$noAuditPath' as audit path")
+        noAuditPath
+    }
 
     implicit val loggingConfig = SubscriptionController.subscribeLoggingConfig
     logging.debug(s"Request received for $nino")
