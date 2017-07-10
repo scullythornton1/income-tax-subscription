@@ -105,8 +105,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
 
       Then("The result should have a HTTP status of UNAUTHORISED and an empty body")
       res should have(
-        httpStatus(UNAUTHORIZED),
-        emptyBody
+        httpStatus(INTERNAL_SERVER_ERROR)
       )
     }
 
@@ -299,7 +298,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
       val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
 
-      Then("The result should have a HTTP status of UNAUTHORISED")
+      Then("The result should have a HTTP status of INTERNAL_SERVER_ERROR")
       res should have(
         httpStatus(INTERNAL_SERVER_ERROR)
       )

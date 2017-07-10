@@ -88,7 +88,7 @@ class UserAccessControllerISpec extends ComponentSpecBase {
       )
     }
 
-    "return FORBIDDEN when auth fails" in {
+    "return INTERNAL_SERVER_ERROR when auth fails" in {
       Given("I setup the wiremock stubs")
       AuthStub.stubAuthFailure()
 
@@ -97,7 +97,7 @@ class UserAccessControllerISpec extends ComponentSpecBase {
 
       Then("The result should have a HTTP status of FORBIDDEN")
       res should have(
-        httpStatus(FORBIDDEN)
+        httpStatus(INTERNAL_SERVER_ERROR)
       )
     }
   }
