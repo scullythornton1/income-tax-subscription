@@ -32,18 +32,24 @@
 
 package config
 
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
 
+import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.auth.microservice.connectors.AuthConnector
-import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
+import uk.gov.hmrc.play.config.{AppName, RunMode}
+import uk.gov.hmrc.play.http.HttpPost
 import uk.gov.hmrc.play.http.hooks.HttpHook
 import uk.gov.hmrc.play.http.ws._
 
 @Singleton
 class WSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch with AppName with RunMode {
   override val hooks: Seq[HttpHook] = NoneRequired
+}
+
+@Singleton
+class AuthConnector @Inject()(val http: HttpPost, config: AppConfig) extends PlayAuthConnector {
+  override val serviceUrl: String = config.authURL
 }
 
 object WSHttp extends WSHttp
@@ -55,6 +61,3 @@ class MicroserviceAuditConnector extends AuditConnector with RunMode {
 
 object MicroserviceAuditConnector extends MicroserviceAuditConnector
 
-object MicroserviceAuthConnector extends AuthConnector with ServicesConfig {
-  override val authBaseUrl = baseUrl("auth")
-}

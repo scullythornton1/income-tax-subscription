@@ -19,30 +19,30 @@ package controllers.subscription
 import javax.inject.Inject
 
 import audit.{Logging, LoggingConfig}
-import connectors.AuthConnector
-import controllers.AuthenticatedController
 import models.frontend.FEFailureResponse
 import play.api.mvc.{Action, AnyContent}
-import services.SubscriptionStatusService
+import services.{AuthService, SubscriptionStatusService}
+import uk.gov.hmrc.play.microservice.controller.BaseController
 import utils.Implicits._
 import utils.JsonUtils.toJsValue
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SubscriptionStatusController @Inject()(logging: Logging,
-                                             override val auth: AuthConnector,
-                                             subscriptionStatusService: SubscriptionStatusService) extends AuthenticatedController {
+                                             authService: AuthService,
+                                             subscriptionStatusService: SubscriptionStatusService) extends BaseController {
+  import authService._
 
   def checkSubscriptionStatus(nino: String): Action[AnyContent] = Action.async { implicit request =>
-    authenticated {
+    authorised() {
       implicit val loggingConfig = SubscriptionStatusController.checkSubscriptionStatusLoggingConfig
       subscriptionStatusService.checkMtditsaSubscription(nino).map {
-        case Right(r) =>
-          logging.debug(s"successful, responding with\n$r")
-          Ok(toJsValue(r))
-        case Left(l) =>
-          logging.warn(s"failed, responding with\nstatus=${l.status}\nreason=${l.reason}")
-          Status(l.status)(toJsValue(FEFailureResponse(l.reason)))
+        case Right(success) =>
+          logging.debug(s"successful, responding with\n$success")
+          Ok(toJsValue(success))
+        case Left(failure) =>
+          logging.warn(s"failed, responding with\nstatus=${failure.status}\nreason=${failure.reason}")
+          Status(failure.status)(toJsValue(FEFailureResponse(failure.reason)))
       }
     }
   }

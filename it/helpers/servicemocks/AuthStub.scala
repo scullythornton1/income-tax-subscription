@@ -19,13 +19,14 @@ package helpers.servicemocks
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import helpers.{IntegrationTestConstants, WiremockHelper}
 import models.auth.UserIds
-import play.api.http.Status
+import play.api.http.{HeaderNames, Status}
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Json}
+import uk.gov.hmrc.auth.core.Retrievals
 
 object AuthStub extends WireMockMethods {
   val authIDs = "/uri/to/ids"
-  val authority = "/auth/authority"
+  val authority = "/auth/authorise"
 
   val gatewayID = "12345"
   val internalID = "internal"
@@ -33,51 +34,21 @@ object AuthStub extends WireMockMethods {
   val userIDs = UserIds(internalId = internalID, externalId = externalID)
 
   def stubAuthSuccess(): StubMapping = {
-    stubAuthoritySuccess()
-    stubAuthorityUserIDsSuccess()
+    when(method = POST, uri = authority)
+      .thenReturn(status = OK, body = successfulAuthResponse)
   }
+
+  private def exceptionHeaders(value: String) = Map(HeaderNames.WWW_AUTHENTICATE -> s"""MDTP detail="$value"""")
 
   def stubAuthFailure(): StubMapping = {
-    stubAuthorityFailure()
+    when(method = POST, uri = authority)
+      .thenReturn(status = UNAUTHORIZED, headers = exceptionHeaders("MissingBearerToken"))
   }
 
-  def stubAuthoritySuccess(): StubMapping =
-    when(method = GET, uri = authority)
-      .thenReturn(status = OK, body = successfulAuthResponse)
-
-  def stubAuthorityFailure(): StubMapping =
-    when(method = GET, uri = authority)
-      .thenReturn(status = UNAUTHORIZED)
-
-  def successfulAuthResponse: JsObject = {
+  val successfulAuthResponse: JsObject = {
     Json.obj(
-      "uri" -> "/auth/oid/58a2e8c82e00008c005d4699",
-      "userDetailsLink" -> "/uri/to/user-details",
-      "credentials" -> Json.obj(
-        "gatewayId" -> gatewayID
-      ),
-      "ids" -> authIDs
+      "internalId" -> userIDs.internalId
     )
-  }
-
-  def stubAuthorityUserIDsSuccess(): StubMapping =
-    when(method = GET, uri = authIDs)
-      .thenReturn(status = OK, body = userIDs)
-
-  def stubGetAuthoritySuccess(): Unit = {
-    val authBody = IntegrationTestConstants.Auth.authResponseJson("/auth/oid/58a2e8c82e00008c005d4699", "/uri/to/user-details", "12345", authIDs).toString()
-
-    WiremockHelper.stubGet(authority, Status.OK, authBody)
-  }
-
-  def stubGetAuthorityFailure(): Unit = {
-    WiremockHelper.stubGet(authority, Status.UNAUTHORIZED, "")
-  }
-
-  def stubGetIDsSuccess(): Unit = {
-    val idsBody = IntegrationTestConstants.Auth.idsResponseJson("foo", "bar").toString()
-
-    WiremockHelper.stubGet(authIDs, Status.OK, idsBody)
   }
 
 }

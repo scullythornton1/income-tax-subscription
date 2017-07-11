@@ -19,13 +19,14 @@ package controllers.subscription
 import javax.inject.Inject
 
 import audit.{Logging, LoggingConfig}
-import connectors.AuthConnector
-import controllers.{AuthenticatedController, ITSASessionKeys}
+import controllers.ITSASessionKeys
 import models.frontend.{FEFailureResponse, FERequest}
 import play.api.libs.json.{JsError, JsSuccess}
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import services.RosmAndEnrolManagerService
+import services.{AuthService, RosmAndEnrolManagerService}
+import uk.gov.hmrc.auth.core.AuthorisationException
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.microservice.controller.BaseController
 import utils.JsonUtils._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,8 +34,9 @@ import scala.concurrent.Future
 
 class SubscriptionController @Inject()(logging: Logging,
                                        subManService: RosmAndEnrolManagerService,
-                                       override val auth: AuthConnector
-                                      ) extends AuthenticatedController {
+                                       authService: AuthService
+                                      ) extends BaseController {
+  import authService._
 
   def subscribe(nino: String): Action[AnyContent] = Action.async { implicit request =>
     val path = request.headers.get(ITSASessionKeys.RequestURI) match {
@@ -47,10 +49,11 @@ class SubscriptionController @Inject()(logging: Logging,
 
     implicit val loggingConfig = SubscriptionController.subscribeLoggingConfig
     logging.debug(s"Request received for $nino")
-    lazy val parseError: Future[Result] = BadRequest(toJsValue(FEFailureResponse("Request is invalid")))
-    authenticated {
-      parseRequest(request).fold(parseError) { feRequest =>
-        createSubscription(feRequest, path)
+
+    authorised() {
+      parseRequest(request) match {
+        case Some(feRequest) => createSubscription(feRequest, path)
+        case None => BadRequest(toJsValue(FEFailureResponse("Request is invalid")))
       }
     }
   }
