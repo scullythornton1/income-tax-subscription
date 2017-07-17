@@ -49,7 +49,7 @@ class WSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch wit
 
 @Singleton
 class AuthConnector @Inject()(val http: HttpPost, config: AppConfig) extends PlayAuthConnector {
-  override val serviceUrl: String = config.authURL
+  override lazy val serviceUrl: String = config.authURL
 }
 
 object WSHttp extends WSHttp
