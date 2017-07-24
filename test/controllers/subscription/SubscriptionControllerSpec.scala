@@ -25,10 +25,6 @@ import services.mocks.{MockAuthService, MockSubscriptionManagerService}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.JsonUtils._
 import utils.MaterializerSupport
-import utils.TestConstants.AuthenticatorResponse._
-import utils.TestConstants.GG.EnrolResponseExamples._
-import utils.TestConstants.GG.KnownFactsResponse._
-import utils.TestConstants.GG._
 import utils.TestConstants._
 
 import scala.concurrent.Future
@@ -45,18 +41,12 @@ class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerSe
         FakeRequest()
           .withJsonBody(fePropertyRequest.copy(enrolUser = true))
           .withHeaders(ITSASessionKeys.RequestURI -> "")
-
       mockAuthSuccess()
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
-      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
-      mockRefreshProfile(refreshSuccess)
       val result = call(fakeRequest)
       jsonBodyOf(result).as[FESuccessResponse].mtditId.get shouldBe testMtditId
 
-      verifyMockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(1)
-      verifyRefreshProfile(1)
     }
 
     "return the id when successful, do not call enrol user if it is set to false" in {
@@ -64,16 +54,12 @@ class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerSe
         FakeRequest()
           .withJsonBody(fePropertyRequest.copy(enrolUser = false))
           .withHeaders(ITSASessionKeys.RequestURI -> "")
-
       mockAuthSuccess()
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
-      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
       val result = call(fakeRequest)
       jsonBodyOf(result).as[FESuccessResponse].mtditId.get shouldBe testMtditId
 
-      verifyMockGovernmentGatewayEnrol()(0)
-      verifyRefreshProfile(0)
     }
 
     "return failure when the json body cannot be parsed" in {

@@ -18,14 +18,11 @@ package services.mocks
 
 import audit.Logging
 import config.AppConfig
-import play.api.Configuration
 import services.RosmAndEnrolManagerService
 import uk.gov.hmrc.play.http.HttpGet
-import connectors.mocks.MockAuthenticatorConnector
 
-trait MockSubscriptionManagerService extends MockRegistrationService with MockSubscriptionService with MockEnrolmentService with MockAuthenticatorConnector {
+trait MockSubscriptionManagerService extends MockRegistrationService with MockSubscriptionService {
 
-  override lazy val config = app.injector.instanceOf[Configuration]
   override lazy val appConfig = app.injector.instanceOf[AppConfig]
   override lazy val logging = app.injector.instanceOf[Logging]
   override lazy val httpPost = mockHttpPost
@@ -35,9 +32,7 @@ trait MockSubscriptionManagerService extends MockRegistrationService with MockSu
     appConfig,
     logging,
     TestRegistrationService,
-    TestSubscriptionService,
-    TestEnrolmentService,
-    TestGGAuthenticationConnector
+    TestSubscriptionService
   )
 
 }

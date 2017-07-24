@@ -17,7 +17,6 @@
 package utils
 
 import models.frontend.{Both, Business, FERequest, Property}
-import models.gg.{EnrolRequest, KnownFactsRequest, TypeValuePair}
 import models.registration.RegistrationRequestModel
 import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
 import models.{DateModel, ErrorModel}
@@ -86,13 +85,6 @@ object TestConstants {
       cashOrAccruals = "cash"
     ))
   )
-  val governmentGatewayEnrolPayload =
-    EnrolRequest(
-      portalId = GovernmentGateway.ggPortalId,
-      serviceName = GovernmentGateway.ggServiceName,
-      friendlyName = GovernmentGateway.ggFriendlyName,
-      knownFacts = List(testMtditId, testNino)
-    )
 
   object GetBusinessDetailsResponse {
     val successResponse: (String, String, String) => JsValue = (nino: String, safeId: String, mtdbsa: String) =>
@@ -261,101 +253,6 @@ object TestConstants {
        |  "reason":"$reason"
        |}
     """.stripMargin
-
-  object GG {
-
-    lazy val knowFactsRequest = KnownFactsRequest(
-      List(
-        TypeValuePair(GovernmentGateway.MTDITID, testMtditId),
-        TypeValuePair(GovernmentGateway.NINO, testNino)
-      )
-    )
-
-    object KnownFactsResponse {
-
-      def successResponse(line: Int): JsValue =
-        s"""{
-           | "linesUpdated" : $line
-           | }""".stripMargin
-
-      def failureResponse(statusCode: Int, message: String): JsValue =
-        s"""{
-           | "statusCode" : $statusCode,
-           | "message" : "$message"
-           | }""".stripMargin
-
-      lazy val addKnownFactsSuccess = (OK, successResponse(1))
-
-      val SERVICE_DOES_NOT_EXISTS_MODEL = ErrorModel(BAD_REQUEST, "The service specified does not exist")
-      val GATEWAY_ERROR_MODEL = ErrorModel(INTERNAL_SERVER_ERROR, "Authentication successful, but error accessing user information with Gateway token")
-
-      val SERVICE_DOES_NOT_EXISTS = (BAD_REQUEST, failureResponse(BAD_REQUEST, SERVICE_DOES_NOT_EXISTS_MODEL.reason))
-      val GATEWAY_ERROR = (INTERNAL_SERVER_ERROR, failureResponse(INTERNAL_SERVER_ERROR, GATEWAY_ERROR_MODEL.reason))
-
-    }
-
-    object TypeValuePairExamples {
-      val testType1 = GovernmentGateway.MTDITID
-      val testValue1 = testMtditId
-      val testType2 = GovernmentGateway.NINO
-      val testValue2 = testNino
-
-      def jsonTypeValuePair(testType: String, testValue: String): JsValue =
-        s"""{"type" : "$testType",
-           | "value" : "$testValue"
-           | }""".stripMargin
-    }
-
-    object EnrolRequestExamples {
-      val portalId = GovernmentGateway.ggPortalId
-      val serviceName = GovernmentGateway.ggServiceName
-      val friendlyName = GovernmentGateway.ggFriendlyName
-      val knownFact1 = testMtditId
-      val knownFact2 = testNino
-
-      def jsonEnrolRequest(portalId: String, serviceName: String, friendlyName: String, knownFacts: List[String]): JsValue =
-        s"""{
-           |     "portalId": "$portalId",
-           |     "serviceName": "$serviceName",
-           |     "friendlyName": "$friendlyName",
-           |     "knownFacts": [
-           |        ${knownFacts.map(x =>s""" "$x" """).mkString(",")}
-           |      ]
-           |}""".stripMargin
-    }
-
-    object EnrolResponseExamples {
-      val serviceName = GovernmentGateway.ggServiceName
-      val state = "Activated"
-      val friendlyName = GovernmentGateway.ggFriendlyName
-      val testType1 = GovernmentGateway.MTDITID
-      val testValue1 = testMtditId
-      val testType2 = GovernmentGateway.NINO
-      val testValue2 = testNino
-
-      def jsonEnrolResponse(serviceName: String, state: String, friendlyName: String, identifier: List[TypeValuePair]): JsValue =
-        s"""{
-           |     "serviceName": "$serviceName",
-           |     "state": "$state",
-           |     "friendlyName": "$friendlyName",
-           |     "identifiers": [
-           |        ${identifier.map(x => s"""{ "type" : "${x.`type`}", "value" : "${x.value}"}""").mkString(",")}
-           |      ]
-           |}""".stripMargin
-
-      val enrolSuccess = jsonEnrolResponse(
-        serviceName,
-        state,
-        friendlyName,
-        List(
-          TypeValuePair(testType1, testValue1),
-          TypeValuePair(testType2, testValue2)
-        ))
-
-      val enrolFailure = Json.toJson("""{reason:"Dummy Reason"}""")
-    }
-
-  }
 
   object AuthenticatorResponse {
 
