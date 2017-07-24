@@ -254,12 +254,6 @@ object TestConstants {
        |}
     """.stripMargin
 
-  object AuthenticatorResponse {
-
-    val refreshSuccess = (NO_CONTENT, None)
-    val refreshFailure: (Int, Option[JsValue]) = (BAD_REQUEST, """{ "reason" : "Bearer token missing or invalid, or GG-token has expired" }""": JsValue)
-
-  }
 
   object GovernmentGateway {
     val MTDITID = "MTDITID"

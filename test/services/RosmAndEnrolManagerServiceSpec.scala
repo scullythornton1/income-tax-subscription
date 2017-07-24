@@ -36,19 +36,19 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
 
     def call(request: FERequest): Either[ErrorModel, FESuccessResponse] = await(TestSubscriptionManagerService.rosmAndEnrol(request, path))
 
-    "return the mtditId when reg, subscribe, known facts, enrol and refresh is successful (property only)" in {
+    "return the mtditId when register and subscribe are successful (property only)" in {
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
       call(fePropertyRequest).right.get.mtditId.get shouldBe testMtditId
     }
 
-    "return the mtditId when reg, subscribe, known facts, enrol and refresh is successful (business only)" in {
+    "return the mtditId when register and subscribe are successful (business only)" in {
       mockRegister(registerRequestPayload)(regSuccess)
       mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
       call(feBusinessRequest).right.get.mtditId.get shouldBe testMtditId
     }
 
-    "return the mtditId when reg, subscribe, known facts, enrol and refresh is successful (both business and property)" in {
+    "return the mtditId when register and subscribe are successful (both business and property)" in {
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
       mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
