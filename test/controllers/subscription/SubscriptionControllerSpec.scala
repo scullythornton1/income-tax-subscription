@@ -25,10 +25,6 @@ import services.mocks.{MockAuthService, MockSubscriptionManagerService}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.JsonUtils._
 import utils.MaterializerSupport
-import utils.TestConstants.AuthenticatorResponse._
-import utils.TestConstants.GG.EnrolResponseExamples._
-import utils.TestConstants.GG.KnownFactsResponse._
-import utils.TestConstants.GG._
 import utils.TestConstants._
 
 import scala.concurrent.Future
@@ -40,40 +36,18 @@ class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerSe
   def call(request: Request[AnyContentAsJson]): Future[Result] = TestController.subscribe(testNino)(request)
 
   "SubscriptionController" should {
-    "return the id when successful, call enrol user if it is set to true" in {
+
+    "return the id when successful" in {
       val fakeRequest: FakeRequest[AnyContentAsJson] =
         FakeRequest()
-          .withJsonBody(fePropertyRequest.copy(enrolUser = true))
+          .withJsonBody(fePropertyRequest)
           .withHeaders(ITSASessionKeys.RequestURI -> "")
-
       mockAuthSuccess()
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
-      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
-      mockRefreshProfile(refreshSuccess)
       val result = call(fakeRequest)
       jsonBodyOf(result).as[FESuccessResponse].mtditId.get shouldBe testMtditId
 
-      verifyMockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)(1)
-      verifyRefreshProfile(1)
-    }
-
-    "return the id when successful, do not call enrol user if it is set to false" in {
-      val fakeRequest: FakeRequest[AnyContentAsJson] =
-        FakeRequest()
-          .withJsonBody(fePropertyRequest.copy(enrolUser = false))
-          .withHeaders(ITSASessionKeys.RequestURI -> "")
-
-      mockAuthSuccess()
-      mockRegister(registerRequestPayload)(regSuccess)
-      mockPropertySubscribe(propertySubscribeSuccess)
-      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      val result = call(fakeRequest)
-      jsonBodyOf(result).as[FESuccessResponse].mtditId.get shouldBe testMtditId
-
-      verifyMockGovernmentGatewayEnrol()(0)
-      verifyRefreshProfile(0)
     }
 
     "return failure when the json body cannot be parsed" in {

@@ -24,7 +24,6 @@ import models.frontend.{FEFailureResponse, FERequest}
 import play.api.libs.json.{JsError, JsSuccess}
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import services.{AuthService, RosmAndEnrolManagerService}
-import uk.gov.hmrc.auth.core.AuthorisationException
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import utils.JsonUtils._

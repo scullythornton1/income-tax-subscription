@@ -29,8 +29,7 @@ class FERequestSpec extends UnitSpec {
     "Provide the correct reader for FERequest, set enrolUser to true if it is not provided" in {
       val feRequest = FERequest(
         nino = TestConstants.testNino,
-        incomeSource = Business,
-        enrolUser = true
+        incomeSource = Business
       )
 
       val request: JsValue = Json.toJson(feRequest)
@@ -45,16 +44,14 @@ class FERequestSpec extends UnitSpec {
     "Provide the correct reader for FERequest, set enrolUser to the supplied value if it is provided" in {
       val feRequest = FERequest(
         nino = TestConstants.testNino,
-        incomeSource = Business,
-        enrolUser = false
+        incomeSource = Business
       )
 
       val request: JsValue = Json.toJson(feRequest)
       val expected = Json.fromJson[FERequest](
         s"""{"nino" : "${TestConstants.testNino}",
            | "isAgent" : false,
-           | "incomeSource":"${IncomeSourceType.business}",
-           | "enrolUser" : false
+           | "incomeSource":"${IncomeSourceType.business}"
            |}""".stripMargin).get
       val actual = Json.fromJson[FERequest](request).get
       actual shouldBe expected
@@ -66,8 +63,7 @@ class FERequestSpec extends UnitSpec {
         s"""{"nino" : "${TestConstants.testNino}",
            | "isAgent" : false,
            | "arn" : "${TestConstants.testArn}",
-           | "incomeSource":"${IncomeSourceType.business}",
-           | "enrolUser" : false
+           | "incomeSource":"${IncomeSourceType.business}"
            |}""".stripMargin)
       parsed.isSuccess shouldBe true
     }

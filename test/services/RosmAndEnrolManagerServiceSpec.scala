@@ -19,14 +19,9 @@ package services
 import models.ErrorModel
 import models.frontend.{FERequest, FESuccessResponse}
 import play.api.http.Status._
-import play.api.libs.json.Json
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import services.mocks.MockSubscriptionManagerService
-import utils.TestConstants.GG.KnownFactsResponse._
-import utils.TestConstants.GG.EnrolResponseExamples._
-import utils.TestConstants.GG._
+import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.TestConstants._
-import utils.TestConstants.AuthenticatorResponse._
 
 import scala.concurrent.ExecutionContext
 
@@ -41,59 +36,23 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
 
     def call(request: FERequest): Either[ErrorModel, FESuccessResponse] = await(TestSubscriptionManagerService.rosmAndEnrol(request, path))
 
-    "return the mtditId when reg, subscribe, known facts, enrol and refresh is successful (property only)" in {
+    "return the mtditId when register and subscribe are successful (property only)" in {
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
-      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
-      mockRefreshProfile(refreshSuccess)
       call(fePropertyRequest).right.get.mtditId.get shouldBe testMtditId
     }
 
-    "return the mtditId when reg, subscribe, known facts, enrol and refresh is successful (business only)" in {
+    "return the mtditId when register and subscribe are successful (business only)" in {
       mockRegister(registerRequestPayload)(regSuccess)
       mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
-      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
-      mockRefreshProfile(refreshSuccess)
       call(feBusinessRequest).right.get.mtditId.get shouldBe testMtditId
     }
 
-    "return the mtditId when reg, subscribe, known facts, enrol and refresh is successful (both business and property)" in {
+    "return the mtditId when register and subscribe are successful (both business and property)" in {
       mockRegister(registerRequestPayload)(regSuccess)
       mockPropertySubscribe(propertySubscribeSuccess)
       mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
-      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
-      mockRefreshProfile(refreshSuccess)
       call(feBothRequest).right.get.mtditId.get shouldBe testMtditId
-    }
-
-    "return an error when reg, subscribe, known facts, enrol is successful but refresh fails" in {
-      mockRegister(registerRequestPayload)(regSuccess)
-      mockPropertySubscribe(propertySubscribeSuccess)
-      mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
-      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, enrolSuccess))
-      mockRefreshProfile(refreshFailure)
-      call(feBothRequest).left.get.status shouldBe INTERNAL_SERVER_ERROR
-    }
-
-    "return an error when reg, subscribe, known facts is successful but enrol fails" in {
-      mockRegister(registerRequestPayload)(regSuccess)
-      mockPropertySubscribe(propertySubscribeSuccess)
-      mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
-      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((BAD_REQUEST, enrolFailure))
-      call(feBothRequest).left.get.status shouldBe BAD_REQUEST
-    }
-
-    "return an error when reg, subscribe but known facts fails" in {
-      mockRegister(registerRequestPayload)(regSuccess)
-      mockPropertySubscribe(propertySubscribeSuccess)
-      mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
-      mockAddKnownFacts(knowFactsRequest)(SERVICE_DOES_NOT_EXISTS)
-      call(feBothRequest).left.get.status shouldBe BAD_REQUEST
     }
 
     "return an error when reg, property subscribe success, business subscribe fails" in {
@@ -168,31 +127,6 @@ class RosmAndEnrolManagerServiceSpec extends MockSubscriptionManagerService {
       mockPropertySubscribe(INVALID_NINO)
       mockBusinessSubscribe(businessSubscriptionRequestPayload)(businessSubscribeSuccess)
       call(feBothRequest).left.get.status shouldBe BAD_REQUEST
-    }
-
-  }
-
-  "RosmAndEnrolManagerService.orchestrateEnrolment" should {
-
-    val dummyResponse = Json.parse("{}")
-
-    def call: Either[ErrorModel, HttpResponse] = await(TestSubscriptionManagerService.orchestrateEnrolment(testNino, testMtditId))
-
-    "return OK response correctly when both KnownFactsAdd and ggEnrol are successful" in {
-      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((OK, dummyResponse))
-      call.right.get.status shouldBe OK
-    }
-
-    "return BAD request response correctly when KnownFactsAdd successful and ggEnrol fail" in {
-      mockAddKnownFacts(knowFactsRequest)(addKnownFactsSuccess)
-      mockGovernmentGatewayEnrol(governmentGatewayEnrolPayload)((BAD_REQUEST, dummyResponse))
-      call.left.get.status shouldBe BAD_REQUEST
-    }
-
-    "return BAD_REQUEST response correctly" in {
-      mockAddKnownFacts(knowFactsRequest)(GATEWAY_ERROR)
-      call.left.get.status shouldBe INTERNAL_SERVER_ERROR
     }
 
   }

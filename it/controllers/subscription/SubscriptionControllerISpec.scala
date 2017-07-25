@@ -29,9 +29,6 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       AuthStub.stubAuthSuccess()
       RegistrationStub.stubNewRegistrationSuccess()
       SubscriptionStub.stubBusinessSubscribeSuccess()
-      GGAdminStub.stubAddKnownFactsSuccess()
-      GGConnectorStub.stubEnrolSuccess()
-      GGAuthenticationStub.stubRefreshProfileSuccess()
 
       When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
       val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
@@ -50,9 +47,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       AuthStub.stubAuthSuccess()
       RegistrationStub.stubNewRegistrationSuccess()
       SubscriptionStub.stubPropertySubscribeSuccess()
-      GGAdminStub.stubAddKnownFactsSuccess()
-      GGConnectorStub.stubEnrolSuccess()
-      GGAuthenticationStub.stubRefreshProfileSuccess()
+
 
       When("I call POST /subscription/:nino where nino is the test nino with a Property Request")
       val res = IncomeTaxSubscription.createSubscription(fePropertyRequest)
@@ -73,9 +68,7 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       RegistrationStub.stubNewRegistrationSuccess()
       SubscriptionStub.stubBusinessSubscribeSuccess()
       SubscriptionStub.stubPropertySubscribeSuccess()
-      GGAdminStub.stubAddKnownFactsSuccess()
-      GGConnectorStub.stubEnrolSuccess()
-      GGAuthenticationStub.stubRefreshProfileSuccess()
+
 
       When("I call POST /subscription/:nino where nino is the test nino with both a property request and a business request")
       val res = IncomeTaxSubscription.createSubscription(feBothRequest)
@@ -246,66 +239,5 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       AuditStub.verifyAudit()
     }
 
-    "when Known Facts fail then return BAD_REQUEST" in {
-      Given("I setup the wiremock stubs")
-      AuthStub.stubAuthSuccess()
-      RegistrationStub.stubNewRegistrationSuccess()
-      SubscriptionStub.stubBusinessSubscribeSuccess()
-      GGAdminStub.stubAddKnownFactsFailure()
-
-      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
-      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
-
-      Then("The result should have a HTTP status of BAD REQUEST and return a reason code")
-      res should have(
-        httpStatus(BAD_REQUEST),
-        jsonBodyAs[FEFailureResponse](FEFailureResponse(testErrorReason))
-      )
-
-      Then("The subscription should have been audited")
-      AuditStub.verifyAudit()
-    }
-
-    "when Enrolment fails then return FORBIDDEN" in {
-      Given("I setup the wiremock stubs")
-      AuthStub.stubAuthSuccess()
-      RegistrationStub.stubNewRegistrationSuccess()
-      SubscriptionStub.stubBusinessSubscribeSuccess()
-      GGAdminStub.stubAddKnownFactsSuccess()
-      GGConnectorStub.stubEnrolFailure()
-
-      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
-      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
-
-      Then("The result should have a HTTP status of FORBIDDEN")
-      res should have(
-        httpStatus(FORBIDDEN)
-      )
-
-      Then("The subscription should have been audited")
-      AuditStub.verifyAudit()
-    }
-
-    "when Refresh Profile fails then return INTERNAL_SERVER_ERROR" in {
-      Given("I setup the wiremock stubs")
-      AuthStub.stubAuthSuccess()
-      RegistrationStub.stubNewRegistrationSuccess()
-      SubscriptionStub.stubBusinessSubscribeSuccess()
-      GGAdminStub.stubAddKnownFactsSuccess()
-      GGConnectorStub.stubEnrolSuccess()
-      GGAuthenticationStub.stubRefreshProfileFailure()
-
-      When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
-      val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
-
-      Then("The result should have a HTTP status of INTERNAL_SERVER_ERROR")
-      res should have(
-        httpStatus(INTERNAL_SERVER_ERROR)
-      )
-
-      Then("The subscription should have been audited")
-      AuditStub.verifyAudit()
-    }
   }
-
 }

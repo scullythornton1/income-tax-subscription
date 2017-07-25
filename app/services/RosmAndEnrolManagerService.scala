@@ -20,9 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import audit.Logging
 import config.AppConfig
-import connectors.GGAuthenticationConnector
 import models.ErrorModel
-import models.authenticator.{RefreshFailure, RefreshSuccessful}
 import models.frontend._
 import models.subscription.business.BusinessSubscriptionSuccessResponseModel
 import models.subscription.property.PropertySubscriptionResponseModel
@@ -38,9 +36,7 @@ class RosmAndEnrolManagerService @Inject()
   appConfig: AppConfig,
   logging: Logging,
   registrationService: RegistrationService,
-  subscriptionService: SubscriptionService,
-  enrolmentService: EnrolmentService,
-  authenticatorConnector: GGAuthenticationConnector
+  subscriptionService: SubscriptionService
 ) {
 
   lazy val urlHeaderAuthorization: String = s"Bearer ${appConfig.desToken}"
@@ -74,20 +70,7 @@ class RosmAndEnrolManagerService @Inject()
     )(hc)
 
     val result: Future[Either[ErrorModel, FESuccessResponse]] = orchestrateROSM(request).flatMap {
-      case Right(rosmSuccess) =>
-        request.enrolUser match {
-          case false =>
-            Future.successful(FESuccessResponse(rosmSuccess.mtditId))
-          case true =>
-            orchestrateEnrolment(request.nino, rosmSuccess.mtditId.get).flatMap {
-              case Right(enrolSuccess) =>
-                authenticatorConnector.refreshProfile.map {
-                  case RefreshSuccessful => FESuccessResponse(rosmSuccess.mtditId)
-                  case RefreshFailure => ErrorModel(INTERNAL_SERVER_ERROR, "Authenticator Refresh Profile Failed")
-                }
-              case Left(enrolFailure) => Future.successful(enrolFailure)
-            }
-        }
+      case Right(rosmSuccess) => Future.successful(FESuccessResponse(rosmSuccess.mtditId))
       case Left(rosmFailure) => Future.successful(rosmFailure)
     }
     result.map {
@@ -121,18 +104,6 @@ class RosmAndEnrolManagerService @Inject()
     }
   }
 
-  def orchestrateEnrolment(nino: String, mtditId: String)(implicit hc: HeaderCarrier, ec: ExecutionContext):
-  Future[Either[ErrorModel, HttpResponse]] = {
-    enrolmentService.addKnownFacts(nino, mtditId).flatMap {
-      case Right(knownFactSuccess) => enrolmentService.ggEnrol(nino, mtditId).map(result =>
-        result.status match {
-          case OK => result
-          case _ => ErrorModel(result.status, "Failed in call to Government Gateway Enrol")
-        }
-      )
-      case Left(knownFactError) => Future.successful(knownFactError)
-    }
-  }
 
   def businessSubscription(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext)
   : Future[Option[Either[ErrorModel, BusinessSubscriptionSuccessResponseModel]]] = {
