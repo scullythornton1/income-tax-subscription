@@ -30,9 +30,7 @@ case class FERequest
   accountingPeriodStart: Option[DateModel] = None,
   accountingPeriodEnd: Option[DateModel] = None,
   tradingName: Option[String] = None,
-  cashOrAccruals: Option[String] = None,
-  // enrolUser must be set to true for individual and false for agent
-  enrolUser: Boolean = true
+  cashOrAccruals: Option[String] = None
 )
 
 object FERequest {
@@ -46,8 +44,7 @@ object FERequest {
       (JsPath \ "accountingPeriodStart").readNullable[DateModel] and
       (JsPath \ "accountingPeriodEnd").readNullable[DateModel] and
       (JsPath \ "tradingName").readNullable[String] and
-      (JsPath \ "cashOrAccruals").readNullable[String] and
-      (JsPath \ "enrolUser").readNullable[Boolean].map(x => x.fold(true)(y => y))
+      (JsPath \ "cashOrAccruals").readNullable[String]
     ) (FERequest.apply _)
 
   val writes: OWrites[FERequest] = Json.writes[FERequest]
