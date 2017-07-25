@@ -16,15 +16,12 @@
 
 package config
 
-import javax.inject.{Inject,Singleton}
+import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
   val authURL: String
-  val ggURL: String
-  val ggAdminURL: String
-  val ggAuthenticationURL: String
   val desURL: String
   val desEnvironment: String
   val desToken: String
@@ -36,13 +33,10 @@ class MicroserviceAppConfig @Inject()(val configuration: Configuration) extends 
   private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
   override lazy val authURL = baseUrl("auth")
-  override lazy val ggAuthenticationURL = baseUrl("gg-authentication")
-  override lazy val ggURL = baseUrl("government-gateway")
-  override lazy val ggAdminURL = baseUrl("gg-admin")
 
-  lazy val desBase = configuration.getString("feature-switching.useNewDesRoute").fold(false)(x=>x.toBoolean) match {
-    case true =>"microservice.services.new-des"
-    case _ =>"microservice.services.des"
+  lazy val desBase = configuration.getString("feature-switching.useNewDesRoute").fold(false)(x => x.toBoolean) match {
+    case true => "microservice.services.new-des"
+    case _ => "microservice.services.des"
   }
   override lazy val desURL = loadConfig(s"$desBase.url")
   override lazy val desEnvironment = loadConfig(s"$desBase.environment")
