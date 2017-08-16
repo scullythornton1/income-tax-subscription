@@ -36,8 +36,6 @@ class Module extends AbstractModule {
     bind(classOf[WSPut]).to(classOf[config.WSHttp]).asEagerSingleton()
     bind(classOf[HttpPut]).to(classOf[config.WSHttp]).asEagerSingleton()
     bind(classOf[AuthConnector]).to(classOf[config.AuthConnector])
-
-    bind(classOf[ThrottleService]).to(classOf[ThrottleServiceImp])
   }
 
 }
