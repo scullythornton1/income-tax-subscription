@@ -27,9 +27,6 @@ private object AppDependencies {
   private val scalaJVersion = "2.3.0"
   private val cucumberVersion = "1.2.5"
 
-  private val mongoLockVersion = "4.1.0"
-  private val reactiveMongoVersion = "5.2.0"
-
   private val wiremockVersion = "2.5.1"
 
   private val playAuthVersion = "1.2.0"
@@ -43,8 +40,6 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "play-config" % playConfigVersion,
     "uk.gov.hmrc" %% "logback-json-logger" % logbackJsonLoggerVersion,
     "uk.gov.hmrc" %% "domain" % domainVersion,
-    "uk.gov.hmrc" %% "mongo-lock" % mongoLockVersion,
-    "uk.gov.hmrc" %% "play-reactivemongo" % reactiveMongoVersion,
     "uk.gov.hmrc" %% "play-auth" % playAuthVersion
   )
 

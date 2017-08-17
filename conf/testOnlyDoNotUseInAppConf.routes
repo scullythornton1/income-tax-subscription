@@ -8,8 +8,5 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 
-GET        /income-tax-subscription/test-only/reset-throttle        @testonly.controllers.ResetThrottleController.resetThrottle
-
-
 # Add all the application routes to the prod.routes file
 ->         /                                                        prod.Routes
