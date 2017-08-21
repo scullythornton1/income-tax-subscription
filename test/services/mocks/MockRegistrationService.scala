@@ -16,9 +16,8 @@
 
 package services.mocks
 
-import audit.Logging
-import services.RegistrationService
 import connectors.mocks.MockRegistrationConnector
+import services.RegistrationService
 
 trait MockRegistrationService extends MockRegistrationConnector {
 

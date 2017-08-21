@@ -19,17 +19,13 @@ package helpers
 import controllers.ITSASessionKeys
 import helpers.servicemocks.{AuditStub, WireMockMethods}
 import models.frontend.FERequest
-import models.throttling.UserCount
 import org.scalatest._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.json.Writes
 import play.api.libs.ws.WSResponse
 import play.api.{Application, Environment, Mode}
-import reactivemongo.api.commands.WriteResult
-import repositories.Repositories
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -70,7 +66,6 @@ trait ComponentSpecBase extends UnitSpec
   override def beforeEach(): Unit = {
     super.beforeEach()
     resetWiremock()
-    await(IncomeTaxSubscription.dropThrottleRepo())
     AuditStub.stubAuditing()
   }
 
@@ -78,8 +73,6 @@ trait ComponentSpecBase extends UnitSpec
     stopWiremock()
     super.afterAll()
   }
-
-  lazy val throttleMongoRepository = app.injector.instanceOf[Repositories].throttleRepository
 
   implicit val hc = HeaderCarrier()
 
@@ -89,8 +82,6 @@ trait ComponentSpecBase extends UnitSpec
     def get(uri: String): WSResponse = await(buildClient(uri).get())
 
     def createSubscription(body: FERequest): WSResponse = post(s"/subscription/${body.nino}", body)
-
-    def checkUserAccess(nino: String): WSResponse = get(s"/throttle/$nino")
 
     def post[T](uri: String, body: T)(implicit writes: Writes[T]): WSResponse = {
       await(
@@ -103,9 +94,6 @@ trait ComponentSpecBase extends UnitSpec
       )
     }
 
-    def insertUserCount(userCount: UserCount): WriteResult = await(throttleMongoRepository.insert(userCount))
-
-    def dropThrottleRepo(): Unit = await(throttleMongoRepository.drop)
   }
 
 }
