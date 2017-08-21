@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2016 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,13 @@
  * limitations under the License.
  */
 
-package utils
+import sbt.Tests.{Group, SubProcess}
+import sbt._
 
-import scala.concurrent.Future
+private object TestPhases {
 
-
-trait Implicits {
-
-  implicit def optionUtl[T, S <: T](data: S): Option[T] = Some(data)
-
-  implicit def futureUtl[T, S <: T](fData: S): Future[T] = Future.successful(fData)
-
-  implicit def futureUtl[T](err: Throwable): Future[T] = Future.failed(err)
-
-  implicit def eitherUtilLeft[T, R <: T, L](left: L): Either[L, R] = Left(left)
-
-  implicit def eitherUtilRight[T, R <: T, L](right: R): Either[L, R] = Right(right)
-
+  def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Tests.Group] =
+    tests map {
+      test => new Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name,"-Dlogger.resource=logback-test.xml"))))
+    }
 }
-
-object Implicits extends Implicits

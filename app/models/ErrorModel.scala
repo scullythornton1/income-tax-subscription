@@ -16,6 +16,7 @@
 
 package models
 
+import play.api.http.Status
 import play.api.libs.json.{JsValue, Json}
 import utils.Implicits._
 
@@ -64,7 +65,7 @@ object ErrorModel {
 
   def unapply(error: ErrorModel): Option[(Int, Option[String], String)] = Some((error.status, error.code, error.reason))
 
-  lazy val parseFailure: JsValue => ErrorModel = (js: JsValue) => ErrorModel(500, "PARSE_ERROR", js.toString)
+  lazy val parseFailure: JsValue => ErrorModel = (js: JsValue) => ErrorModel(Status.INTERNAL_SERVER_ERROR, "PARSE_ERROR", js.toString)
 
   implicit val format = Json.format[ErrorModel]
 

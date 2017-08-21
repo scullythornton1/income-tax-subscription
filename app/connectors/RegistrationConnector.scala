@@ -149,7 +149,7 @@ object RegistrationConnector {
 
   val auditGetRegistrationName = "getRegistration-api-1(b)"
 
-  import _root_.utils.Implicits.OptionUtl
+  import _root_.utils.Implicits.optionUtl
 
   val registerLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "RegistrationConnector.register")
 

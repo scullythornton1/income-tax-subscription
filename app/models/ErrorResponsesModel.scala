@@ -16,6 +16,7 @@
 
 package models
 
+import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json, Writes}
 
 sealed abstract class ErrorResponseModel(
@@ -27,12 +28,12 @@ sealed abstract class ErrorResponseModel(
   }
 }
 
-case object ErrorUnauthorized extends ErrorResponseModel(401, "UNAUTHORIZED", "Bearer token is missing or not authorized")
+case object ErrorUnauthorized extends ErrorResponseModel(UNAUTHORIZED, "UNAUTHORIZED", "Bearer token is missing or not authorized")
 
-case object ErrorNotFound extends ErrorResponseModel(404, "NOT_FOUND", "Resource was not found")
+case object ErrorNotFound extends ErrorResponseModel(NOT_FOUND, "NOT_FOUND", "Resource was not found")
 
-case object ErrorGenericBadRequest extends ErrorResponseModel(400, "BAD_REQUEST", "Bad Request")
+case object ErrorGenericBadRequest extends ErrorResponseModel(BAD_REQUEST, "BAD_REQUEST", "Bad Request")
 
-case object ErrorAcceptHeaderInvalid extends ErrorResponseModel(406, "ACCEPT_HEADER_INVALID", "The accept header is missing or invalid")
+case object ErrorAcceptHeaderInvalid extends ErrorResponseModel(BAD_REQUEST, "ACCEPT_HEADER_INVALID", "The accept header is missing or invalid")
 
-case object ErrorInternalServerError extends ErrorResponseModel(500, "INTERNAL_SERVER_ERROR", "Internal server error")
+case object ErrorInternalServerError extends ErrorResponseModel(INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "Internal server error")

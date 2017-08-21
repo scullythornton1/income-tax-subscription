@@ -116,7 +116,7 @@ class SubscriptionConnector @Inject()
 
 object SubscriptionConnector {
 
-  import _root_.utils.Implicits.OptionUtl
+  import _root_.utils.Implicits.optionUtl
 
   val auditBusinessSubscribeName = "business-subscribe-api-10"
   val businessSubscribeLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "SubscriptionConnector.businessSubscribe")
