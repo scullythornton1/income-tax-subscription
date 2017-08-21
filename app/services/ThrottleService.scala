@@ -41,7 +41,7 @@ class ThrottleServiceImp @Inject()(repositories: Repositories,
   lazy val throttleMongoRepository = repositories.throttleRepository
 
   //$COVERAGE-OFF$
-  def dateTime = DateTimeUtils.now
+  def dateTime: DateTime = DateTimeUtils.now
 
   lazy val threshold = getConfInt("throttle-threshold", throw new Exception("throttle-threshold not found in config"))
   //$COVERAGE-ON$

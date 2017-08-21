@@ -96,7 +96,7 @@ object BusinessDetailsConnector {
 
   val auditGetBusinessDetails = "getBusinessDetails api-5"
 
-  import _root_.utils.Implicits.OptionUtl
+  import _root_.utils.Implicits.optionUtl
 
   val getRegistrationLoggingConfig: Option[LoggingConfig] = LoggingConfig(heading = "BusinessDetailsConnector.getBusinessDetails")
 

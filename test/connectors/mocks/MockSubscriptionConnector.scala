@@ -46,6 +46,6 @@ trait MockSubscriptionConnector extends MockHttp with GuiceOneAppPerSuite {
     setupMockHttpPost(url = TestSubscriptionConnector.businessSubscribeUrl(nino), payload)(status, response)
 
   def setupMockPropertySubscribe(nino: String)(status: Int, response: JsValue): Unit =
-    setupMockHttpPost(url = TestSubscriptionConnector.propertySubscribeUrl(nino), OptionUtl("{}": JsValue))(status, response)
+    setupMockHttpPost(url = TestSubscriptionConnector.propertySubscribeUrl(nino), optionUtl("{}": JsValue))(status, response)
 
 }
