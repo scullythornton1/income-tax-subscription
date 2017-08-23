@@ -17,6 +17,7 @@
 package utils
 
 import models.frontend.{Both, Business, FERequest, Property}
+import models.matching.LockoutResponse
 import models.registration.RegistrationRequestModel
 import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
 import models.{DateModel, ErrorModel}
@@ -50,6 +51,10 @@ object TestConstants {
   val SERVER_ERROR = (INTERNAL_SERVER_ERROR, failureResponse(SERVER_ERROR_MODEL.code.get, SERVER_ERROR_MODEL.reason))
   val UNAVAILABLE = (SERVICE_UNAVAILABLE, failureResponse(UNAVAILABLE_MODEL.code.get, UNAVAILABLE_MODEL.reason))
   val CONFLICT_ERROR = (CONFLICT, failureResponse(CONFLICT_ERROR_MODEL.code.get, CONFLICT_ERROR_MODEL.reason))
+
+  val testLockoutSuccess = Right(Some(LockoutResponse(testArn)))
+  val testLockoutFailure = Left(ErrorModel(BAD_REQUEST, ""))
+  val testLockoutNone = Right(None)
 
   val fePropertyRequest = FERequest(
     nino = testNino,
@@ -283,4 +288,5 @@ object TestConstants {
            "externalId":"$externalId"
         }""")
   }
+
 }
