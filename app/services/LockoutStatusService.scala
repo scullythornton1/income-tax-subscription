@@ -18,16 +18,20 @@ package services
 
 import javax.inject.{Inject, Singleton}
 
-import connectors.matching.LockoutStatusConnector
 import models.ErrorModel
 import models.matching.LockoutResponse
+import repositories.Repositories
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 @Singleton
-class LockoutStatusService  @Inject()(lockoutStatusConnector: LockoutStatusConnector) {
+class LockoutStatusService  @Inject()(repositories: Repositories) {
 
-  def checkLockoutStatus(arn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, Option[LockoutResponse]]] =
-    lockoutStatusConnector.getLockoutStatus(arn)
+  def checkLockoutStatus(arn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, Option[LockoutResponse]]] = {
+    repositories.lockoutRepository.lockUser(arn)
+    repositories.lockoutRepository.getLockoutStatus(arn).map {
+      case response => Right(response)
+    }
+  }
 
 }

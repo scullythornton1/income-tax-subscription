@@ -32,15 +32,15 @@ class LockoutStatusController @Inject()(authService: AuthService,
   import authService._
 
   def checkLockoutStatus(arn: String): Action[AnyContent] = Action.async { implicit request =>
-    authorised() {
+//    authorised() {
       lockoutStatusService.checkLockoutStatus(arn).map {
         case Right(Some(arn)) => Ok(Json.toJson(arn))
         case Right(None) => NotFound
         case Left(_) => InternalServerError
-      }
+//      }
     }
   }
 
 }
 
-object LockoutStatusController {}
+//object LockoutStatusController {}
