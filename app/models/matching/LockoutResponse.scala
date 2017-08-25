@@ -16,9 +16,11 @@
 
 package models.matching
 
+import java.time.LocalDateTime
+
 import play.api.libs.json.Json
 
-case class LockoutResponse(arn: String)
+case class LockoutResponse(arn: String, expiryTimestamp: LocalDateTime)
 
 object LockoutResponse {
   implicit val format = Json.format[LockoutResponse]

@@ -24,14 +24,14 @@ import repositories.Repositories
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+
 @Singleton
-class LockoutStatusService  @Inject()(repositories: Repositories) {
+class LockoutStatusService @Inject()(repositories: Repositories) {
 
   def checkLockoutStatus(arn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, Option[LockoutResponse]]] = {
-    repositories.lockoutRepository.lockUser(arn)
-    repositories.lockoutRepository.getLockoutStatus(arn).map {
-      case response => Right(response)
-    }
+        repositories.lockoutRepository.getLockoutStatus(arn).map {
+          case response => Right(response)
+        }
   }
 
 }
