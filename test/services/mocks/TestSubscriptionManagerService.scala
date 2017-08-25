@@ -18,10 +18,33 @@ package services.mocks
 
 import audit.Logging
 import config.AppConfig
+import models.ErrorModel
+import models.frontend.{FERequest, FESuccessResponse}
+import org.mockito.ArgumentMatchers
+import org.scalatest.mockito.MockitoSugar
 import services.RosmAndEnrolManagerService
-import uk.gov.hmrc.play.http.HttpGet
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
+import org.mockito.Mockito._
 
-trait MockSubscriptionManagerService extends MockRegistrationService with MockSubscriptionService {
+import scala.concurrent.{ExecutionContext, Future}
+
+trait MockSubscriptionManagerService extends MockitoSugar {
+  val mockSubscriptionManagerService = mock[RosmAndEnrolManagerService]
+
+  def mockRosmAndEnrol(request: FERequest, path: String)(response: Future[Either[ErrorModel, FESuccessResponse]]): Unit = {
+    when(mockSubscriptionManagerService.rosmAndEnrol(
+      ArgumentMatchers.eq(request),
+      ArgumentMatchers.eq(path)
+    )(
+      ArgumentMatchers.any[HeaderCarrier],
+      ArgumentMatchers.any[ExecutionContext]
+    ))
+      .thenReturn(response)
+  }
+
+}
+
+trait TestSubscriptionManagerService extends MockRegistrationService with MockSubscriptionService {
 
   override lazy val appConfig = app.injector.instanceOf[AppConfig]
   override lazy val logging = app.injector.instanceOf[Logging]
@@ -32,7 +55,7 @@ trait MockSubscriptionManagerService extends MockRegistrationService with MockSu
     appConfig,
     logging,
     TestRegistrationService,
-    TestSubscriptionService
+    mockSubscriptionService
   )
 
 }
