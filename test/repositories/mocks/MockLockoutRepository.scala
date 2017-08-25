@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package repositories
+package repositories.mocks
 
-import javax.inject.Inject
+import models.matching.LockoutResponse
+import org.scalatest.mockito.MockitoSugar
+import repositories.LockoutMongoRepository
+import org.mockito.Mockito._
+import scala.concurrent.Future
 
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.DefaultDB
-import uk.gov.hmrc.lock.LockRepository
+trait MockLockoutRepository extends MockitoSugar {
+  val mockLockoutMongoRepository = mock[LockoutMongoRepository]
 
-class Repositories @Inject()(mongo: ReactiveMongoComponent) {
-
-  implicit lazy val db: () => DefaultDB = mongo.mongoConnector.db
-
-  lazy val lockoutRepository = new LockoutMongoRepository
-  lazy val lockRepository = new LockRepository
+  def mockGetLockoutStatus(arn: String)(response: Future[Option[LockoutResponse]]) =
+    when(mockLockoutMongoRepository.getLockoutStatus(arn))
+      .thenReturn(response)
 }
-

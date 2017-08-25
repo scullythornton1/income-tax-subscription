@@ -16,7 +16,6 @@
 
 package services.mocks
 
-import connectors.mocks.MockLockoutStatusConnector
 import models.ErrorModel
 import models.matching.LockoutResponse
 import org.mockito.ArgumentMatchers
@@ -25,6 +24,8 @@ import services.LockoutStatusService
 import uk.gov.hmrc.play.http.HeaderCarrier
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
+import repositories.LockoutMongoRepository
+import repositories.mocks.MockLockoutRepository
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.TestConstants._
 
@@ -51,9 +52,9 @@ trait MockLockoutStatusService extends UnitSpec with MockitoSugar with BeforeAnd
 
 }
 
-trait TestLockoutStatusService extends MockLockoutStatusConnector {
+trait TestLockoutStatusService extends MockLockoutRepository {
 
-  object TestLockoutStatusService extends LockoutStatusService(mockLockoutStatusConnector)
+  object TestLockoutStatusService extends LockoutStatusService(mockLockoutMongoRepository)
 
 }
 

@@ -17,10 +17,11 @@
 package repositories
 
 import java.time._
+import javax.inject.Inject
 
 import models.lockout.CheckLockout
 import models.matching.LockoutResponse
-import reactivemongo.api.DB
+import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.IndexType.Ascending
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson._
@@ -30,25 +31,25 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class LockoutMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[CheckLockout, BSONObjectID]("lockout", mongo, CheckLockout.oformats, ReactiveMongoFormats.objectIdFormats) {
+class LockoutMongoRepository @Inject()(implicit mongo: ReactiveMongoComponent)
+  extends ReactiveRepository[LockoutResponse, BSONObjectID](
+    "lockout",
+    mongo.mongoConnector.db,
+    LockoutResponse.format,
+    ReactiveMongoFormats.objectIdFormats
+  ) {
 
   def getLockoutStatus(arn: String): Future[Option[LockoutResponse]] = {
-    val selector = BSONDocument(CheckLockout.arn -> arn)
-    lazy val getLockout = collection.find(selector).one[CheckLockout]
-
-    getLockout.map {
-      case result@Some(_) => result.map(lock => LockoutResponse(lock.arn, lock.expiryTimestamp.toLocalDateTime))
-      case _ => None
-    }
+    val selector = BSONDocument(LockoutResponse.arn -> arn)
+    collection.find(selector).one[LockoutResponse]
   }
 
   def lockUser(arn: String): Future[Boolean] = {
     val ttl: Duration = Duration.ofMinutes(1)
     val expiryTimestamp = OffsetDateTime.ofInstant(Instant.now.plusSeconds(ttl.getSeconds), ZoneId.systemDefault())
 
-    val selector = CheckLockout(arn, expiryTimestamp)
-    collection.insert(selector).map {
+    val model = LockoutResponse(arn, expiryTimestamp)
+    collection.insert(model).map {
       case result if result.ok => true
       case result => false
     }

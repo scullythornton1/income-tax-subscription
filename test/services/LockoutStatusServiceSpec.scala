@@ -20,10 +20,14 @@ import services.mocks.TestLockoutStatusService
 import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.TestConstants.testArn
 import play.api.http.Status._
+import uk.gov.hmrc.play.test.UnitSpec
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.TestConstants._
 
-class LockoutStatusServiceSpec extends TestLockoutStatusService {
+import scala.concurrent.Future
+
+class LockoutStatusServiceSpec extends UnitSpec with TestLockoutStatusService {
 
   implicit val hc = HeaderCarrier()
 
@@ -31,21 +35,21 @@ class LockoutStatusServiceSpec extends TestLockoutStatusService {
 
   "LockoutStatusService" should {
 
-    "return a OK if they are locked out" in {
-      mockLockedOut(testArn)
+    "return a testLockoutSuccess if they are locked out" in {
+      mockGetLockoutStatus(testArn)(Future.successful(Some(testLockoutResponse)))
       val result = await(call)
       result shouldBe testLockoutSuccess
 
     }
 
-    "return a NOT_FOUND if they are not locked out" in {
+    "return a testLockoutNone if they are not locked out" in {
       mockNotLockedOut(testArn)
       val result = await(call)
       result shouldBe testLockoutNone
 
     }
 
-    "return a INTERNAL_SERVER_ERROR if it fails" in {
+    "return a testLockoutFailure if it fails" in {
       mockLockedOutFailure(testArn)
       val result = await(call)
       result shouldBe testLockoutFailure
