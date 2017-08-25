@@ -23,13 +23,13 @@ import models.subscription.property.PropertySubscriptionResponseModel
 import play.api.http.Status._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.http.HeaderCarrier
-import connectors.mocks.MockSubscriptionConnector
+import connectors.mocks.TestSubscriptionConnector
 import _root_.utils.JsonUtils._
 import _root_.utils.TestConstants._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SubscriptionConnectorSpec extends MockSubscriptionConnector {
+class SubscriptionConnectorSpec extends TestSubscriptionConnector {
 
   implicit val hc = HeaderCarrier()
 

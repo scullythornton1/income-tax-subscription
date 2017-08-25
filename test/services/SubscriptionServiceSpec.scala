@@ -16,33 +16,31 @@
 
 package services
 
-import models.subscription.property.PropertySubscriptionResponseModel
+import models.ErrorModel
 import models.subscription.IncomeSourceModel
-import org.scalatestplus.play.OneAppPerSuite
+import models.subscription.property.PropertySubscriptionResponseModel
+import services.mocks.TestSubscriptionService
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
-import utils.JsonUtils
 import utils.TestConstants._
-import services.mocks.MockSubscriptionService
 
 import scala.util.Right
 
-class SubscriptionServiceSpec extends UnitSpec with OneAppPerSuite with JsonUtils with MockSubscriptionService {
+class SubscriptionServiceSpec extends TestSubscriptionService {
 
   implicit val hc = HeaderCarrier()
 
   "SubscriptionService" should {
 
-    def propertySubscribeCall = await(TestSubscriptionService.propertySubscribe(fePropertyRequest))
+    def propertySubscribeCall: Either[ErrorModel, PropertySubscriptionResponseModel] = await(TestSubscriptionService.propertySubscribe(fePropertyRequest))
 
     "return success if the subscription succeeds" in {
-      mockPropertySubscribe(propertySubscribeSuccess)
-      val expected = PropertySubscriptionResponseModel(testSafeId, testMtditId, IncomeSourceModel(testSourceId))
-      propertySubscribeCall shouldBe Right(expected)
+      mockPropertySubscribe(testNino)(Right(propertySubscriptionSuccess))
+      propertySubscribeCall shouldBe Right(propertySubscriptionSuccess)
     }
 
     "return not found response" in {
-      mockPropertySubscribe(NOT_FOUND_NINO)
+
+      mockPropertySubscribe(testNino)(Left(NOT_FOUND_NINO_MODEL))
       propertySubscribeCall shouldBe Left(NOT_FOUND_NINO_MODEL)
     }
   }
