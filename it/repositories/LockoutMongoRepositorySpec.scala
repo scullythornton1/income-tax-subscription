@@ -16,12 +16,13 @@
 
 package repositories
 
+import helpers.IntegrationTestConstants._
 import models.matching.LockoutResponse
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.play.test.UnitSpec
-import helpers.IntegrationTestConstants._
+
 import scala.concurrent.ExecutionContext.Implicits._
 
 class LockoutMongoRepositorySpec extends UnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach {
@@ -31,6 +32,18 @@ class LockoutMongoRepositorySpec extends UnitSpec with GuiceOneAppPerSuite with 
 
   override def beforeEach(): Unit = {
     await(TestLockoutMongoRepository.dropDb)
+  }
+
+  "lockoutAgent" should {
+    "return the model when there is no lock" in {
+      val (insertRes, stored) = await(for {
+        insertRes <- TestLockoutMongoRepository.lockoutAgent(testArn)
+        stored <- TestLockoutMongoRepository.find(LockoutResponse.arn -> testArn)
+      } yield (insertRes.get, stored))
+
+      stored.size shouldBe 1
+      insertRes shouldBe stored.head
+    }
   }
 
   "getLockoutStatus" should {
