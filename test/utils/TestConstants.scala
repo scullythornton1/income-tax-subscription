@@ -62,6 +62,8 @@ object TestConstants {
   lazy val testLockoutFailure = Left(ErrorModel(BAD_REQUEST, ""))
   lazy val testLockoutNone = Right(None)
 
+  lazy val testException = new Exception("an error")
+
   val fePropertyRequest = FERequest(
     nino = testNino,
     incomeSource = Property,

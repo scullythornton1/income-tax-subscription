@@ -17,15 +17,27 @@
 package repositories.mocks
 
 import models.matching.LockoutResponse
+import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import repositories.LockoutMongoRepository
-import org.mockito.Mockito._
+import utils.TestConstants.{testException, testLockoutResponse}
+
 import scala.concurrent.Future
 
 trait MockLockoutRepository extends MockitoSugar {
   val mockLockoutMongoRepository = mock[LockoutMongoRepository]
 
-  def mockGetLockoutStatus(arn: String)(response: Future[Option[LockoutResponse]]) =
+
+  private def mockGetLockoutStatus(arn: String)(response: Future[Option[LockoutResponse]]) =
     when(mockLockoutMongoRepository.getLockoutStatus(arn))
       .thenReturn(response)
+
+  def mockLockedOut(arn: String): Unit =
+    mockGetLockoutStatus(arn)(Future.successful(Some(testLockoutResponse)))
+
+  def mockNotLockedOut(arn: String): Unit =
+    mockGetLockoutStatus(arn)(Future.successful(None))
+
+  def mockLockedOutFailure(arn: String): Unit =
+    mockGetLockoutStatus(arn)(Future.failed(testException))
 }

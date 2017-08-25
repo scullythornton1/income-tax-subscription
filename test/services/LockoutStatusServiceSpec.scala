@@ -17,9 +17,10 @@
 package services
 
 import services.mocks.TestLockoutStatusService
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{HeaderCarrier, InternalServerException}
 import utils.TestConstants.testArn
 import play.api.http.Status._
+import play.api.test.Helpers.await
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -36,7 +37,7 @@ class LockoutStatusServiceSpec extends UnitSpec with TestLockoutStatusService {
   "LockoutStatusService" should {
 
     "return a testLockoutSuccess if they are locked out" in {
-      mockGetLockoutStatus(testArn)(Future.successful(Some(testLockoutResponse)))
+      mockLockedOut(testArn)
       val result = await(call)
       result shouldBe testLockoutSuccess
 
@@ -51,8 +52,8 @@ class LockoutStatusServiceSpec extends UnitSpec with TestLockoutStatusService {
 
     "return a testLockoutFailure if it fails" in {
       mockLockedOutFailure(testArn)
-      val result = await(call)
-      result shouldBe testLockoutFailure
+      val ex = intercept[Exception](await(call))
+      ex shouldBe testException
 
     }
   }

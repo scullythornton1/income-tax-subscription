@@ -21,7 +21,7 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.play.test.UnitSpec
-import utils.TestConstants._
+import helpers.IntegrationTestConstants._
 import scala.concurrent.ExecutionContext.Implicits._
 
 class LockoutMongoRepositorySpec extends UnitSpec with GuiceOneAppPerSuite with BeforeAndAfterEach {
