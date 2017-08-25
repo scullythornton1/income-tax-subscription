@@ -51,4 +51,9 @@ object LockoutResponse {
 
   implicit val format: OFormat[LockoutResponse] = OFormat[LockoutResponse](reader, writer)
 
+  val feWritter: OWrites[LockoutResponse] = new OWrites[LockoutResponse] {
+    override def writes(o: LockoutResponse): JsObject =
+      Json.obj("arn" -> o.arn, expiry -> o.expiryTimestamp.toString)
+  }
+
 }

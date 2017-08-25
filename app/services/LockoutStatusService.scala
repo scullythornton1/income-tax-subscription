@@ -34,4 +34,10 @@ class LockoutStatusService @Inject()(lockoutRepository: LockoutMongoRepository) 
         }
   }
 
+  def lockoutAgent(arn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, Option[LockoutResponse]]] = {
+    lockoutRepository.lockoutAgent(arn).map {
+      case response => Right(response)
+    }
+  }
+
 }

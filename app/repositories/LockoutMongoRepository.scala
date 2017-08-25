@@ -44,14 +44,14 @@ class LockoutMongoRepository @Inject()(implicit mongo: ReactiveMongoComponent)
     collection.find(selector).one[LockoutResponse]
   }
 
-  def lockUser(arn: String): Future[Boolean] = {
+  def lockoutAgent(arn: String): Future[Option[LockoutResponse]] = {
     val ttl: Duration = Duration.ofMinutes(1)
     val expiryTimestamp = OffsetDateTime.ofInstant(Instant.now.plusSeconds(ttl.getSeconds), ZoneId.systemDefault())
 
     val model = LockoutResponse(arn, expiryTimestamp)
     collection.insert(model).map {
-      case result if result.ok => true
-      case result => false
+      case result if result.ok => Some(model)
+      case result => None
     }
   }
 

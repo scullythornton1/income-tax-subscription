@@ -18,6 +18,7 @@ package controllers.matching
 
 import javax.inject.{Inject, Singleton}
 
+import models.matching.LockoutResponse
 import models.matching.LockoutResponse.format
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
@@ -25,6 +26,7 @@ import services.{AuthService, LockoutStatusService}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+
 @Singleton
 class LockoutStatusController @Inject()(authService: AuthService,
                                         lockoutStatusService: LockoutStatusService) extends BaseController {
@@ -32,12 +34,21 @@ class LockoutStatusController @Inject()(authService: AuthService,
   import authService._
 
   def checkLockoutStatus(arn: String): Action[AnyContent] = Action.async { implicit request =>
-//    authorised() {
+    authorised() {
       lockoutStatusService.checkLockoutStatus(arn).map {
-        case Right(Some(lock)) => Ok(Json.toJson(lock))
+        case Right(Some(lock)) => Ok(Json.toJson(lock)(LockoutResponse.feWritter))
         case Right(None) => NotFound
         case Left(_) => InternalServerError
-//      }
+      }
+    }
+  }
+
+  def lockoutAgent(arn: String): Action[AnyContent] = Action.async { implicit request =>
+    authorised() {
+      lockoutStatusService.lockoutAgent(arn).map {
+        case Right(Some(lock)) => Created(Json.toJson(lock)(LockoutResponse.feWritter))
+        case Left(_) => InternalServerError
+      }
     }
   }
 

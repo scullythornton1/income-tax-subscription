@@ -3,3 +3,4 @@ POST        /subscription/:nino               @controllers.subscription.Subscrip
 GET         /subscription/:nino               @controllers.subscription.SubscriptionStatusController.checkSubscriptionStatus(nino: String)
 
 GET         /client-matching/lock/:arn        @controllers.matching.LockoutStatusController.checkLockoutStatus(arn:String)
+POST        /client-matching/lock/:arn        @controllers.matching.LockoutStatusController.lockoutAgent(arn:String)
