@@ -16,13 +16,15 @@
 
 package controllers.matching
 
-import play.api.http.Status._
+import models.matching.LockoutResponse
+import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import services.mocks.{MockAuthService, MockLockoutStatusService}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.MaterializerSupport
-import utils.TestConstants.testArn
+import utils.TestConstants.{testArn, testLockoutResponse}
 
 import scala.concurrent.Future
 
@@ -31,15 +33,18 @@ class LockoutStatusControllerSpec extends UnitSpec with MockLockoutStatusService
 
   object TestController extends LockoutStatusController(mockAuthService, mockLockoutStatusService)
 
-  def call: Future[Result] = TestController.checkLockoutStatus(testArn)(FakeRequest())
+  "LockoutStatusController.checkLockoutStatus" should {
+    def call: Future[Result] = TestController.checkLockoutStatus(testArn)(FakeRequest())
 
-  "LockoutStatusController" should {
     "when the queried ARN is locked out should return OK" in {
       mockAuthSuccess()
       mockLockedOut(testArn)
 
       val result = call
       status(result) shouldBe OK
+
+      val content = Json.parse(contentAsString(result))
+      content shouldBe Json.toJson(testLockoutResponse)(LockoutResponse.feWritter)
     }
 
     "when the queried ARN is not locked out should return a NOT_FOUND" in {
@@ -57,8 +62,29 @@ class LockoutStatusControllerSpec extends UnitSpec with MockLockoutStatusService
       val result = call
       status(result) shouldBe INTERNAL_SERVER_ERROR
     }
+  }
 
+  "LockoutStatusController.lockoutAgent" should {
+    def call: Future[Result] = TestController.lockoutAgent(testArn)(FakeRequest())
 
+    "when the queried ARN is locked out should return CREATED" in {
+      mockAuthSuccess()
+      mockLockCreated(testArn)
+
+      val result = call
+      status(result) shouldBe CREATED
+
+      val content = Json.parse(contentAsString(result))
+      content shouldBe Json.toJson(testLockoutResponse)(LockoutResponse.feWritter)
+    }
+
+    "when anything else is returned should return an INTERNAL_SERVER_ERROR" in {
+      mockAuthSuccess()
+      mockLockCreationFailed(testArn)
+
+      val result = call
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+    }
   }
 
 }

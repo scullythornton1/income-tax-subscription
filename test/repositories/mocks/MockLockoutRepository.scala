@@ -27,6 +27,15 @@ import scala.concurrent.Future
 trait MockLockoutRepository extends MockitoSugar {
   val mockLockoutMongoRepository = mock[LockoutMongoRepository]
 
+  private def mockLockoutAgent(arn: String)(response: Future[Option[LockoutResponse]]) =
+    when(mockLockoutMongoRepository.lockoutAgent(arn))
+      .thenReturn(response)
+
+  def mockLockCreated(arn: String): Unit =
+    mockLockoutAgent(arn)(Future.successful(Some(testLockoutResponse)))
+
+  def mockLockCreationFailed(arn: String): Unit =
+    mockLockoutAgent(arn)(Future.failed(testException))
 
   private def mockGetLockoutStatus(arn: String)(response: Future[Option[LockoutResponse]]) =
     when(mockLockoutMongoRepository.getLockoutStatus(arn))

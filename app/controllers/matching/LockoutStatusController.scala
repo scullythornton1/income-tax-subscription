@@ -19,7 +19,6 @@ package controllers.matching
 import javax.inject.{Inject, Singleton}
 
 import models.matching.LockoutResponse
-import models.matching.LockoutResponse.format
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 import services.{AuthService, LockoutStatusService}
@@ -54,4 +53,3 @@ class LockoutStatusController @Inject()(authService: AuthService,
 
 }
 
-//object LockoutStatusController {}

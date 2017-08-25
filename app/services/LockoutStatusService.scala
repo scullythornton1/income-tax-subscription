@@ -28,14 +28,14 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class LockoutStatusService @Inject()(lockoutRepository: LockoutMongoRepository) {
 
-  def checkLockoutStatus(arn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, Option[LockoutResponse]]] = {
-        lockoutRepository.getLockoutStatus(arn).map {
-          case response => Right(response)
-        }
-  }
-
   def lockoutAgent(arn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, Option[LockoutResponse]]] = {
     lockoutRepository.lockoutAgent(arn).map {
+      case response => Right(response)
+    }
+  }
+
+  def checkLockoutStatus(arn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, Option[LockoutResponse]]] = {
+    lockoutRepository.getLockoutStatus(arn).map {
       case response => Right(response)
     }
   }

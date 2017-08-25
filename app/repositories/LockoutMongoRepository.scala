@@ -39,11 +39,6 @@ class LockoutMongoRepository @Inject()(implicit mongo: ReactiveMongoComponent)
     ReactiveMongoFormats.objectIdFormats
   ) {
 
-  def getLockoutStatus(arn: String): Future[Option[LockoutResponse]] = {
-    val selector = BSONDocument(LockoutResponse.arn -> arn)
-    collection.find(selector).one[LockoutResponse]
-  }
-
   def lockoutAgent(arn: String): Future[Option[LockoutResponse]] = {
     val ttl: Duration = Duration.ofMinutes(1)
     val expiryTimestamp = OffsetDateTime.ofInstant(Instant.now.plusSeconds(ttl.getSeconds), ZoneId.systemDefault())
@@ -53,6 +48,11 @@ class LockoutMongoRepository @Inject()(implicit mongo: ReactiveMongoComponent)
       case result if result.ok => Some(model)
       case result => None
     }
+  }
+
+  def getLockoutStatus(arn: String): Future[Option[LockoutResponse]] = {
+    val selector = BSONDocument(LockoutResponse.arn -> arn)
+    collection.find(selector).one[LockoutResponse]
   }
 
   def dropDb: Future[Unit] = collection.drop()

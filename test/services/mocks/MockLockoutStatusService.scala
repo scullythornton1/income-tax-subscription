@@ -35,6 +35,23 @@ trait MockLockoutStatusService extends UnitSpec with MockitoSugar with BeforeAnd
 
   val mockLockoutStatusService = mock[LockoutStatusService]
 
+  override def beforeEach() ={
+    super.beforeEach()
+    reset(mockLockoutStatusService)
+  }
+
+  private def mockLockoutAgent(arn: String)(result: Future[Either[ErrorModel, Option[LockoutResponse]]]): Unit =
+    when(mockLockoutStatusService.lockoutAgent(ArgumentMatchers.eq(arn))(
+      ArgumentMatchers.any[HeaderCarrier],
+      ArgumentMatchers.any[ExecutionContext]
+    )).thenReturn(result)
+
+  def mockLockCreated(arn: String): Unit =
+    mockLockoutAgent(arn)(Future.successful(testLockoutSuccess))
+
+  def mockLockCreationFailed(arn: String): Unit =
+    mockLockoutAgent(arn)(Future.successful(testLockoutFailure))
+
   private def mockGetLockoutStatus(arn: String)(result: Future[Either[ErrorModel, Option[LockoutResponse]]]): Unit =
     when(mockLockoutStatusService.checkLockoutStatus(ArgumentMatchers.eq(arn))(
       ArgumentMatchers.any[HeaderCarrier],
