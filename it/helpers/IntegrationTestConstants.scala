@@ -19,6 +19,7 @@ package helpers
 import java.time.{Instant, OffsetDateTime, ZoneId}
 
 import models.frontend.{Both, Business, FERequest, Property}
+import models.lockout.LockOutRequest
 import models.registration.RegistrationRequestModel
 import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
 import models.{DateModel, ErrorModel}
@@ -55,6 +56,10 @@ object IntegrationTestConstants {
   val CONFLICT_ERROR = (CONFLICT, failureResponse(CONFLICT_ERROR_MODEL.code.get, CONFLICT_ERROR_MODEL.reason))
 
   def offsetDateTime: OffsetDateTime = OffsetDateTime.ofInstant(Instant.now, ZoneId.systemDefault())
+
+  val lockoutRequest = LockOutRequest(
+    timeoutSeconds = 10
+  )
 
   val fePropertyRequest = FERequest(
     nino = testNino,
