@@ -39,8 +39,8 @@ class LockoutMongoRepository @Inject()(implicit mongo: ReactiveMongoComponent)
     ReactiveMongoFormats.objectIdFormats
   ) {
 
-  def lockoutAgent(arn: String): Future[Option[LockoutResponse]] = {
-    val ttl: Duration = Duration.ofMinutes(1)
+  def lockoutAgent(arn: String, timeoutSeconds: Int): Future[Option[LockoutResponse]] = {
+    val ttl: Duration = Duration.ofSeconds(timeoutSeconds)
     val expiryTimestamp = OffsetDateTime.ofInstant(Instant.now.plusSeconds(ttl.getSeconds), ZoneId.systemDefault())
 
     val model = LockoutResponse(arn, expiryTimestamp)

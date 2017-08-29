@@ -24,7 +24,7 @@ import play.api.test.Helpers._
 import services.mocks.{MockAuthService, MockLockoutStatusService}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.MaterializerSupport
-import utils.TestConstants.{testArn, testLockoutResponse}
+import utils.TestConstants.{testArn, testLockoutRequest, testLockoutResponse}
 
 import scala.concurrent.Future
 
@@ -65,7 +65,7 @@ class LockoutStatusControllerSpec extends UnitSpec with MockLockoutStatusService
   }
 
   "LockoutStatusController.lockoutAgent" should {
-    def call: Future[Result] = TestController.lockoutAgent(testArn)(FakeRequest())
+    def call: Future[Result] = TestController.lockoutAgent(testArn)(FakeRequest().withJsonBody(Json.toJson(testLockoutRequest)))
 
     "when the queried ARN is locked out should return CREATED" in {
       mockAuthSuccess()

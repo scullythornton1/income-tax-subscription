@@ -28,7 +28,7 @@ class LockoutStatusServiceSpec extends UnitSpec with TestLockoutStatusService {
   implicit val hc = HeaderCarrier()
 
   "LockoutStatusService.lockoutAgent" should {
-    def call = await(TestLockoutStatusService.lockoutAgent(testArn))
+    def call = await(TestLockoutStatusService.lockoutAgent(testArn, testLockoutRequest))
 
     "return a testLockoutSuccess if the lock is created" in {
       mockLockCreated(testArn)

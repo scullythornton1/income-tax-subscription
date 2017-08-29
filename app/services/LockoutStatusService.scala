@@ -19,6 +19,7 @@ package services
 import javax.inject.{Inject, Singleton}
 
 import models.ErrorModel
+import models.lockout.LockOutRequest
 import models.matching.LockoutResponse
 import repositories.LockoutMongoRepository
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -28,16 +29,14 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class LockoutStatusService @Inject()(lockoutRepository: LockoutMongoRepository) {
 
-  def lockoutAgent(arn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, Option[LockoutResponse]]] = {
-    lockoutRepository.lockoutAgent(arn).map {
-      case response => Right(response)
-    }
+  def lockoutAgent(arn: String, request: LockOutRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext)
+  : Future[Either[ErrorModel, Option[LockoutResponse]]] = {
+    lockoutRepository.lockoutAgent(arn, request.timeoutSeconds).map(response => Right(response))
   }
 
-  def checkLockoutStatus(arn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, Option[LockoutResponse]]] = {
-    lockoutRepository.getLockoutStatus(arn).map {
-      case response => Right(response)
-    }
+  def checkLockoutStatus(arn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext)
+  : Future[Either[ErrorModel, Option[LockoutResponse]]] = {
+    lockoutRepository.getLockoutStatus(arn).map(response => Right(response))
   }
 
 }
