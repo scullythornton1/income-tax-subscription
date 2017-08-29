@@ -19,6 +19,7 @@ package controllers.matching
 import helpers.ComponentSpecBase
 import helpers.IntegrationTestConstants._
 import helpers.servicemocks._
+import models.lockout.LockoutRequest
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.Status._
 import play.modules.reactivemongo.ReactiveMongoComponent
@@ -61,6 +62,39 @@ class LockoutStatusControllerISpec extends ComponentSpecBase with BeforeAndAfter
       Then("The result should have a HTTP status of NOT_FOUND")
       res should have(
         httpStatus(NOT_FOUND)
+      )
+
+    }
+  }
+  "lockoutAgent" should {
+    "lockout the agent when tries have exceeded" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+
+      def lockoutRequest = LockoutRequest(30)
+
+      When("I call POST /client-matching/lock/:arn where arn is the test arn")
+      val res = IncomeTaxSubscription.lockoutAgent(testArn, lockoutRequest)
+
+      Then("The result should have a HTTP status of OK")
+      res should have(
+        httpStatus(CREATED)
+      )
+
+    }
+    "returns an error if lock already exists" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+
+      def lockoutRequest = LockoutRequest(30)
+
+      When("I call POST /client-matching/lock/:arn where arn is the test arn")
+      def res = IncomeTaxSubscription.lockoutAgent(testArn, lockoutRequest)
+      await(res)
+
+      Then("The result should have a HTTP status of INTERNAL_SERVER_ERROR")
+      res should have(
+        httpStatus(INTERNAL_SERVER_ERROR)
       )
 
     }
