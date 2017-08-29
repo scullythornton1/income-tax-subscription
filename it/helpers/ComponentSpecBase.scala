@@ -19,7 +19,7 @@ package helpers
 import controllers.ITSASessionKeys
 import helpers.servicemocks.{AuditStub, WireMockMethods}
 import models.frontend.FERequest
-import models.lockout.LockOutRequest
+import models.lockout.LockoutRequest
 import org.scalatest._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -84,9 +84,9 @@ trait ComponentSpecBase extends UnitSpec
 
     def createSubscription(body: FERequest): WSResponse = post(s"/subscription/${body.nino}", body)
 
-    def checkLockoutStatus(arn: String): WSResponse = get (s"/client-matching/lock/$arn")
+    def checkLockoutStatus(arn: String): WSResponse = get(s"/client-matching/lock/$arn")
 
-    def lockoutAgent(arn: String, body: LockOutRequest): WSResponse = post(s"/client-matching/lock/$arn", body)
+    def lockoutAgent(arn: String, body: LockoutRequest): WSResponse = post(s"/client-matching/lock/$arn", body)
 
     def post[T](uri: String, body: T)(implicit writes: Writes[T]): WSResponse = {
       await(

@@ -18,7 +18,7 @@ package controllers.matching
 
 import javax.inject.{Inject, Singleton}
 
-import models.lockout.LockOutRequest
+import models.lockout.LockoutRequest
 import models.matching.LockoutResponse
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
@@ -46,7 +46,7 @@ class LockoutStatusController @Inject()(authService: AuthService,
 
   def lockoutAgent(arn: String): Action[AnyContent] = Action.async { implicit request =>
     authorised() {
-      request.body.asJson.map(Json.fromJson[LockOutRequest](_).asOpt) match {
+      request.body.asJson.map(Json.fromJson[LockoutRequest](_).asOpt) match {
         case Some(Some(req)) =>
           lockoutStatusService.lockoutAgent(arn, req).map {
             case Right(Some(lock)) => Created(Json.toJson(lock)(LockoutResponse.feWritter))

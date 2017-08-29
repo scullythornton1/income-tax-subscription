@@ -38,7 +38,7 @@ class LockoutStatusControllerISpec extends ComponentSpecBase with BeforeAndAfter
       Given("I setup the wiremock stubs")
       AuthStub.stubAuthSuccess()
 
-      def insert = TestLockoutMongoRepository.lockoutAgent(testArn)
+      def insert = TestLockoutMongoRepository.lockoutAgent(testArn, 10)
 
       await(insert).isDefined shouldBe true
 
