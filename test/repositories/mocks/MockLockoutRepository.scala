@@ -17,6 +17,7 @@
 package repositories.mocks
 
 import models.matching.LockoutResponse
+import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import repositories.LockoutMongoRepository
@@ -28,7 +29,7 @@ trait MockLockoutRepository extends MockitoSugar {
   val mockLockoutMongoRepository = mock[LockoutMongoRepository]
 
   private def mockLockoutAgent(arn: String)(response: Future[Option[LockoutResponse]]) =
-    when(mockLockoutMongoRepository.lockoutAgent(arn))
+    when(mockLockoutMongoRepository.lockoutAgent(ArgumentMatchers.eq(arn), ArgumentMatchers.any()))
       .thenReturn(response)
 
   def mockLockCreated(arn: String): Unit =
