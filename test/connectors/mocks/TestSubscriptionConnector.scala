@@ -18,16 +18,47 @@ package connectors.mocks
 
 import audit.Logging
 import config.AppConfig
-import connectors.SubscriptionConnector
+import connectors.{BusinessConnectorUtil, PropertyConnectorUtil, SubscriptionConnector}
 import models.subscription.business.BusinessSubscriptionRequestModel
+import org.mockito.ArgumentMatchers
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.play.http.HttpPost
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost}
 import utils.JsonUtils._
 import utils.TestConstants.{BusinessSubscriptionResponse, PropertySubscriptionResponse, _}
+import org.mockito.Mockito._
+import org.scalatest.{BeforeAndAfterEach, Suite, TestSuite}
 
-trait MockSubscriptionConnector extends MockHttp with GuiceOneAppPerSuite {
+import scala.concurrent.ExecutionContext
+
+trait MockSubscriptionConnector extends MockitoSugar {
+  val mockSubscriptionConnector = mock[SubscriptionConnector]
+
+  def mockBusinessSubscribe(nino: String, request: BusinessSubscriptionRequestModel)(response: BusinessConnectorUtil.Response): Unit = {
+    when(mockSubscriptionConnector.businessSubscribe(
+      ArgumentMatchers.eq(nino),
+      ArgumentMatchers.eq(request)
+    )(
+      ArgumentMatchers.any[HeaderCarrier],
+      ArgumentMatchers.any[ExecutionContext]
+    ))
+      .thenReturn(response)
+  }
+
+  def mockPropertySubscribe(nino: String)(response: PropertyConnectorUtil.Response): Unit = {
+    when(mockSubscriptionConnector.propertySubscribe(
+      ArgumentMatchers.eq(nino)
+    )(
+      ArgumentMatchers.any[HeaderCarrier],
+      ArgumentMatchers.any[ExecutionContext]
+    ))
+      .thenReturn(response)
+  }
+}
+
+trait TestSubscriptionConnector extends MockHttp with GuiceOneAppPerSuite {
 
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val httpPost: HttpPost = mockHttpPost

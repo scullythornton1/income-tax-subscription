@@ -21,8 +21,11 @@ import java.time.{Instant, OffsetDateTime, ZoneId}
 import models.frontend.{Both, Business, FERequest, Property}
 import models.lockout.LockoutRequest
 import models.matching.LockoutResponse
+import models.frontend._
 import models.registration.RegistrationRequestModel
-import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
+import models.subscription.IncomeSourceModel
+import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel, BusinessSubscriptionSuccessResponseModel}
+import models.subscription.property.PropertySubscriptionResponseModel
 import models.{DateModel, ErrorModel}
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
@@ -298,5 +301,11 @@ object TestConstants {
            "externalId":"$externalId"
         }""")
   }
+
+  val propertySubscriptionSuccess = PropertySubscriptionResponseModel(testSafeId, testMtditId, IncomeSourceModel(testSourceId))
+
+  val businessSubscriptionSuccess = BusinessSubscriptionSuccessResponseModel(testSafeId, testMtditId, List(IncomeSourceModel(testSourceId)))
+
+  val feSuccessResponse = FESuccessResponse(Some(testMtditId))
 
 }

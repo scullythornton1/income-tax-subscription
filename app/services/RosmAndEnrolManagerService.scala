@@ -105,7 +105,7 @@ class RosmAndEnrolManagerService @Inject()
   }
 
 
-  def businessSubscription(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext)
+  private def businessSubscription(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext)
   : Future[Option[Either[ErrorModel, BusinessSubscriptionSuccessResponseModel]]] = {
     request.incomeSource match {
       case Both | Business => subscriptionService.businessSubscribe(request) map {
@@ -116,7 +116,7 @@ class RosmAndEnrolManagerService @Inject()
     }
   }
 
-  def propertySubscription(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext)
+  private def propertySubscription(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext)
   : Future[Option[Either[ErrorModel, PropertySubscriptionResponseModel]]] = {
     request.incomeSource match {
       case Both | Property => subscriptionService.propertySubscribe(request) map {

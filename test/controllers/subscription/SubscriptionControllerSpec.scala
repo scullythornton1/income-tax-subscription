@@ -16,12 +16,14 @@
 
 package controllers.subscription
 
+import audit.Logging
 import controllers.ITSASessionKeys
 import models.frontend.FESuccessResponse
+import models.subscription.business.BusinessSubscriptionSuccessResponseModel
 import play.api.http.Status._
 import play.api.mvc.{AnyContentAsJson, Request, Result}
 import play.api.test.FakeRequest
-import services.mocks.{MockAuthService, MockSubscriptionManagerService}
+import services.mocks.{MockAuthService, MockSubscriptionManagerService, TestSubscriptionManagerService}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.JsonUtils._
 import utils.MaterializerSupport
@@ -31,7 +33,9 @@ import scala.concurrent.Future
 
 class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerService with MaterializerSupport with MockAuthService {
 
-  object TestController extends SubscriptionController(logging, TestSubscriptionManagerService, mockAuthService)
+  val logging = mock[Logging]
+
+  object TestController extends SubscriptionController(logging, mockSubscriptionManagerService, mockAuthService)
 
   def call(request: Request[AnyContentAsJson]): Future[Result] = TestController.subscribe(testNino)(request)
 
@@ -43,8 +47,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerSe
           .withJsonBody(fePropertyRequest)
           .withHeaders(ITSASessionKeys.RequestURI -> "")
       mockAuthSuccess()
-      mockRegister(registerRequestPayload)(regSuccess)
-      mockPropertySubscribe(propertySubscribeSuccess)
+      mockRosmAndEnrol(fePropertyRequest, "")(Future.successful(Right(feSuccessResponse)))
       val result = call(fakeRequest)
       jsonBodyOf(result).as[FESuccessResponse].mtditId.get shouldBe testMtditId
 
