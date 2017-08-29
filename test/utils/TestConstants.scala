@@ -19,6 +19,7 @@ package utils
 import java.time.{Instant, LocalDateTime, OffsetDateTime, ZoneId}
 
 import models.frontend.{Both, Business, FERequest, Property}
+import models.lockout.LockOutRequest
 import models.matching.LockoutResponse
 import models.registration.RegistrationRequestModel
 import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
@@ -56,6 +57,7 @@ object TestConstants {
 
   def offsetDateTime: OffsetDateTime = OffsetDateTime.ofInstant(Instant.now, ZoneId.systemDefault())
 
+  lazy val testLockoutRequest = LockOutRequest(timeoutSeconds = 10)
   lazy val testLockoutResponse = LockoutResponse(testArn, offsetDateTime)
 
   lazy val testLockoutSuccess = Right(Some(testLockoutResponse))

@@ -37,7 +37,7 @@ class LockoutMongoRepositorySpec extends UnitSpec with GuiceOneAppPerSuite with 
   "lockoutAgent" should {
     "return the model when there is no lock" in {
       val (insertRes, stored) = await(for {
-        insertRes <- TestLockoutMongoRepository.lockoutAgent(testArn)
+        insertRes <- TestLockoutMongoRepository.lockoutAgent(testArn, 10)
         stored <- TestLockoutMongoRepository.find(LockoutResponse.arn -> testArn)
       } yield (insertRes.get, stored))
 

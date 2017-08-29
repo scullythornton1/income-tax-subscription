@@ -18,6 +18,7 @@ package controllers.matching
 
 import javax.inject.{Inject, Singleton}
 
+import models.lockout.LockOutRequest
 import models.matching.LockoutResponse
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
@@ -25,6 +26,7 @@ import services.{AuthService, LockoutStatusService}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class LockoutStatusController @Inject()(authService: AuthService,
@@ -44,10 +46,16 @@ class LockoutStatusController @Inject()(authService: AuthService,
 
   def lockoutAgent(arn: String): Action[AnyContent] = Action.async { implicit request =>
     authorised() {
-      lockoutStatusService.lockoutAgent(arn).map {
-        case Right(Some(lock)) => Created(Json.toJson(lock)(LockoutResponse.feWritter))
-        case Left(_) => InternalServerError
+      request.body.asJson.map(Json.fromJson[LockOutRequest](_).asOpt) match {
+        case Some(Some(req)) =>
+          lockoutStatusService.lockoutAgent(arn, req).map {
+            case Right(Some(lock)) => Created(Json.toJson(lock)(LockoutResponse.feWritter))
+            case Left(_) => InternalServerError
+          }
+        case _ =>
+          Future.successful(BadRequest)
       }
+
     }
   }
 
