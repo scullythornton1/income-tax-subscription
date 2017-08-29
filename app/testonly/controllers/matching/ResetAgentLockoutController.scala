@@ -21,6 +21,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent}
 import repositories.LockoutMongoRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class ResetAgentLockoutController @Inject()(mongoRepository: LockoutMongoRepository) extends BaseController {

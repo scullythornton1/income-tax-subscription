@@ -8,7 +8,7 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 
-GET        /income-tax-subscription/client-matching/test-only/reset-agent-lockout           testonly.controllers.matching.ResetAgentLockoutController.resetAgentLockout
+GET        /income-tax-subscription/client-matching/test-only/reset-agent-lockout           @testonly.controllers.matching.ResetAgentLockoutController.resetAgentLockout
 
 
 # Add all the application routes to the prod.routes file
