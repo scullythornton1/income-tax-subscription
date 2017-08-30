@@ -16,18 +16,23 @@
 
 package helpers
 
+import java.time.{Instant, OffsetDateTime, ZoneId}
+
 import models.frontend.{Both, Business, FERequest, Property}
+import models.lockout.LockoutRequest
 import models.registration.RegistrationRequestModel
 import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel}
 import models.{DateModel, ErrorModel}
 import play.api.http.Status._
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.domain.Generator
 import utils.JsonUtils._
 
 object IntegrationTestConstants {
 
   lazy val testNino = new Generator().nextNino.nino
+  // for the purpose of unit tests we only need a random string for the ARN
+  lazy val testArn: String = new Generator().nextNino.nino
   lazy val testSafeId = "XE0001234567890"
   lazy val testMtditId = "mtditId001"
   lazy val testSourceId = "sourceId0001"
@@ -49,6 +54,12 @@ object IntegrationTestConstants {
   val SERVER_ERROR = (INTERNAL_SERVER_ERROR, failureResponse(SERVER_ERROR_MODEL.code.get, SERVER_ERROR_MODEL.reason))
   val UNAVAILABLE = (SERVICE_UNAVAILABLE, failureResponse(UNAVAILABLE_MODEL.code.get, UNAVAILABLE_MODEL.reason))
   val CONFLICT_ERROR = (CONFLICT, failureResponse(CONFLICT_ERROR_MODEL.code.get, CONFLICT_ERROR_MODEL.reason))
+
+  def offsetDateTime: OffsetDateTime = OffsetDateTime.ofInstant(Instant.now, ZoneId.systemDefault())
+
+  val lockoutRequest = LockoutRequest(
+    timeoutSeconds = 10
+  )
 
   val fePropertyRequest = FERequest(
     nino = testNino,

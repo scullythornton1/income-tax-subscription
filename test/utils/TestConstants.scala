@@ -16,6 +16,11 @@
 
 package utils
 
+import java.time.{Instant, OffsetDateTime, ZoneId}
+
+import models.frontend.{Both, Business, FERequest, Property}
+import models.lockout.LockoutRequest
+import models.matching.LockoutResponse
 import models.frontend._
 import models.registration.RegistrationRequestModel
 import models.subscription.IncomeSourceModel
@@ -52,6 +57,17 @@ object TestConstants {
   val SERVER_ERROR = (INTERNAL_SERVER_ERROR, failureResponse(SERVER_ERROR_MODEL.code.get, SERVER_ERROR_MODEL.reason))
   val UNAVAILABLE = (SERVICE_UNAVAILABLE, failureResponse(UNAVAILABLE_MODEL.code.get, UNAVAILABLE_MODEL.reason))
   val CONFLICT_ERROR = (CONFLICT, failureResponse(CONFLICT_ERROR_MODEL.code.get, CONFLICT_ERROR_MODEL.reason))
+
+  def offsetDateTime: OffsetDateTime = OffsetDateTime.ofInstant(Instant.now, ZoneId.systemDefault())
+
+  lazy val testLockoutRequest = LockoutRequest(timeoutSeconds = 10)
+  lazy val testLockoutResponse = LockoutResponse(testArn, offsetDateTime)
+
+  lazy val testLockoutSuccess = Right(Some(testLockoutResponse))
+  lazy val testLockoutFailure = Left(ErrorModel(BAD_REQUEST, ""))
+  lazy val testLockoutNone = Right(None)
+
+  lazy val testException = new Exception("an error")
 
   val fePropertyRequest = FERequest(
     nino = testNino,
