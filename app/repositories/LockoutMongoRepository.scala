@@ -55,8 +55,6 @@ class LockoutMongoRepository @Inject()(implicit mongo: ReactiveMongoComponent)
     collection.find(selector).one[LockoutResponse]
   }
 
-  def dropDb: Future[Unit] = collection.drop()
-
   val lockIndex = Index(
     Seq((CheckLockout.expiry, IndexType(Ascending.value))),
     name = Some("lockExpires"),
@@ -68,6 +66,14 @@ class LockoutMongoRepository @Inject()(implicit mongo: ReactiveMongoComponent)
     options = BSONDocument("expireAfterSeconds" -> 0)
   )
 
-  collection.indexesManager.ensure(lockIndex)
+  private def setIndex() = collection.indexesManager.ensure(lockIndex)
+
+  setIndex()
+
+  def dropDb: Future[Unit] = {
+    collection.drop()
+    setIndex().map(_ => Unit)
+  }
+
 
 }
