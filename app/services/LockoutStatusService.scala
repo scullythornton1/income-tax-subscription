@@ -22,9 +22,9 @@ import models.ErrorModel
 import models.lockout.LockoutRequest
 import models.matching.LockoutResponse
 import repositories.LockoutMongoRepository
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class LockoutStatusService @Inject()(lockoutRepository: LockoutMongoRepository) {

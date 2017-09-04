@@ -23,11 +23,11 @@ import connectors.RegistrationConnector
 import models.ErrorModel
 import models.registration.{RegistrationRequestModel, RegistrationSuccessResponseModel}
 import play.api.http.Status.CONFLICT
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class RegistrationService @Inject()(registrationConnector: RegistrationConnector,

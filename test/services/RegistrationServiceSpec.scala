@@ -17,9 +17,9 @@
 package services
 
 import play.api.http.Status._
-import uk.gov.hmrc.play.http.HeaderCarrier
 import services.mocks.MockRegistrationService
 import utils.TestConstants._
+import uk.gov.hmrc.http.HeaderCarrier
 
 class RegistrationServiceSpec extends MockRegistrationService {
 

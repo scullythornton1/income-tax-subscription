@@ -23,9 +23,10 @@ import models.registration.RegistrationRequestModel
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.play.http.{HttpGet, HttpPost}
 import utils.Implicits._
 import utils.TestConstants.{GetRegistrationResponse, NewRegistrationResponse, _}
+import uk.gov.hmrc.http.{HttpGet, HttpPost}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait MockRegistrationConnector extends MockHttp with GuiceOneAppPerSuite {
 

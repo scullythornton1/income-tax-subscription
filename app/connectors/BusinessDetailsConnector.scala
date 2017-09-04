@@ -24,18 +24,18 @@ import connectors.utils.ConnectorUtils
 import models.ErrorModel
 import models.registration.{GetBusinessDetailsFailureResponseModel, GetBusinessDetailsSuccessResponseModel}
 import play.api.http.Status._
+import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpReads, HttpResponse}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.logging.Authorization
 
 import scala.annotation.switch
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class BusinessDetailsConnector @Inject()(appConfig: AppConfig,
                                          logging: Logging,
                                          httpGet: HttpGet
-                                        ) extends ServicesConfig with RawResponseReads {
+                                        )(implicit ec: ExecutionContext) extends ServicesConfig with RawResponseReads {
 
   import Logging._
 
@@ -56,7 +56,7 @@ class BusinessDetailsConnector @Inject()(appConfig: AppConfig,
     val updatedHc = createHeaderCarrierGet(hc)
     logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
 
-    httpGet.GET[HttpResponse](getBusinessDetailsUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc)
+    httpGet.GET[HttpResponse](getBusinessDetailsUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc, ec)
       .map { response =>
         response.status match {
           case OK =>

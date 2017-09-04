@@ -23,7 +23,7 @@ import play.api.{Application, Configuration, Logger}
 import uk.gov.hmrc.play.audit.AuditExtensions
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.{Audit, DataEvent}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 case class LoggingConfig(heading: String)
 
@@ -61,7 +61,6 @@ class Logging @Inject()(application: Application,
       tags = AuditExtensions.auditHeaderCarrier(hc).toAuditTags(transactionName, path) ++ tags,
       detail = AuditExtensions.auditHeaderCarrier(hc).toAuditDetails(detail.toSeq: _*)
     )
-    val pjs = packet: JsValue
     audit.sendDataEvent(packet)
   }
 
@@ -76,7 +75,7 @@ class Logging @Inject()(application: Application,
     """.stripMargin
 
   private def splunkFunction(transactionName: String, detail: Map[String, String], auditType: String)(implicit hc: HeaderCarrier) = {
-    val loggingFunc: String => Unit = if (debugToWarn) Logger.warn(_) else Logger.debug(_)
+    val loggingFunc: String => Unit = if (debugToWarn) Logger.warn else Logger.debug
     loggingFunc(Logging.splunkString + splunkToLogger(transactionName, detail, auditType))
     sendDataEvent(
       transactionName = transactionName,

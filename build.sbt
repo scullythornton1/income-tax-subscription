@@ -21,6 +21,8 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 lazy val plugins: Seq[Plugins] = Seq(PlayScala)
 
+scalaVersion := "2.11.11"
+
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
   Seq(

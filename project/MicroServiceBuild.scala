@@ -27,11 +27,8 @@ private object AppDependencies {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val microserviceBootstrapVersion = "5.16.0"
-  private val playHealthVersion = "2.1.0"
-  private val logbackJsonLoggerVersion = "3.1.0"
+  private val microserviceBootstrapVersion = "6.8.0"
   private val playUrlBindersVersion = "2.1.0"
-  private val playConfigVersion = "4.3.0"
   private val domainVersion = "4.1.0"
   private val hmrcTestVersion = "2.3.0"
   private val scalaTestVersion = "3.0.1"
@@ -47,20 +44,17 @@ private object AppDependencies {
 
   private val wiremockVersion = "2.5.1"
 
-  private val playAuthVersion = "1.2.0"
+  private val authClientVersion = "0.2.0"
 
 
   val compile = Seq(
     ws,
     "uk.gov.hmrc" %% "microservice-bootstrap" % microserviceBootstrapVersion,
-    "uk.gov.hmrc" %% "play-health" % playHealthVersion,
     "uk.gov.hmrc" %% "play-url-binders" % playUrlBindersVersion,
-    "uk.gov.hmrc" %% "play-config" % playConfigVersion,
-    "uk.gov.hmrc" %% "logback-json-logger" % logbackJsonLoggerVersion,
     "uk.gov.hmrc" %% "domain" % domainVersion,
     "uk.gov.hmrc" %% "mongo-lock" % mongoLockVersion,
     "uk.gov.hmrc" %% "play-reactivemongo" % reactiveMongoVersion,
-    "uk.gov.hmrc" %% "play-auth" % playAuthVersion
+    "uk.gov.hmrc" %% "auth-client" % authClientVersion
   )
 
   trait TestDependencies {

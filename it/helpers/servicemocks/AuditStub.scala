@@ -16,7 +16,7 @@
 
 package helpers.servicemocks
 
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 object AuditStub extends WireMockMethods {
   val appName = "income-tax-subscription-agent-frontend"
