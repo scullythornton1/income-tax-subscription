@@ -25,13 +25,13 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost}
 import utils.JsonUtils._
 import utils.TestConstants.{BusinessSubscriptionResponse, PropertySubscriptionResponse, _}
 import org.mockito.Mockito._
 import org.scalatest.{BeforeAndAfterEach, Suite, TestSuite}
 
 import scala.concurrent.ExecutionContext
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpPost }
 
 trait MockSubscriptionConnector extends MockitoSugar {
   val mockSubscriptionConnector = mock[SubscriptionConnector]

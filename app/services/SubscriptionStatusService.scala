@@ -23,10 +23,10 @@ import connectors.BusinessDetailsConnector
 import models.ErrorModel
 import models.frontend.FESuccessResponse
 import play.api.http.Status._
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class SubscriptionStatusService @Inject()(businessDetailsConnector: BusinessDetailsConnector,

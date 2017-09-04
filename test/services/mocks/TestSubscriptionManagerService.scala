@@ -23,10 +23,10 @@ import models.frontend.{FERequest, FESuccessResponse}
 import org.mockito.ArgumentMatchers
 import org.scalatest.mockito.MockitoSugar
 import services.RosmAndEnrolManagerService
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
 import org.mockito.Mockito._
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet }
 
 trait MockSubscriptionManagerService extends MockitoSugar {
   val mockSubscriptionManagerService = mock[RosmAndEnrolManagerService]

@@ -25,19 +25,19 @@ import models.ErrorModel
 import models.registration._
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Writes}
+import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.logging.Authorization
 
 import scala.annotation.switch
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class RegistrationConnector @Inject()(appConfig: AppConfig,
                                       logging: Logging,
                                       httpPost: HttpPost,
                                       httpGet: HttpGet
-                                     ) extends ServicesConfig with RawResponseReads {
+                                     ) (implicit ec: ExecutionContext) extends ServicesConfig with RawResponseReads {
 
   import Logging._
 
@@ -68,7 +68,7 @@ class RegistrationConnector @Inject()(appConfig: AppConfig,
 
     logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
     httpPost.POST[RegistrationRequestModel, HttpResponse](newRegistrationUrl(nino), registration)(
-      implicitly[Writes[RegistrationRequestModel]], implicitly[HttpReads[HttpResponse]], updatedHc)
+      implicitly[Writes[RegistrationRequestModel]], implicitly[HttpReads[HttpResponse]], updatedHc, ec)
       .map { response =>
         response.status match {
           case OK =>
@@ -111,7 +111,7 @@ class RegistrationConnector @Inject()(appConfig: AppConfig,
     auditRequest(eventTypeRequest)
 
     logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
-    httpGet.GET[HttpResponse](getRegistrationUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc)
+    httpGet.GET[HttpResponse](getRegistrationUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc, ec)
       .map { response =>
         response.status match {
           case OK =>

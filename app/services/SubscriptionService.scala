@@ -24,11 +24,11 @@ import models.ErrorModel
 import models.frontend.FERequest
 import models.subscription.business.{BusinessDetailsModel, BusinessSubscriptionRequestModel, BusinessSubscriptionSuccessResponseModel}
 import models.subscription.property.PropertySubscriptionResponseModel
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class SubscriptionService @Inject()(subscriptionConnector: SubscriptionConnector,

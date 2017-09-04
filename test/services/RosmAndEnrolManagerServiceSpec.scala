@@ -22,11 +22,11 @@ import models.subscription.IncomeSourceModel
 import models.subscription.property.PropertySubscriptionResponseModel
 import play.api.http.Status._
 import services.mocks.TestSubscriptionManagerService
-import uk.gov.hmrc.play.http.HeaderCarrier
 import utils.TestConstants._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Right
+import uk.gov.hmrc.http.HeaderCarrier
 
 class RosmAndEnrolManagerServiceSpec extends TestSubscriptionManagerService {
 

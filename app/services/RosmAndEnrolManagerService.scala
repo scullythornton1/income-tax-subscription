@@ -25,10 +25,10 @@ import models.frontend._
 import models.subscription.business.BusinessSubscriptionSuccessResponseModel
 import models.subscription.property.PropertySubscriptionResponseModel
 import play.api.http.Status._
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import utils.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class RosmAndEnrolManagerService @Inject()
@@ -88,7 +88,7 @@ class RosmAndEnrolManagerService @Inject()
 
   def orchestrateROSM(request: FERequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[ErrorModel, FESuccessResponse]] = {
     registrationService.register(request.isAgent, request.nino) flatMap {
-      case Right(success) => {
+      case Right(success) =>
         for {
           businessResult <- businessSubscription(request)
           propertyResult <- propertySubscription(request)
@@ -99,7 +99,6 @@ class RosmAndEnrolManagerService @Inject()
           case (_, Some(Right(x))) => FESuccessResponse(x.mtditId) // We only need the response of one of the calls
           case (_, _) => ErrorModel(INTERNAL_SERVER_ERROR, "Unexpected Error") // this error is impossible but included for exhaustive match
         }
-      }
       case Left(failure) => Future.successful(failure)
     }
   }

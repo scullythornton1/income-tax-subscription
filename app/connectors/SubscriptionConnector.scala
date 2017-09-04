@@ -28,9 +28,9 @@ import models.subscription.business._
 import models.subscription.property.{PropertySubscriptionFailureModel, PropertySubscriptionResponseModel}
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Writes}
+import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.logging.Authorization
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -60,7 +60,7 @@ class SubscriptionConnector @Inject()
 
     logging.debug(s"Request:\n$requestDetails\n\nHeader Carrier:\n$updatedHc")
     httpPost.POST[BusinessSubscriptionRequestModel, HttpResponse](businessSubscribeUrl(nino), businessSubscriptionPayload)(
-      implicitly[Writes[BusinessSubscriptionRequestModel]], implicitly[HttpReads[HttpResponse]], createHeaderCarrierPost(hc)
+      implicitly[Writes[BusinessSubscriptionRequestModel]], implicitly[HttpReads[HttpResponse]], createHeaderCarrierPost(hc), ec
     ).map { response =>
       response.status match {
         case OK =>
@@ -90,7 +90,7 @@ class SubscriptionConnector @Inject()
     val updatedHc = createHeaderCarrierPost(hc)
     logging.debug(s"Request:\n$requestDetails\n\nHeader Carrier:\n$updatedHc")
     httpPost.POST[JsValue, HttpResponse](propertySubscribeUrl(nino), "{}": JsValue)(implicitly[Writes[JsValue]],
-      implicitly[HttpReads[HttpResponse]], updatedHc).map {response =>
+      implicitly[HttpReads[HttpResponse]], updatedHc, ec).map {response =>
 
         response.status match {
           case OK =>

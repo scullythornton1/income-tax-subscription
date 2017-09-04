@@ -17,11 +17,11 @@
 package services
 
 import services.mocks.TestLockoutStatusService
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.TestConstants._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 class LockoutStatusServiceSpec extends UnitSpec with TestLockoutStatusService {
 

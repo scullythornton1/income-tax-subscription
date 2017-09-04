@@ -18,12 +18,12 @@ package services
 
 import models.frontend.FESuccessResponse
 import play.api.http.Status._
-import uk.gov.hmrc.play.http.HeaderCarrier
 import services.mocks.MockSubscriptionStatusService
 import utils.TestConstants._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.Implicits._
+import uk.gov.hmrc.http.HeaderCarrier
 
 class SubscriptionStatusServiceSpec extends MockSubscriptionStatusService {
 
