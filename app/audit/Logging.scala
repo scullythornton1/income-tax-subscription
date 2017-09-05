@@ -75,7 +75,7 @@ class Logging @Inject()(application: Application,
     """.stripMargin
 
   private def splunkFunction(transactionName: String, detail: Map[String, String], auditType: String)(implicit hc: HeaderCarrier) = {
-    val loggingFunc: String => Unit = if (debugToWarn) Logger.warn else Logger.debug
+    val loggingFunc: String => Unit = if (debugToWarn) Logger.warn(_) else Logger.debug(_)
     loggingFunc(Logging.splunkString + splunkToLogger(transactionName, detail, auditType))
     sendDataEvent(
       transactionName = transactionName,
