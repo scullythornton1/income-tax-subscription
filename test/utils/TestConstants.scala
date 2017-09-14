@@ -17,7 +17,9 @@
 package utils
 
 import java.time.{Instant, OffsetDateTime, ZoneId}
+import java.util.UUID
 
+import models.digitalcontact.PaperlessPreferenceKey
 import models.frontend.{Both, Business, FERequest, Property}
 import models.lockout.LockoutRequest
 import models.matching.LockoutResponse
@@ -41,6 +43,7 @@ object TestConstants {
   lazy val testMtditId = "mtditId001"
   lazy val testSourceId = "sourceId0001"
   lazy val testErrorReason = "Error Reason"
+  lazy val testPreferencesToken: String = s"${UUID.randomUUID()}"
 
   val INVALID_NINO_MODEL = ErrorModel(BAD_REQUEST, "INVALID_NINO", "Submission has not passed validation. Invalid parameter NINO.")
   val INVALID_PAYLOAD_MODEL = ErrorModel(BAD_REQUEST, "INVALID_PAYLOAD", "Submission has not passed validation. Invalid PAYLOAD.")
@@ -308,4 +311,5 @@ object TestConstants {
 
   val feSuccessResponse = FESuccessResponse(Some(testMtditId))
 
+  val testPaperlessPreferenceKey = PaperlessPreferenceKey(testPreferencesToken, testNino)
 }

@@ -14,17 +14,6 @@
  * limitations under the License.
  */
 
-package common
+package models.digitalcontact
 
-object Constants {
-
-  object GovernmentGateway {
-    val MTDITID = "MTDITID"
-    val NINO = "NINO"
-    val ggPortalId = "Default"
-    val ggServiceName = "HMRC-MTD-IT"
-    val ggFriendlyName = "Making Tax Digital Income Tax Self-Assessment enrolment"
-  }
-
-  val ninoJsonKey = "nino"
-}
+case class PaperlessPreferenceKey(token: String, nino: String)

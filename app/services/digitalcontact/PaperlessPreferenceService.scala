@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package common
+package services.digitalcontact
 
-object Constants {
+import javax.inject.{Inject, Singleton}
 
-  object GovernmentGateway {
-    val MTDITID = "MTDITID"
-    val NINO = "NINO"
-    val ggPortalId = "Default"
-    val ggServiceName = "HMRC-MTD-IT"
-    val ggFriendlyName = "Making Tax Digital Income Tax Self-Assessment enrolment"
-  }
+import models.digitalcontact.PaperlessPreferenceKey
+import repositories.digitalcontact.PaperlessPreferenceMongoRepository
 
-  val ninoJsonKey = "nino"
+import scala.concurrent.Future
+
+@Singleton
+class PaperlessPreferenceService @Inject()(paperlessPreferenceRepository: PaperlessPreferenceMongoRepository){
+  def storeNino(key: PaperlessPreferenceKey): Future[PaperlessPreferenceKey] = paperlessPreferenceRepository.storeNino(key)
 }
