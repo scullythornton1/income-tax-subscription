@@ -14,17 +14,25 @@
  * limitations under the License.
  */
 
-package services.digitalcontact
+package models.digitalcontact
 
-import javax.inject.{Inject, Singleton}
+import play.api.libs.json.Json
+import uk.gov.hmrc.play.test.UnitSpec
+import utils.Implicits
+import utils.TestConstants._
 
-import models.digitalcontact.PaperlessPreferenceKey
-import repositories.digitalcontact.PaperlessPreferenceMongoRepository
+class PaperlessPreferenceKeyModelSpec extends UnitSpec with Implicits {
 
-import scala.concurrent.Future
+  "model writer" should {
+    import utils.TestConstants.PaperlessPreferenceResponse.successResponse
 
-@Singleton
-class PaperlessPreferenceService @Inject()(paperlessPreferenceRepository: PaperlessPreferenceMongoRepository){
-  def storeNino(key: PaperlessPreferenceKey): Future[PaperlessPreferenceKey] = paperlessPreferenceRepository.storeNino(key)
-  def getNino(token: String): Future[Option[PaperlessPreferenceKey]] = paperlessPreferenceRepository.retrieveNino(token)
+    "format the class into the expected format" in {
+      val token = "ABC"
+      val nino = testNino
+      val response: PaperlessPreferenceKey = PaperlessPreferenceKey(token, nino)
+      Json.toJson[PaperlessPreferenceKey](response) shouldBe successResponse(nino)
+
+    }
+  }
+
 }

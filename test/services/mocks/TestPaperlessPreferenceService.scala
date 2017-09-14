@@ -37,6 +37,21 @@ trait MockPaperlessPreferenceService extends MockitoSugar {
     when(mockPaperlessPreferenceService.storeNino(key))
       .thenReturn(Future.failed(testException))
   }
+
+  def mockNinoGetFound(token: String): Unit = {
+    when(mockPaperlessPreferenceService.getNino(token))
+      .thenReturn(Future.successful(Some(testPaperlessPreferenceKey)))
+  }
+
+  def mockNinoGetNotFound(token: String): Unit = {
+    when(mockPaperlessPreferenceService.getNino(token))
+      .thenReturn(Future.successful(None))
+  }
+
+  def mockNinoGetFailed(token: String): Unit = {
+    when(mockPaperlessPreferenceService.getNino(token))
+      .thenReturn(Future.failed(testException))
+  }
 }
 
 trait TestPaperlessPreferenceService extends MockPaperlessPreferenceRepository {

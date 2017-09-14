@@ -20,8 +20,8 @@ import javax.inject.{Inject, Singleton}
 
 import common.Constants._
 import models.digitalcontact.PaperlessPreferenceKey
-import play.api.libs.json.{JsError, JsSuccess, JsValue}
-import play.api.mvc.Action
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.mvc.{Action, AnyContent}
 import services.AuthService
 import services.digitalcontact.PaperlessPreferenceService
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -47,6 +47,15 @@ class PaperlessPreferenceController @Inject()(authService: AuthService,
           Future.successful(
             BadRequest(s"$errors")
           )
+      }
+    }
+  }
+
+  def getNino(token: String): Action[AnyContent] = Action.async { implicit req =>
+    authorised() {
+      paperlessPreferenceService.getNino(token).map {
+        case Some(model) => Ok(Json.toJson(model)(PaperlessPreferenceKey.writes))
+        case None => NotFound
       }
     }
   }

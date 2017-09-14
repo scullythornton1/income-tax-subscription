@@ -16,4 +16,23 @@
 
 package models.digitalcontact
 
+import play.api.libs.json._
+
 case class PaperlessPreferenceKey(token: String, nino: String)
+
+object PaperlessPreferenceKey {
+
+  implicit val writes: Writes[PaperlessPreferenceKey] = new Writes[PaperlessPreferenceKey] {
+    override def writes(o: PaperlessPreferenceKey): JsValue =
+      Json.obj(
+        "identifiers" ->
+          List(
+            Json.obj(
+              "name" -> "nino",
+              "value" -> o.nino
+            )
+          )
+      )
+  }
+
+}
