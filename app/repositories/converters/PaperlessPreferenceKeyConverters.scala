@@ -30,8 +30,12 @@ object PaperlessPreferenceKeyReads extends Reads[PaperlessPreferenceKey] {
 
 object PaperlessPreferenceKeyWrites extends OWrites[PaperlessPreferenceKey] {
   override def writes(model: PaperlessPreferenceKey): JsObject = Json.obj(
-    "_id" -> model.token,
-    "nino" -> model.nino,
-    "expiryTimestamp" -> Json.obj("$date" -> Instant.now.toEpochMilli)
+    tokenKey -> model.token,
+    ninoKey -> model.nino,
+    timestampKey -> Json.obj("$date" -> Instant.now.toEpochMilli)
   )
+
+  val tokenKey = "_id"
+  val ninoKey = "nino"
+  val timestampKey = "creationTimestamp"
 }

@@ -36,7 +36,7 @@ class PaperlessPreferenceController @Inject()(authService: AuthService,
   import authService._
 
   def storeNino(token: String): Action[JsValue] = Action.async(parse.json) { implicit req =>
-    authorised() {
+//    authorised() {
       (req.body \ ninoJsonKey).validate[String] match {
         case JsSuccess(nino, _) =>
           val model = PaperlessPreferenceKey(token, nino)
@@ -48,6 +48,6 @@ class PaperlessPreferenceController @Inject()(authService: AuthService,
             BadRequest(s"$errors")
           )
       }
-    }
+//    }
   }
 }

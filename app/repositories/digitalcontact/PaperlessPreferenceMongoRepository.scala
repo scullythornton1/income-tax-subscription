@@ -26,6 +26,7 @@ import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.IndexType.Ascending
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson._
+import repositories.converters.PaperlessPreferenceKeyWrites._
 import repositories.converters.{PaperlessPreferenceKeyReads, PaperlessPreferenceKeyWrites}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -36,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class PaperlessPreferenceMongoRepository @Inject()(config: AppConfig)(implicit mongo: ReactiveMongoComponent, ec: ExecutionContext)
   extends ReactiveRepository[PaperlessPreferenceKey, BSONObjectID](
-    "lockout",
+    "paperlessPreference",
     mongo.mongoConnector.db,
     OFormat(PaperlessPreferenceKeyReads, PaperlessPreferenceKeyWrites),
     ReactiveMongoFormats.objectIdFormats
@@ -47,21 +48,25 @@ class PaperlessPreferenceMongoRepository @Inject()(config: AppConfig)(implicit m
   }
 
   def retrieveNino(token: String): Future[Option[PaperlessPreferenceKey]] = {
-    find("_id" -> token) map (_.headOption)
+    find(tokenKey -> token) map (_.headOption)
   }
 
-  private val ttlIndex = Index(
-    Seq((CheckLockout.expiry, IndexType(Ascending.value))),
+  private lazy val ttlIndex = Index(
+    Seq((timestampKey, IndexType(Ascending.value))),
     name = Some("tokenExpires"),
     unique = false,
     background = false,
     dropDups = false,
     sparse = false,
     version = None,
-    options = BSONDocument("expireAfterSeconds" -> 0)
+    options = BSONDocument("expireAfterSeconds" -> config.paperlessPreferencesExpirySeconds)
   )
 
-  private def setIndex() = collection.indexesManager.ensure(ttlIndex)
+  private def setIndex(): Unit = {
+    collection.indexesManager.drop(ttlIndex.name.get) onComplete {
+      _ => collection.indexesManager.ensure(ttlIndex)
+    }
+  }
 
   setIndex()
 }
