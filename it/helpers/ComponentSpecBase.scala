@@ -24,7 +24,7 @@ import org.scalatest._
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Writes
+import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.WSResponse
 import play.api.{Application, Environment, Mode}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 trait ComponentSpecBase extends UnitSpec
   with GivenWhenThen with TestSuite
-  with GuiceOneServerPerSuite with ScalaFutures with IntegrationPatience with Matchers
+  with GuiceOneServerPerSuite with ScalaFutures with IntegrationPatience with Matchers with Assertions
   with WiremockHelper with BeforeAndAfterEach with BeforeAndAfterAll with Eventually
   with CustomMatchers with WireMockMethods {
 
@@ -87,6 +87,8 @@ trait ComponentSpecBase extends UnitSpec
     def checkLockoutStatus(arn: String): WSResponse = get(s"/client-matching/lock/$arn")
 
     def lockoutAgent(arn: String, body: LockoutRequest): WSResponse = post(s"/client-matching/lock/$arn", body)
+
+    def storeNino(token: String, nino: String): WSResponse = post(s"/identifier-mapping/$token", Json.obj("nino" -> nino))
 
     def post[T](uri: String, body: T)(implicit writes: Writes[T]): WSResponse = {
       await(

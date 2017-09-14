@@ -28,6 +28,7 @@ trait AppConfig {
   val desURL: String
   val desEnvironment: String
   val desToken: String
+  val paperlessPreferencesExpirySeconds: Int
 }
 
 @Singleton
@@ -47,4 +48,9 @@ class MicroserviceAppConfig @Inject()(val configuration: Configuration) extends 
   override lazy val desURL = loadConfig(s"$desBase.url")
   override lazy val desEnvironment = loadConfig(s"$desBase.environment")
   override lazy val desToken = loadConfig(s"$desBase.authorization-token")
+  override val paperlessPreferencesExpirySeconds: Int = {
+    val key = s"paperless-preference.expiry-seconds"
+      configuration.getInt(s"paperless-preference.expiry-seconds")
+        .getOrElse(throw new Exception(s"Missing configuration key: $key"))
+  }
 }
