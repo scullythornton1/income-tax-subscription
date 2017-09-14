@@ -38,12 +38,15 @@ class PaperlessPreferenceControllerISpec extends ComponentSpecBase with BeforeAn
       Given("I setup the wiremock stubs")
       AuthStub.stubAuthSuccess()
 
+      When("I call the store nino endpoint")
       val res = IncomeTaxSubscription.storeNino(testPreferencesToken, testNino)
 
+      Then("The result status should be OK")
       res should have(
         httpStatus(Status.CREATED)
       )
 
+      Then("The database should contain the inserted NINO")
       val dbRes = await(paperlessPreferenceRepository.find("_id" -> testPreferencesToken)).headOption
 
       dbRes should contain(PaperlessPreferenceKey(testPreferencesToken, testNino))
