@@ -90,6 +90,8 @@ trait ComponentSpecBase extends UnitSpec
 
     def storeNino(token: String, nino: String): WSResponse = post(s"/identifier-mapping/$token", Json.obj("nino" -> nino))
 
+    def getNino(token: String): WSResponse = get(s"/identifier-mapping/$token")
+
     def post[T](uri: String, body: T)(implicit writes: Writes[T]): WSResponse = {
       await(
         buildClient(uri)
