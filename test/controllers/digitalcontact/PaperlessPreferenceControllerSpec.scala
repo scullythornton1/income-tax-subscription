@@ -17,7 +17,7 @@
 package controllers.digitalcontact
 
 import common.Constants._
-import play.api.http.Status._
+import models.digitalcontact.PaperlessPreferenceKey
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -25,6 +25,7 @@ import services.mocks.{MockAuthService, MockPaperlessPreferenceService}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.MaterializerSupport
 import utils.TestConstants._
+import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -70,4 +71,39 @@ class PaperlessPreferenceControllerSpec extends UnitSpec with MaterializerSuppor
       status(res) shouldBe BAD_REQUEST
     }
   }
+
+  s"getNino($testPreferencesToken)" should {
+    "return successful NINO found" in {
+      mockAuthSuccess()
+      mockNinoGetFound(testPreferencesToken)
+
+      val res: Future[Result] = TestPaperlessPreferenceController.getNino(testPreferencesToken)(FakeRequest())
+
+      status(res) shouldBe OK
+      val content = Json.parse(contentAsString(res))
+      content shouldBe Json.toJson(testPaperlessPreferenceKey)(PaperlessPreferenceKey.writes)
+
+    }
+
+    "return successful NINO not found" in {
+      mockAuthSuccess()
+      mockNinoGetNotFound(testPreferencesToken)
+
+      val res: Future[Result] = TestPaperlessPreferenceController.getNino(testPreferencesToken)(FakeRequest())
+
+      status(res) shouldBe NOT_FOUND
+    }
+
+    "return an exception" in {
+      mockAuthSuccess()
+      mockNinoGetFailed(testPreferencesToken)
+
+      val request: FakeRequest[JsValue] = FakeRequest().withBody(Json.obj())
+
+      val res: Future[Result] = TestPaperlessPreferenceController.getNino(testPreferencesToken)(FakeRequest())
+
+      intercept[Exception](await(res)) shouldBe testException
+    }
+  }
+
 }

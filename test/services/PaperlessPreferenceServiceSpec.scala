@@ -16,6 +16,7 @@
 
 package services
 
+import models.digitalcontact.PaperlessPreferenceKey
 import services.mocks.TestPaperlessPreferenceService
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.TestConstants._
@@ -35,5 +36,28 @@ class PaperlessPreferenceServiceSpec extends UnitSpec with TestPaperlessPreferen
       val res = TestPaperlessPreferenceService.storeNino(testPaperlessPreferenceKey)
       intercept[Exception](await(res)) shouldBe testException
     }
+  }
+
+  "getNino" should {
+    "successful response found" in {
+      mockNinoRetrieve(testPreferencesToken)
+
+      val res = TestPaperlessPreferenceService.getNino(testPreferencesToken)
+      await(res) shouldBe Some(PaperlessPreferenceKey(testPreferencesToken, testNino))
+    }
+    "not found response" in {
+      mockNinoRetrieveNotFound(testPreferencesToken)
+
+      val res = TestPaperlessPreferenceService.getNino(testPreferencesToken)
+      await(res) shouldBe None
+    }
+
+    "return exception when failed" in {
+      mockNinoRetrieveFailed(testPreferencesToken)
+
+      val res = TestPaperlessPreferenceService.getNino(testPreferencesToken)
+      intercept[Exception](await(res)) shouldBe testException
+    }
+
   }
 }

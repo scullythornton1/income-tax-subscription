@@ -23,6 +23,8 @@ import org.scalatest.BeforeAndAfterEach
 import play.api.http.Status
 import repositories.digitalcontact.PaperlessPreferenceMongoRepository
 import helpers.IntegrationTestConstants._
+import play.api.libs.json.Json
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class PaperlessPreferenceControllerISpec extends ComponentSpecBase with BeforeAndAfterEach {
@@ -50,6 +52,33 @@ class PaperlessPreferenceControllerISpec extends ComponentSpecBase with BeforeAn
       val dbRes = await(paperlessPreferenceRepository.find("_id" -> testPreferencesToken)).headOption
 
       dbRes should contain(PaperlessPreferenceKey(testPreferencesToken, testNino))
+    }
+  }
+
+  s"GET /identifier-mapping/$testPreferencesToken" should {
+    "GET the NINO successfully and return OK" in {
+      Given("I setup the wiremock stubs")
+      AuthStub.stubAuthSuccess()
+      IncomeTaxSubscription.storeNino(testPreferencesToken, testNino)
+
+      When("I call the get nino endpoint")
+      val res = IncomeTaxSubscription.getNino(testPreferencesToken)
+
+      Then("The result status should be OK")
+      res should have(
+        httpStatus(Status.OK),
+        jsonBodyAs(
+          Json.obj(
+            "identifiers" ->
+              List(
+                Json.obj(
+                  "name" -> "nino",
+                  "value" -> s"$testNino"
+                )
+              )
+          )
+        )
+      )
     }
   }
 }

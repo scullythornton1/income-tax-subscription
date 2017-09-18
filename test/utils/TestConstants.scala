@@ -154,6 +154,20 @@ object TestConstants {
 
   val registerRequestPayload = RegistrationRequestModel(isAnAgent = false)
 
+  object PaperlessPreferenceResponse {
+    val successResponse: String => JsValue = (nino: String) =>
+      s"""
+         |{
+         |    "identifiers": [
+         |        {
+         |            "name":"nino",
+         |            "value":"$nino"
+         |        }
+         |    ]
+         |}
+         """.stripMargin
+  }
+
   object NewRegistrationResponse {
     val successResponse: String => JsValue = (safeId: String) =>
       s"""
