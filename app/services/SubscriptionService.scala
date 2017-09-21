@@ -37,7 +37,7 @@ class SubscriptionService @Inject()(subscriptionConnector: SubscriptionConnector
   def propertySubscribe(request: FERequest)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, PropertySubscriptionResponseModel]] = {
     implicit val subscribeLoggingConfig: Option[LoggingConfig] = SubscriptionService.propertySubscribeLoggingConfig
     logging.debug(s"Request: $request")
-    subscriptionConnector.propertySubscribe(request.nino)
+    subscriptionConnector.propertySubscribe(request.nino, request.arn)
   }
 
   def businessSubscribe(request: FERequest)(implicit hc: HeaderCarrier): Future[Either[ErrorModel, BusinessSubscriptionSuccessResponseModel]] = {
@@ -49,7 +49,7 @@ class SubscriptionService @Inject()(subscriptionConnector: SubscriptionConnector
       cashOrAccruals = request.cashOrAccruals.get,
       tradingName = request.tradingName.get
     )
-    subscriptionConnector.businessSubscribe(request.nino, BusinessSubscriptionRequestModel(List(businessDetails)))
+    subscriptionConnector.businessSubscribe(request.nino, BusinessSubscriptionRequestModel(List(businessDetails)), request.arn)
   }
 
 }

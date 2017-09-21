@@ -42,7 +42,7 @@ class SubscriptionConnectorSpec extends TestSubscriptionConnector {
 
   "SubscriptionConnector.businessSubscribe" should {
 
-    def result = await(TestSubscriptionConnector.businessSubscribe(testNino, businessSubscriptionRequestPayload))
+    def result = await(TestSubscriptionConnector.businessSubscribe(testNino, businessSubscriptionRequestPayload, arn = None))
 
     "Post to the correct url" in {
       TestSubscriptionConnector.businessSubscribeUrl(testNino) should endWith(s"/income-tax-self-assessment/nino/$testNino/business")
@@ -87,7 +87,7 @@ class SubscriptionConnectorSpec extends TestSubscriptionConnector {
 
   "SubscriptionConnector.propertySubscribe" should {
 
-    def result = await(TestSubscriptionConnector.propertySubscribe(testNino))
+    def result = await(TestSubscriptionConnector.propertySubscribe(testNino, arn = None))
 
     "Post to the correct url" in {
       TestSubscriptionConnector.propertySubscribeUrl(testNino) should endWith(s"/income-tax-self-assessment/nino/$testNino/properties")

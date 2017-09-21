@@ -50,12 +50,12 @@ class SubscriptionConnector @Inject()
     headerCarrier.copy(authorization = Some(Authorization(urlHeaderAuthorization)))
       .withExtraHeaders("Environment" -> applicationConfig.desEnvironment, "Content-Type" -> "application/json")
 
-  def businessSubscribe(nino: String, businessSubscriptionPayload: BusinessSubscriptionRequestModel)
+  def businessSubscribe(nino: String, businessSubscriptionPayload: BusinessSubscriptionRequestModel, arn: Option[String])
                        (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[BusinessConnectorUtil.Response] = {
     import BusinessConnectorUtil._
     import SubscriptionConnector._
     implicit val loggingConfig = SubscriptionConnector.businessSubscribeLoggingConfig
-    lazy val requestDetails: Map[String, String] = Map("nino" -> nino, "subscribe" -> (businessSubscriptionPayload: JsValue).toString)
+    lazy val requestDetails: Map[String, String] = Map("nino" -> nino, "arn" -> arn.fold("-")(identity), "subscribe" -> (businessSubscriptionPayload: JsValue).toString)
     val updatedHc = createHeaderCarrierPost(hc)
 
     logging.debug(s"Request:\n$requestDetails\n\nHeader Carrier:\n$updatedHc")
@@ -82,34 +82,34 @@ class SubscriptionConnector @Inject()
     }
   }
 
-  def propertySubscribe(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[PropertyConnectorUtil.Response] = {
+  def propertySubscribe(nino: String, arn: Option[String])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[PropertyConnectorUtil.Response] = {
     import PropertyConnectorUtil._
     import SubscriptionConnector._
     implicit val loggingConfig = SubscriptionConnector.propertySubscribeLoggingConfig
-    lazy val requestDetails: Map[String, String] = Map("nino" -> nino)
+    lazy val requestDetails: Map[String, String] = Map("nino" -> nino, "arn" -> arn.fold("-")(identity))
     val updatedHc = createHeaderCarrierPost(hc)
     logging.debug(s"Request:\n$requestDetails\n\nHeader Carrier:\n$updatedHc")
     httpPost.POST[JsValue, HttpResponse](propertySubscribeUrl(nino), "{}": JsValue)(implicitly[Writes[JsValue]],
-      implicitly[HttpReads[HttpResponse]], updatedHc, ec).map {response =>
+      implicitly[HttpReads[HttpResponse]], updatedHc, ec).map { response =>
 
-        response.status match {
-          case OK =>
-            logging.info(s"Property subscription responded with an OK")
-            parseSuccess(response.body)
-          case status =>
+      response.status match {
+        case OK =>
+          logging.info(s"Property subscription responded with an OK")
+          parseSuccess(response.body)
+        case status =>
 
-            logging.audit(
-              transactionName = auditPropertySubscribeName,
-              detail = requestDetails + ("response" -> response.body),
-              auditType = auditPropertySubscribeName + "-" + eventTypeUnexpectedError
-            )(updatedHc)
+          logging.audit(
+            transactionName = auditPropertySubscribeName,
+            detail = requestDetails + ("response" -> response.body),
+            auditType = auditPropertySubscribeName + "-" + eventTypeUnexpectedError
+          )(updatedHc)
 
-            val parseResponse@Left(ErrorModel(_, optCode, message)) = parseFailure(status, response.body)
-            val code: String = optCode.getOrElse("N/A")
-            logging.warn(s"Property subscription responded with an error, status=$status code=$code message=$message")
+          val parseResponse@Left(ErrorModel(_, optCode, message)) = parseFailure(status, response.body)
+          val code: String = optCode.getOrElse("N/A")
+          logging.warn(s"Property subscription responded with an error, status=$status code=$code message=$message")
 
-            parseResponse
-        }
+          parseResponse
+      }
     }
   }
 }

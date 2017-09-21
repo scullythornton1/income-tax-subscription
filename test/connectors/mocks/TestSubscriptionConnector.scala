@@ -39,7 +39,8 @@ trait MockSubscriptionConnector extends MockitoSugar {
   def mockBusinessSubscribe(nino: String, request: BusinessSubscriptionRequestModel)(response: BusinessConnectorUtil.Response): Unit = {
     when(mockSubscriptionConnector.businessSubscribe(
       ArgumentMatchers.eq(nino),
-      ArgumentMatchers.eq(request)
+      ArgumentMatchers.eq(request),
+      ArgumentMatchers.any()
     )(
       ArgumentMatchers.any[HeaderCarrier],
       ArgumentMatchers.any[ExecutionContext]
@@ -49,7 +50,8 @@ trait MockSubscriptionConnector extends MockitoSugar {
 
   def mockPropertySubscribe(nino: String)(response: PropertyConnectorUtil.Response): Unit = {
     when(mockSubscriptionConnector.propertySubscribe(
-      ArgumentMatchers.eq(nino)
+      ArgumentMatchers.eq(nino),
+      ArgumentMatchers.any()
     )(
       ArgumentMatchers.any[HeaderCarrier],
       ArgumentMatchers.any[ExecutionContext]

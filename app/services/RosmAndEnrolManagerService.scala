@@ -59,6 +59,7 @@ class RosmAndEnrolManagerService @Inject()
   val auditResponseMap: (FERequest, FESuccessResponse) => Map[String, String] = (feRequest, response) =>
     Map(
       "nino" -> feRequest.nino,
+      "arn" -> feRequest.arn.fold("-")(identity),
       "mtdItsaReferenceNumber" -> response.mtditId.get
     )
 
