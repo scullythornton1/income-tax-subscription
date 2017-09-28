@@ -22,12 +22,13 @@ import play.api.http.Status.UNAUTHORIZED
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{EssentialFilter, RequestHeader, Result}
+import uk.gov.hmrc.auth.core.AuthorisationException
 import uk.gov.hmrc.play.config.{AppName, RunMode}
 import uk.gov.hmrc.play.microservice.bootstrap.DefaultMicroserviceGlobal
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.play.microservice.filters.{ AuditFilter, LoggingFilter, MicroserviceFilterSupport }
+import uk.gov.hmrc.play.microservice.filters.{AuditFilter, LoggingFilter, MicroserviceFilterSupport}
 
 object ControllerConfiguration extends ControllerConfig(Play.current.configuration)
 
@@ -51,13 +52,17 @@ object MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode {
   override val microserviceAuditFilter = MicroserviceAuditFilter
 
   override def onError(request: RequestHeader, ex: Throwable): Future[Result] = {
-    super.onError(request, ex) map (res => {
-      res.header.status
-      match {
-        case UNAUTHORIZED => Status(ErrorUnauthorized.httpStatusCode)(Json.toJson(ErrorUnauthorized))
-        case _ => Status(ErrorInternalServerError.httpStatusCode)(Json.toJson(ErrorInternalServerError))
-      }
-    })
+    ex match {
+      case ex: AuthorisationException => Future.successful(Unauthorized)
+      case _ =>
+        super.onError(request, ex) map (res => {
+          res.header.status
+          match {
+            case UNAUTHORIZED => Status(ErrorUnauthorized.httpStatusCode)(Json.toJson(ErrorUnauthorized))
+            case _ => Status(ErrorInternalServerError.httpStatusCode)(Json.toJson(ErrorInternalServerError))
+          }
+        })
+    }
   }
 
   override def onBadRequest(request: RequestHeader, error: String): Future[Result] = {
