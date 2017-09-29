@@ -89,16 +89,16 @@ class SubscriptionControllerISpec extends ComponentSpecBase {
       AuditStub.verifyAudit()
     }
 
-    "fail when Auth returns an UNAUTHORISED response" in {
+    "fail when Auth returns an UNAUTHORIZED response" in {
       Given("I setup the wiremock stubs")
       AuthStub.stubAuthFailure()
 
       When("I call POST /subscription/:nino where nino is the test nino with a Business Request")
       val res = IncomeTaxSubscription.createSubscription(feBusinessRequest)
 
-      Then("The result should have a HTTP status of UNAUTHORISED and an empty body")
+      Then("The result should have a HTTP status of UNAUTHORIZED and an empty body")
       res should have(
-        httpStatus(INTERNAL_SERVER_ERROR)
+        httpStatus(UNAUTHORIZED)
       )
     }
 

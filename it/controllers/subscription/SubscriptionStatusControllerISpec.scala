@@ -43,7 +43,7 @@ class SubscriptionStatusControllerISpec extends ComponentSpecBase {
       BusinessDetailsStub.verifyGetBusinessDetails()
     }
 
-    "return INTERNAL_SERVER_ERROR when auth fails" in {
+    "return UNAUTHORIZED when auth fails" in {
       Given("I setup the wiremock stubs")
       AuthStub.stubAuthFailure()
 
@@ -52,7 +52,7 @@ class SubscriptionStatusControllerISpec extends ComponentSpecBase {
 
       Then("The result should have a HTTP status of OK and a body containing the MTDID")
       res should have(
-        httpStatus(INTERNAL_SERVER_ERROR)
+        httpStatus(UNAUTHORIZED)
       )
     }
 
