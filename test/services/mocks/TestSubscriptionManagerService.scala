@@ -21,12 +21,14 @@ import config.AppConfig
 import models.ErrorModel
 import models.frontend.{FERequest, FESuccessResponse}
 import org.mockito.ArgumentMatchers
-import org.scalatest.mockito.MockitoSugar
-import services.RosmAndEnrolManagerService
 import org.mockito.Mockito._
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import services.RosmAndEnrolManagerService
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet }
 
 trait MockSubscriptionManagerService extends MockitoSugar {
   val mockSubscriptionManagerService = mock[RosmAndEnrolManagerService]
@@ -44,17 +46,15 @@ trait MockSubscriptionManagerService extends MockitoSugar {
 
 }
 
-trait TestSubscriptionManagerService extends MockRegistrationService with MockSubscriptionService {
+trait TestSubscriptionManagerService extends UnitSpec with GuiceOneAppPerSuite with MockRegistrationService with MockSubscriptionService {
 
-  override lazy val appConfig = app.injector.instanceOf[AppConfig]
-  override lazy val logging = app.injector.instanceOf[Logging]
-  override lazy val httpPost = mockHttpPost
-  override lazy val httpGet: HttpGet = mockHttpGet
+  lazy val appConfig = app.injector.instanceOf[AppConfig]
+  val logging = mock[Logging]
 
   object TestSubscriptionManagerService extends RosmAndEnrolManagerService(
     appConfig,
     logging,
-    TestRegistrationService,
+    mockRegistrationService,
     mockSubscriptionService
   )
 

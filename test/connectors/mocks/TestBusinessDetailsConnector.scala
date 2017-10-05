@@ -18,16 +18,24 @@ package connectors.mocks
 
 import audit.Logging
 import config.AppConfig
-import connectors.BusinessDetailsConnector
+import connectors.{BusinessDetailsConnector, GetBusinessDetailsUtil}
+import models.ErrorModel
+import models.registration.GetBusinessDetailsSuccessResponseModel
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito._
+import org.mockito._
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.libs.json.JsValue
+import uk.gov.hmrc.http.{HttpGet, HttpPost}
 import utils.Implicits._
 import utils.TestConstants._
-import uk.gov.hmrc.http.{ HttpGet, HttpPost }
-import scala.concurrent.ExecutionContext.Implicits.global
 
-trait MockBusinessDetailsConnector extends MockHttp with GuiceOneAppPerSuite {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+trait TestBusinessDetailsConnector extends MockHttp with GuiceOneAppPerSuite {
 
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val logging: Logging = app.injector.instanceOf[Logging]
@@ -47,4 +55,26 @@ trait MockBusinessDetailsConnector extends MockHttp with GuiceOneAppPerSuite {
 
   def setupMockBusinessDetails(nino: String)(status: Int, response: JsValue): Unit =
     setupMockHttpGet(url = TestBusinessDetailsConnector.getBusinessDetailsUrl(nino))(status, response)
+}
+
+trait MockBusinessDetailsConnector extends MockitoSugar {
+
+  val mockBusinessDetailsConnector = mock[BusinessDetailsConnector]
+
+  private def setupMockBusinessDetails(nino: String)(response: Future[GetBusinessDetailsUtil.Response]): Unit =
+    when(mockBusinessDetailsConnector.getBusinessDetails(ArgumentMatchers.eq(nino))(ArgumentMatchers.any())).thenReturn(response)
+
+  def mockGetBusinessDetailsSuccess(nino: String): Unit =
+    setupMockBusinessDetails(nino)(Future.successful(Right(GetBusinessDetailsSuccessResponseModel(testMtditId))))
+
+  def mockGetBusinessDetailsNotFound(nino: String): Unit =
+    setupMockBusinessDetails(nino)(Future.successful(Left(ErrorModel(NOT_FOUND, "NOT_FOUND_NINO", "The remote endpoint has indicated that no data can be found"))))
+
+  def mockGetBusinessDetailsFailure(nino: String): Unit =
+    setupMockBusinessDetails(nino)(
+      Future.successful(Left(ErrorModel(INTERNAL_SERVER_ERROR,
+        "SERVER_ERROR",
+        "DES is currently experiencing problems that require live service intervention"))))
+
+
 }

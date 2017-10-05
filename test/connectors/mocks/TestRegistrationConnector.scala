@@ -18,17 +18,22 @@ package connectors.mocks
 
 import audit.Logging
 import config.AppConfig
-import connectors.RegistrationConnector
-import models.registration.RegistrationRequestModel
+import connectors.{GetRegistrationUtil, NewRegistrationUtil, RegistrationConnector}
+import models.registration.{RegistrationRequestModel, RegistrationSuccessResponseModel}
+import org.mockito.ArgumentMatchers
+import org.mockito.Mockito._
+import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.libs.json.JsValue
+import uk.gov.hmrc.http.{HttpGet, HttpPost}
 import utils.Implicits._
 import utils.TestConstants.{GetRegistrationResponse, NewRegistrationResponse, _}
-import uk.gov.hmrc.http.{HttpGet, HttpPost}
-import scala.concurrent.ExecutionContext.Implicits.global
 
-trait MockRegistrationConnector extends MockHttp with GuiceOneAppPerSuite {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
+trait TestRegistrationConnector extends MockHttp with GuiceOneAppPerSuite {
 
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val logging: Logging = app.injector.instanceOf[Logging]
@@ -49,4 +54,34 @@ trait MockRegistrationConnector extends MockHttp with GuiceOneAppPerSuite {
 
   def setupMockGetRegistration(nino: String)(status: Int, response: JsValue): Unit =
     setupMockHttpGet(url = TestRegistrationConnector.getRegistrationUrl(nino))(status, response)
+}
+
+
+trait MockRegistrationConnector extends MockitoSugar {
+
+  val mockRegistrationConnector = mock[RegistrationConnector]
+
+  private def setupMockRegister(nino: String, payload: RegistrationRequestModel)(response: Future[NewRegistrationUtil.Response]): Unit =
+    when(mockRegistrationConnector.register(ArgumentMatchers.eq(nino), ArgumentMatchers.eq(payload))(ArgumentMatchers.any()))
+      .thenReturn(response)
+
+  def mockRegisterSuccess(nino: String, payload: RegistrationRequestModel): Unit =
+    setupMockRegister(nino, payload)(Future.successful(Right(RegistrationSuccessResponseModel(testSafeId))))
+
+  def mockRegisterConflict(nino: String, payload: RegistrationRequestModel): Unit =
+    setupMockRegister(nino, payload)(Future.successful(Left(CONFLICT_ERROR_MODEL)))
+
+  def mockRegisterFailure(nino: String, payload: RegistrationRequestModel): Unit =
+    setupMockRegister(nino, payload)(Future.successful(Left(INVALID_NINO_MODEL)))
+
+  private def setupMockGetRegistration(nino: String)(response: Future[GetRegistrationUtil.Response]): Unit =
+    when(mockRegistrationConnector.getRegistration(ArgumentMatchers.eq(nino))(ArgumentMatchers.any()))
+      .thenReturn(response)
+
+  def mockGetRegistrationSuccess(nino: String): Unit =
+    setupMockGetRegistration(nino)(Future.successful(Right(RegistrationSuccessResponseModel(testSafeId))))
+
+  def mockGetRegistrationFailure(nino: String): Unit =
+    setupMockGetRegistration(nino)(Future.successful(Left(INVALID_NINO_MODEL)))
+
 }

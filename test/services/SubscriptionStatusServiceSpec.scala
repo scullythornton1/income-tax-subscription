@@ -18,14 +18,15 @@ package services
 
 import models.frontend.FESuccessResponse
 import play.api.http.Status._
-import services.mocks.MockSubscriptionStatusService
+import services.mocks.TestSubscriptionStatusService
 import utils.TestConstants._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import utils.Implicits._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.test.UnitSpec
 
-class SubscriptionStatusServiceSpec extends MockSubscriptionStatusService {
+class SubscriptionStatusServiceSpec extends UnitSpec with TestSubscriptionStatusService {
 
   implicit val hc = HeaderCarrier()
 
@@ -34,18 +35,18 @@ class SubscriptionStatusServiceSpec extends MockSubscriptionStatusService {
     def call = await(TestSubscriptionStatusService.checkMtditsaSubscription(testNino))
 
     "return the Right(NONE) when the person does not have a mtditsa subscription" in {
-      mockBusinessDetails(getBusinessDetailsNotFound)
+      mockGetBusinessDetailsNotFound(testNino)
       call.right.get shouldBe None
     }
 
     "return the Right(Some(FESuccessResponse)) when the person already have a mtditsa subscription" in {
-      mockBusinessDetails(getBusinessDetailsSuccess)
+      mockGetBusinessDetailsSuccess(testNino)
       // testMtditId must be the same value defined in getBusinessDetailsSuccess
       call.right.get shouldBe Some(FESuccessResponse(testMtditId))
     }
 
     "return the error for other error type" in {
-      mockBusinessDetails(getBusinessDetailsServerError)
+      mockGetBusinessDetailsFailure(testNino)
       call.left.get.status shouldBe INTERNAL_SERVER_ERROR
     }
 

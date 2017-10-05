@@ -20,12 +20,12 @@ import models.ErrorModel
 import models.registration._
 import play.api.http.Status._
 import play.api.libs.json.JsValue
-import connectors.mocks.MockBusinessDetailsConnector
+import connectors.mocks.TestBusinessDetailsConnector
 import _root_.utils.JsonUtils._
 import _root_.utils.TestConstants._
 import uk.gov.hmrc.http.HeaderCarrier
 
-class BusinessDetailsConnectorSpec extends MockBusinessDetailsConnector {
+class BusinessDetailsConnectorSpec extends TestBusinessDetailsConnector {
 
   implicit val hc = HeaderCarrier()
 
