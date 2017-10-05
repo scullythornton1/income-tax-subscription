@@ -17,11 +17,12 @@
 package services
 
 import play.api.http.Status._
-import services.mocks.MockRegistrationService
+import services.mocks.TestRegistrationService
 import utils.TestConstants._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.test.UnitSpec
 
-class RegistrationServiceSpec extends MockRegistrationService {
+class RegistrationServiceSpec extends UnitSpec with TestRegistrationService {
 
   implicit val hc = HeaderCarrier()
 
@@ -30,24 +31,24 @@ class RegistrationServiceSpec extends MockRegistrationService {
   "RegistrationService" should {
 
     "return the safeId when the registration is successful" in {
-      mockRegister(registerRequestPayload)(regSuccess)
+      mockRegisterSuccess(testNino, registerRequestPayload)
       call.right.get.safeId shouldBe testSafeId
     }
 
     "return the error if registration fails" in {
-      mockRegister(registerRequestPayload)(INVALID_NINO)
+      mockRegisterFailure(testNino, registerRequestPayload)
       call.left.get.status shouldBe BAD_REQUEST
     }
 
     "return the safeId when the registration is conflict but lookup is successful" in {
-      mockRegister(registerRequestPayload)(CONFLICT_ERROR)
-      mockGetRegistration(getRegSuccess)
+      mockRegisterConflict(testNino, registerRequestPayload)
+      mockGetRegistrationSuccess(testNino)
       call.right.get.safeId shouldBe testSafeId
     }
 
     "return the error when both registration is conflict but lookup is unsuccessful" in {
-      mockRegister(registerRequestPayload)(CONFLICT_ERROR)
-      mockGetRegistration(INVALID_NINO)
+      mockRegisterConflict(testNino, registerRequestPayload)
+      mockGetRegistrationFailure(testNino)
       call.left.get.status shouldBe BAD_REQUEST
     }
   }

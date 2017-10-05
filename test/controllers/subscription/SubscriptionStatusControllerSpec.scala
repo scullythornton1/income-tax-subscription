@@ -16,6 +16,7 @@
 
 package controllers.subscription
 
+import audit.Logging
 import models.frontend.FESuccessResponse
 import play.api.http.Status._
 import play.api.mvc.Result
@@ -29,13 +30,15 @@ import scala.concurrent.Future
 
 class SubscriptionStatusControllerSpec extends UnitSpec with MockSubscriptionStatusService with MaterializerSupport with MockAuthService {
 
-  object TestController extends SubscriptionStatusController(logging, mockAuthService, TestSubscriptionStatusService)
+  val logging = mock[Logging]
+
+  object TestController extends SubscriptionStatusController(logging, mockAuthService, mockSubscriptionStatusService)
 
   def call: Future[Result] = TestController.checkSubscriptionStatus(testNino)(FakeRequest())
 
   "SubscriptionStatusController" should {
     "when the queried person has no prior mtditsa subscription return OK with an empty body" in {
-      mockBusinessDetails(getBusinessDetailsNotFound)
+      mockCheckMtditsaNotFound(testNino)
       mockAuthSuccess()
 
       val result = call
@@ -44,7 +47,7 @@ class SubscriptionStatusControllerSpec extends UnitSpec with MockSubscriptionSta
     }
 
     "when the queried person has a prior mtditsa subscription return OK with the id" in {
-      mockBusinessDetails(getBusinessDetailsSuccess)
+      mockCheckMtditsaFound(testNino)
       mockAuthSuccess()
 
       val result = call

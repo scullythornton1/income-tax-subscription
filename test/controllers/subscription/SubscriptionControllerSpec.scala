@@ -19,11 +19,10 @@ package controllers.subscription
 import audit.Logging
 import controllers.ITSASessionKeys
 import models.frontend.FESuccessResponse
-import models.subscription.business.BusinessSubscriptionSuccessResponseModel
 import play.api.http.Status._
 import play.api.mvc.{AnyContentAsJson, Request, Result}
 import play.api.test.FakeRequest
-import services.mocks.{MockAuthService, MockSubscriptionManagerService, TestSubscriptionManagerService}
+import services.mocks.{MockAuthService, MockSubscriptionManagerService}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.JsonUtils._
 import utils.MaterializerSupport
