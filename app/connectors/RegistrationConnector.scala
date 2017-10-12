@@ -25,9 +25,9 @@ import models.ErrorModel
 import models.registration._
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Writes}
-import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.annotation.switch
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,9 +35,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class RegistrationConnector @Inject()(appConfig: AppConfig,
                                       logging: Logging,
-                                      httpPost: HttpPost,
-                                      httpGet: HttpGet
-                                     ) (implicit ec: ExecutionContext) extends ServicesConfig with RawResponseReads {
+                                      httpClient: HttpClient
+                                     ) (implicit ec: ExecutionContext) extends RawResponseReads {
 
   import Logging._
 
@@ -67,7 +66,7 @@ class RegistrationConnector @Inject()(appConfig: AppConfig,
     val updatedHc = createHeaderCarrierPost(hc)
 
     logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
-    httpPost.POST[RegistrationRequestModel, HttpResponse](newRegistrationUrl(nino), registration)(
+    httpClient.POST[RegistrationRequestModel, HttpResponse](newRegistrationUrl(nino), registration)(
       implicitly[Writes[RegistrationRequestModel]], implicitly[HttpReads[HttpResponse]], updatedHc, ec)
       .map { response =>
         response.status match {
@@ -111,7 +110,7 @@ class RegistrationConnector @Inject()(appConfig: AppConfig,
     auditRequest(eventTypeRequest)
 
     logging.debug(s"Request:\n$requestDetails\n\nRequest Headers:\n$updatedHc")
-    httpGet.GET[HttpResponse](getRegistrationUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc, ec)
+    httpClient.GET[HttpResponse](getRegistrationUrl(nino))(implicitly[HttpReads[HttpResponse]], updatedHc, ec)
       .map { response =>
         response.status match {
           case OK =>

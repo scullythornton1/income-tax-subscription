@@ -27,6 +27,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.{HttpGet, HttpPost}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import utils.Implicits._
 import utils.TestConstants.{GetRegistrationResponse, NewRegistrationResponse, _}
 
@@ -37,14 +38,14 @@ trait TestRegistrationConnector extends MockHttp with GuiceOneAppPerSuite {
 
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val logging: Logging = app.injector.instanceOf[Logging]
-  lazy val httpPost: HttpPost = mockHttpPost
-  lazy val httpGet: HttpGet = mockHttpGet
+  lazy val httpPost: HttpPost = mockHttpClient
+  lazy val httpClient: HttpClient = mockHttpClient
 
   def mockRegister(payload: RegistrationRequestModel) = (setupMockRegister(testNino, payload) _).tupled
 
   val mockGetRegistration = (setupMockGetRegistration(testNino) _).tupled
 
-  object TestRegistrationConnector extends RegistrationConnector(appConfig, logging, httpPost, httpGet)
+  object TestRegistrationConnector extends RegistrationConnector(appConfig, logging, httpClient)
 
   val regSuccess = (OK, NewRegistrationResponse.successResponse(testSafeId))
   val getRegSuccess = (OK, GetRegistrationResponse.successResponse(testSafeId))

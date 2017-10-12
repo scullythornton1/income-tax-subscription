@@ -29,8 +29,8 @@ class BusinessDetailsConnectorSpec extends TestBusinessDetailsConnector {
 
   implicit val hc = HeaderCarrier()
 
-  val env = appConfig.desEnvironment
-  val authToken = appConfig.desToken
+  lazy val env = appConfig.desEnvironment
+  lazy val authToken = appConfig.desToken
 
   "BusinessDetailsConnector.getBusinessDetails" should {
     "Put in the correct headers" in {

@@ -25,17 +25,7 @@ import uk.gov.hmrc.http.{ HttpDelete, HttpGet, HttpPost, HttpPut }
 class Module extends AbstractModule {
 
   override def configure(): Unit = {
-    bind(classOf[AuditConnector]).to(classOf[config.MicroserviceAuditConnector])
     bind(classOf[AppConfig]).to(classOf[config.MicroserviceAppConfig]).asEagerSingleton()
-    bind(classOf[WSGet]).to(classOf[config.WSHttp]).asEagerSingleton()
-    bind(classOf[HttpGet]).to(classOf[config.WSHttp]).asEagerSingleton()
-    bind(classOf[WSPost]).to(classOf[config.WSHttp]).asEagerSingleton()
-    bind(classOf[HttpPost]).to(classOf[config.WSHttp]).asEagerSingleton()
-    bind(classOf[WSDelete]).to(classOf[config.WSHttp]).asEagerSingleton()
-    bind(classOf[HttpDelete]).to(classOf[config.WSHttp]).asEagerSingleton()
-    bind(classOf[WSPut]).to(classOf[config.WSHttp]).asEagerSingleton()
-    bind(classOf[HttpPut]).to(classOf[config.WSHttp]).asEagerSingleton()
-    bind(classOf[AuthConnector]).to(classOf[config.AuthConnector])
   }
 
 }

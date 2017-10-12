@@ -16,8 +16,9 @@
 
 package config
 
-import javax.inject.{Inject,Singleton}
-import play.api.Configuration
+import javax.inject.{Inject, Singleton}
+
+import play.api.{Application, Configuration}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
@@ -32,7 +33,9 @@ trait AppConfig {
 }
 
 @Singleton
-class MicroserviceAppConfig @Inject()(val configuration: Configuration) extends AppConfig with ServicesConfig {
+class MicroserviceAppConfig @Inject()(val app: Application) extends AppConfig with ServicesConfig {
+  val configuration = app.configuration
+  override val mode = app.mode
 
   private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
@@ -53,4 +56,6 @@ class MicroserviceAppConfig @Inject()(val configuration: Configuration) extends 
       configuration.getInt(s"paperless-preference.expiry-seconds")
         .getOrElse(throw new Exception(s"Missing configuration key: $key"))
   }
+
+  override protected def runModeConfiguration: Configuration = configuration
 }

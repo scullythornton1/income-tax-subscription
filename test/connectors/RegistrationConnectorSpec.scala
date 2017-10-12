@@ -16,13 +16,13 @@
 
 package connectors
 
+import _root_.utils.JsonUtils._
+import _root_.utils.TestConstants._
+import connectors.mocks.TestRegistrationConnector
 import models.ErrorModel
 import models.registration._
 import play.api.http.Status._
 import play.api.libs.json.JsValue
-import connectors.mocks.TestRegistrationConnector
-import _root_.utils.JsonUtils._
-import _root_.utils.TestConstants._
 import uk.gov.hmrc.http.HeaderCarrier
 
 class RegistrationConnectorSpec extends TestRegistrationConnector {
