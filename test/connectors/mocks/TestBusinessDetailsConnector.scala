@@ -29,6 +29,7 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.{HttpGet, HttpPost}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import utils.Implicits._
 import utils.TestConstants._
 
@@ -39,13 +40,12 @@ trait TestBusinessDetailsConnector extends MockHttp with GuiceOneAppPerSuite {
 
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
   lazy val logging: Logging = app.injector.instanceOf[Logging]
-  lazy val httpPost: HttpPost = mockHttpPost
-  lazy val httpGet: HttpGet = mockHttpGet
+  lazy val httpClient: HttpClient = mockHttpClient
 
 
   val mockBusinessDetails = (setupMockBusinessDetails(testNino) _).tupled
 
-  object TestBusinessDetailsConnector extends BusinessDetailsConnector(appConfig, logging, httpGet)
+  object TestBusinessDetailsConnector extends BusinessDetailsConnector(appConfig, logging, httpClient)
 
   val getBusinessDetailsSuccess = (OK, GetBusinessDetailsResponse.successResponse(testNino, testSafeId, testMtditId))
   val getBusinessDetailsNotFound = (NOT_FOUND, GetBusinessDetailsResponse.failureResponse("NOT_FOUND_NINO", "The remote endpoint has indicated that no data can be found"))

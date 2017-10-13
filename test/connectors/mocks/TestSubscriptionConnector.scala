@@ -21,17 +21,17 @@ import config.AppConfig
 import connectors.{BusinessConnectorUtil, PropertyConnectorUtil, SubscriptionConnector}
 import models.subscription.business.BusinessSubscriptionRequestModel
 import org.mockito.ArgumentMatchers
+import org.mockito.Mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.libs.json.JsValue
+import uk.gov.hmrc.http.{HeaderCarrier, HttpPost}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import utils.JsonUtils._
 import utils.TestConstants.{BusinessSubscriptionResponse, PropertySubscriptionResponse, _}
-import org.mockito.Mockito._
-import org.scalatest.{BeforeAndAfterEach, Suite, TestSuite}
 
 import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpPost }
 
 trait MockSubscriptionConnector extends MockitoSugar {
   val mockSubscriptionConnector = mock[SubscriptionConnector]
@@ -63,7 +63,7 @@ trait MockSubscriptionConnector extends MockitoSugar {
 trait TestSubscriptionConnector extends MockHttp with GuiceOneAppPerSuite {
 
   lazy val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
-  lazy val httpPost: HttpPost = mockHttpPost
+  lazy val httpClient: HttpClient = mockHttpClient
   lazy val logging: Logging = app.injector.instanceOf[Logging]
 
   val mockPropertySubscribe = (setupMockPropertySubscribe(testNino) _).tupled
@@ -73,7 +73,7 @@ trait TestSubscriptionConnector extends MockHttp with GuiceOneAppPerSuite {
   val propertySubscribeSuccess = (OK, PropertySubscriptionResponse.successResponse(testSafeId, testMtditId, testSourceId))
   val businessSubscribeSuccess = (OK, BusinessSubscriptionResponse.successResponse(testSafeId, testMtditId, testSourceId))
 
-  object TestSubscriptionConnector extends SubscriptionConnector(appConfig, httpPost, logging)
+  object TestSubscriptionConnector extends SubscriptionConnector(appConfig, httpClient, logging)
 
   def setupMockBusinessSubscribe(nino: String, payload: BusinessSubscriptionRequestModel)(status: Int, response: JsValue): Unit =
     setupMockHttpPost(url = TestSubscriptionConnector.businessSubscribeUrl(nino), payload)(status, response)

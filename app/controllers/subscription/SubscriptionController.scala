@@ -24,7 +24,7 @@ import models.frontend.{FEFailureResponse, FERequest}
 import play.api.libs.json.{JsError, JsSuccess}
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import services.{AuthService, RosmAndEnrolManagerService}
-import uk.gov.hmrc.play.microservice.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import utils.JsonUtils._
 
 import scala.concurrent.ExecutionContext.Implicits.global

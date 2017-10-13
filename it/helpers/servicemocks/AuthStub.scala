@@ -17,12 +17,10 @@
 package helpers.servicemocks
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-import helpers.{IntegrationTestConstants, WiremockHelper}
 import models.auth.UserIds
-import play.api.http.{HeaderNames, Status}
+import play.api.http.HeaderNames
 import play.api.http.Status._
 import play.api.libs.json.{JsObject, Json}
-import uk.gov.hmrc.auth.core.Retrievals
 
 object AuthStub extends WireMockMethods {
   val authIDs = "/uri/to/ids"
