@@ -18,6 +18,7 @@ package config
 
 import javax.inject.{Inject, Singleton}
 
+import config.featureswitch.FeatureSwitching
 import play.api.{Application, Configuration}
 import uk.gov.hmrc.play.config.ServicesConfig
 
@@ -26,14 +27,14 @@ trait AppConfig {
   val ggURL: String
   val ggAdminURL: String
   val ggAuthenticationURL: String
-  val desURL: String
+  def desURL: String
   val desEnvironment: String
   val desToken: String
   val paperlessPreferencesExpirySeconds: Int
 }
 
 @Singleton
-class MicroserviceAppConfig @Inject()(val app: Application) extends AppConfig with ServicesConfig {
+class MicroserviceAppConfig @Inject()(val app: Application) extends AppConfig with ServicesConfig with FeatureSwitching {
   val configuration = app.configuration
   override val mode = app.mode
 
@@ -44,17 +45,18 @@ class MicroserviceAppConfig @Inject()(val app: Application) extends AppConfig wi
   override lazy val ggURL = baseUrl("government-gateway")
   override lazy val ggAdminURL = baseUrl("gg-admin")
 
-  lazy val desBase = configuration.getString("feature-switching.useNewDesRoute").fold(false)(x=>x.toBoolean) match {
-    case true =>"microservice.services.new-des"
-    case _ =>"microservice.services.des"
-  }
-  override lazy val desURL = loadConfig(s"$desBase.url")
+  private def desBase =
+    if (isEnabled(featureswitch.StubDESFeature)) "microservice.services.stub-des"
+    else "microservice.services.des"
+
+  override def desURL = loadConfig(s"$desBase.url")
+
   override lazy val desEnvironment = loadConfig(s"$desBase.environment")
   override lazy val desToken = loadConfig(s"$desBase.authorization-token")
   override val paperlessPreferencesExpirySeconds: Int = {
     val key = s"paperless-preference.expiry-seconds"
-      configuration.getInt(s"paperless-preference.expiry-seconds")
-        .getOrElse(throw new Exception(s"Missing configuration key: $key"))
+    configuration.getInt(s"paperless-preference.expiry-seconds")
+      .getOrElse(throw new Exception(s"Missing configuration key: $key"))
   }
 
   override protected def runModeConfiguration: Configuration = configuration
