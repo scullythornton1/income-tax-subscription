@@ -27,6 +27,6 @@ object FeatureSwitchSetting {
   implicit val format: OFormat[FeatureSwitchSetting] = Json.format[FeatureSwitchSetting]
 
   def apply(featureSwitch: FeatureSwitch, enable: Boolean): FeatureSwitchSetting =
-    FeatureSwitchSetting(featureSwitch.shortName, enable)
+    FeatureSwitchSetting(featureSwitch.displayName, enable)
 
 }

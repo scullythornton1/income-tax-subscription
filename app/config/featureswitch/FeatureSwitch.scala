@@ -21,7 +21,7 @@ import testonly.controllers.featureswitch.FeatureSwitchSetting
 
 sealed trait FeatureSwitch {
   val name: String
-  val shortName: String
+  val displayName: String
 }
 
 object FeatureSwitch {
@@ -36,13 +36,13 @@ object FeatureSwitch {
     }
 
   def apply(setting: FeatureSwitchSetting): FeatureSwitch =
-    switches find (_.shortName == setting.feature) match {
+    switches find (_.displayName == setting.feature) match {
       case Some(switch) => switch
       case None => throw new IllegalArgumentException("Invalid feature switch: " + setting.feature)
     }
 }
 
 object StubDESFeature extends FeatureSwitch {
-  val shortName = s"stub-des"
-  val name = s"$prefix.$shortName"
+  val displayName = s"Use stub for DES connection"
+  val name = s"$prefix.stub-des"
 }
