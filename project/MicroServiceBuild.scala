@@ -41,7 +41,7 @@ private object AppDependencies {
 
   private val wiremockVersion = "2.5.1"
 
-  private val bootstrapVersion = "0.14.0"
+  private val bootstrapVersion = "1.0.0"
 
 
   val compile = Seq(
