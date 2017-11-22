@@ -21,12 +21,14 @@ import javax.inject.Inject
 
 import models.lockout.CheckLockout
 import models.matching.LockoutResponse
+import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.IndexType.Ascending
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import reactivemongo.play.json.ImplicitBSONHandlers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -51,7 +53,7 @@ class LockoutMongoRepository @Inject()(implicit mongo: ReactiveMongoComponent)
   }
 
   def getLockoutStatus(arn: String): Future[Option[LockoutResponse]] = {
-    val selector = BSONDocument(LockoutResponse.arn -> arn)
+    val selector = Json.obj(LockoutResponse.arn -> arn)
     collection.find(selector).one[LockoutResponse]
   }
 
