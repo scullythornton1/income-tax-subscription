@@ -24,6 +24,7 @@ import org.scalatest.BeforeAndAfterEach
 import play.api.http.Status._
 import play.modules.reactivemongo.ReactiveMongoComponent
 import repositories.LockoutMongoRepository
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class LockoutStatusControllerISpec extends ComponentSpecBase with BeforeAndAfterEach {
   implicit lazy val mongo = app.injector.instanceOf[ReactiveMongoComponent]
@@ -31,7 +32,7 @@ class LockoutStatusControllerISpec extends ComponentSpecBase with BeforeAndAfter
   object TestLockoutMongoRepository extends LockoutMongoRepository
 
   override def beforeEach(): Unit = {
-    await(TestLockoutMongoRepository.dropDb)
+    await(TestLockoutMongoRepository.drop)
   }
 
   "checkLockoutStatus" should {

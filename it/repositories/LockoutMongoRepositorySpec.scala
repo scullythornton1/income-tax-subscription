@@ -31,7 +31,7 @@ class LockoutMongoRepositorySpec extends UnitSpec with GuiceOneAppPerSuite with 
   object TestLockoutMongoRepository extends LockoutMongoRepository
 
   override def beforeEach(): Unit = {
-    await(TestLockoutMongoRepository.dropDb)
+    await(TestLockoutMongoRepository.drop)
   }
 
   "lockoutAgent" should {

@@ -73,7 +73,7 @@ class LockoutMongoRepository @Inject()(implicit mongo: ReactiveMongoComponent)
   setIndex()
 
   def dropDb: Future[Unit] = {
-    collection.drop()
+    collection.drop(failIfNotFound = false)
     setIndex().map(_ => Unit)
   }
 
