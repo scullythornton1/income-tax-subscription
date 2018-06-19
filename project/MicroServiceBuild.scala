@@ -37,7 +37,7 @@ private object AppDependencies {
   private val scalaJVersion = "2.3.0"
   private val cucumberVersion = "1.2.5"
 
-  private val reactiveMongoVersion = "7.0.0"
+  private val reactiveMongoVersion = "6.2.0"
 
   private val wiremockVersion = "2.5.1"
 
