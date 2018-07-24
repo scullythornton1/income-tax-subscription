@@ -27,7 +27,7 @@ private object AppDependencies {
   import play.core.PlayVersion
   import play.sbt.PlayImport._
 
-  private val domainVersion = "5.2.0"
+  private val domainVersion = "5.1.0"
   private val hmrcTestVersion = "3.0.0"
   private val scalaTestVersion = "3.0.1"
   private val scalaTestPlusVersion = "2.0.0"
@@ -37,7 +37,7 @@ private object AppDependencies {
   private val scalaJVersion = "2.3.0"
   private val cucumberVersion = "1.2.5"
 
-  private val reactiveMongoVersion = "6.1.0"
+  private val reactiveMongoVersion = "6.2.0"
 
   private val wiremockVersion = "2.5.1"
 
