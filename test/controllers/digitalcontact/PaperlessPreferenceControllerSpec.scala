@@ -21,11 +21,11 @@ import models.digitalcontact.PaperlessPreferenceKey
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import services.mocks.{MockAuthService, MockPaperlessPreferenceService}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.MaterializerSupport
 import utils.TestConstants._
-import play.api.test.Helpers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -34,7 +34,8 @@ class PaperlessPreferenceControllerSpec extends UnitSpec with MaterializerSuppor
 
   object TestPaperlessPreferenceController extends PaperlessPreferenceController(
     mockAuthService,
-    mockPaperlessPreferenceService
+    mockPaperlessPreferenceService,
+    stubControllerComponents()
   )
 
   s"storeNino($testPreferencesToken)" should {

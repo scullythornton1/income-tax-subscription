@@ -16,19 +16,17 @@
 
 package testonly.controllers.featureswitch
 
-import javax.inject.Inject
-
 import config.featureswitch.FeatureSwitch._
 import config.featureswitch.{FeatureSwitch, FeatureSwitching}
-import play.api.i18n.MessagesApi
+import javax.inject.Inject
 import play.api.libs.json.Json
-import play.api.mvc.{Action, Result}
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import play.api.mvc.{ControllerComponents, Result}
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
 import scala.concurrent.Future
 
-class FeatureSwitchController @Inject()(val messagesApi: MessagesApi)
-  extends BaseController with FeatureSwitching {
+class FeatureSwitchController @Inject()(cc: ControllerComponents)
+  extends BackendController(cc) with FeatureSwitching {
 
   private def returnCurrentSettings = Ok(Json.toJson(switches.map(fs => FeatureSwitchSetting(fs, isEnabled(fs)))))
 

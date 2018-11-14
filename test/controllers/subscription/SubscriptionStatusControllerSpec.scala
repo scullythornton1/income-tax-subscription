@@ -21,6 +21,7 @@ import models.frontend.FESuccessResponse
 import play.api.http.Status._
 import play.api.mvc.Result
 import play.api.test.FakeRequest
+import play.api.test.Helpers.stubControllerComponents
 import services.mocks.{MockAuthService, MockSubscriptionStatusService}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.MaterializerSupport
@@ -32,7 +33,7 @@ class SubscriptionStatusControllerSpec extends UnitSpec with MockSubscriptionSta
 
   val logging = mock[Logging]
 
-  object TestController extends SubscriptionStatusController(logging, mockAuthService, mockSubscriptionStatusService)
+  object TestController extends SubscriptionStatusController(logging, mockAuthService, mockSubscriptionStatusService, stubControllerComponents())
 
   def call: Future[Result] = TestController.checkSubscriptionStatus(testNino)(FakeRequest())
 
