@@ -19,6 +19,7 @@ package controllers.subscription
 import audit.{Logging, LoggingConfig}
 import javax.inject.Inject
 import models.frontend.FEFailureResponse
+import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services.{AuthService, SubscriptionStatusService}
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
@@ -40,7 +41,10 @@ class SubscriptionStatusController @Inject()(logging: Logging,
       subscriptionStatusService.checkMtditsaSubscription(nino).map {
         case Right(success) =>
           logging.debug(s"successful, responding with\n$success")
-          Ok(toJsValue(success))
+          success match {
+            case None => Ok(Json.obj())
+            case _ => Ok(toJsValue(success))
+          }
         case Left(failure) =>
           logging.warn(s"failed, responding with\nstatus=${failure.status}\nreason=${failure.reason}")
           Status(failure.status)(toJsValue(FEFailureResponse(failure.reason)))

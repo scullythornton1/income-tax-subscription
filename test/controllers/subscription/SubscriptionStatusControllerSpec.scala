@@ -42,7 +42,7 @@ class SubscriptionStatusControllerSpec extends UnitSpec with MockSubscriptionSta
       mockCheckMtditsaNotFound(testNino)
       mockAuthSuccess()
 
-      val result = call
+      val result = await(call)
       status(result) shouldBe OK
       jsonBodyOf(result).as[FESuccessResponse].mtditId shouldBe None
     }
@@ -51,7 +51,7 @@ class SubscriptionStatusControllerSpec extends UnitSpec with MockSubscriptionSta
       mockCheckMtditsaFound(testNino)
       mockAuthSuccess()
 
-      val result = call
+      val result = await(call)
       status(result) shouldBe OK
       jsonBodyOf(result).as[FESuccessResponse].mtditId shouldBe Some(testMtditId)
     }
