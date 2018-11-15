@@ -37,7 +37,7 @@ trait AppConfig {
 @Singleton
 class MicroserviceAppConfig @Inject()(servicesConfig: ServicesConfig, configuration: Configuration) extends AppConfig with FeatureSwitching {
 
-  private def loadConfig(key: String) = configuration.get[String](key)
+  private def loadConfig(key: String) = configuration.getOptional[String](key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
   override lazy val authURL = servicesConfig.baseUrl("auth")
   override lazy val ggAuthenticationURL = servicesConfig.baseUrl("gg-authentication")
@@ -54,7 +54,7 @@ class MicroserviceAppConfig @Inject()(servicesConfig: ServicesConfig, configurat
   override lazy val desToken = loadConfig(s"$desBase.authorization-token")
   override val paperlessPreferencesExpirySeconds: Int = {
     val key = s"paperless-preference.expiry-seconds"
-    configuration.get[Int](key)
+    configuration.getOptional[Int](key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
   }
 
