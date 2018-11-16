@@ -26,7 +26,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.http.{HttpGet, HttpPost}
+import uk.gov.hmrc.http.HttpPost
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import utils.Implicits._
 import utils.TestConstants.{GetRegistrationResponse, NewRegistrationResponse, _}

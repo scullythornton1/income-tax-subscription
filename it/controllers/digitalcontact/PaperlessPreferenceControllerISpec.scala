@@ -19,7 +19,6 @@ package controllers.digitalcontact
 import helpers.ComponentSpecBase
 import helpers.servicemocks.AuthStub
 import models.digitalcontact.PaperlessPreferenceKey
-import org.scalatest.BeforeAndAfterEach
 import play.api.http.Status
 import repositories.digitalcontact.PaperlessPreferenceMongoRepository
 import helpers.IntegrationTestConstants._
@@ -27,7 +26,7 @@ import play.api.libs.json.Json
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class PaperlessPreferenceControllerISpec extends ComponentSpecBase with BeforeAndAfterEach {
+class PaperlessPreferenceControllerISpec extends ComponentSpecBase {
   val paperlessPreferenceRepository = app.injector.instanceOf[PaperlessPreferenceMongoRepository]
 
   override def beforeEach(): Unit = {
