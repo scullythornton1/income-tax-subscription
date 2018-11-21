@@ -23,10 +23,12 @@ import models.ErrorModel
 import models.registration.GetBusinessDetailsSuccessResponseModel
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito._
+import org.mockito._
 import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.libs.json.JsValue
+import uk.gov.hmrc.http.{HttpGet, HttpPost}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import utils.Implicits._
 import utils.TestConstants._

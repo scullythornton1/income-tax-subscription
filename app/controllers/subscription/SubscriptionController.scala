@@ -16,25 +16,25 @@
 
 package controllers.subscription
 
+import javax.inject.Inject
+
 import audit.{Logging, LoggingConfig}
 import controllers.ITSASessionKeys
-import javax.inject.Inject
 import models.frontend.{FEFailureResponse, FERequest}
 import play.api.libs.json.{JsError, JsSuccess}
-import play.api.mvc._
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import services.{AuthService, RosmAndEnrolManagerService}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import utils.JsonUtils._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class SubscriptionController @Inject()(logging: Logging,
                                        subManService: RosmAndEnrolManagerService,
-                                       authService: AuthService,
-                                       cc: ControllerComponents
-                                      ) extends BackendController(cc) {
+                                       authService: AuthService
+                                      ) extends BaseController {
   import authService._
 
   def subscribe(nino: String): Action[AnyContent] = Action.async { implicit request =>

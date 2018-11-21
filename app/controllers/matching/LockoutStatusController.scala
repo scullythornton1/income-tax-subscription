@@ -17,20 +17,20 @@
 package controllers.matching
 
 import javax.inject.{Inject, Singleton}
+
 import models.lockout.LockoutRequest
 import models.matching.LockoutResponse
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.mvc.{Action, AnyContent}
 import services.{AuthService, LockoutStatusService}
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
 class LockoutStatusController @Inject()(authService: AuthService,
-                                        lockoutStatusService: LockoutStatusService,
-                                        cc: ControllerComponents) extends BackendController(cc) {
+                                        lockoutStatusService: LockoutStatusService) extends BaseController {
 
   import authService._
 
