@@ -16,22 +16,22 @@
 
 package controllers.digitalcontact
 
-import common.Constants._
 import javax.inject.{Inject, Singleton}
+
+import common.Constants._
 import models.digitalcontact.PaperlessPreferenceKey
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.mvc.{Action, AnyContent}
 import services.AuthService
 import services.digitalcontact.PaperlessPreferenceService
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class PaperlessPreferenceController @Inject()(authService: AuthService,
-                                              paperlessPreferenceService: PaperlessPreferenceService,
-                                              cc: ControllerComponents)(implicit ec: ExecutionContext)
-  extends BackendController(cc) {
+                                              paperlessPreferenceService: PaperlessPreferenceService)(implicit ec: ExecutionContext)
+  extends BaseController {
 
   import authService._
 

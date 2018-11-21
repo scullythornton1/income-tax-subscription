@@ -17,15 +17,14 @@
 package testonly.controllers.matching
 
 import javax.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import repositories.LockoutMongoRepository
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
 
+import play.api.mvc.{Action, AnyContent}
+import repositories.LockoutMongoRepository
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class ResetAgentLockoutController @Inject()(mongoRepository: LockoutMongoRepository,
-                                            cc: ControllerComponents) extends BackendController(cc) {
+class ResetAgentLockoutController @Inject()(mongoRepository: LockoutMongoRepository) extends BaseController {
 
   def resetAgentLockout: Action[AnyContent] = Action.async { implicit request =>
     mongoRepository.dropDb map (_ => Ok)

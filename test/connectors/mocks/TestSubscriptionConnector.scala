@@ -26,7 +26,7 @@ import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status._
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpPost}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import utils.JsonUtils._
 import utils.TestConstants.{BusinessSubscriptionResponse, PropertySubscriptionResponse, _}

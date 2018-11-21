@@ -16,33 +16,34 @@
 
 package config
 
-import config.featureswitch.FeatureSwitching
 import javax.inject.{Inject, Singleton}
-import play.api.Configuration
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
+import config.featureswitch.FeatureSwitching
+import play.api.{Application, Configuration}
+import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
   val authURL: String
   val ggURL: String
   val ggAdminURL: String
   val ggAuthenticationURL: String
-
   def desURL: String
-
   val desEnvironment: String
   val desToken: String
   val paperlessPreferencesExpirySeconds: Int
 }
 
 @Singleton
-class MicroserviceAppConfig @Inject()(servicesConfig: ServicesConfig, configuration: Configuration) extends AppConfig with FeatureSwitching {
+class MicroserviceAppConfig @Inject()(val app: Application) extends AppConfig with ServicesConfig with FeatureSwitching {
+  val configuration = app.configuration
+  override val mode = app.mode
 
-  private def loadConfig(key: String) = configuration.getOptional[String](key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
+  private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
-  override lazy val authURL = servicesConfig.baseUrl("auth")
-  override lazy val ggAuthenticationURL = servicesConfig.baseUrl("gg-authentication")
-  override lazy val ggURL = servicesConfig.baseUrl("government-gateway")
-  override lazy val ggAdminURL = servicesConfig.baseUrl("gg-admin")
+  override lazy val authURL = baseUrl("auth")
+  override lazy val ggAuthenticationURL = baseUrl("gg-authentication")
+  override lazy val ggURL = baseUrl("government-gateway")
+  override lazy val ggAdminURL = baseUrl("gg-admin")
 
   private def desBase =
     if (isEnabled(featureswitch.StubDESFeature)) "microservice.services.stub-des"
@@ -54,8 +55,9 @@ class MicroserviceAppConfig @Inject()(servicesConfig: ServicesConfig, configurat
   override lazy val desToken = loadConfig(s"$desBase.authorization-token")
   override val paperlessPreferencesExpirySeconds: Int = {
     val key = s"paperless-preference.expiry-seconds"
-    configuration.getOptional[Int](key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
-
+    configuration.getInt(s"paperless-preference.expiry-seconds")
+      .getOrElse(throw new Exception(s"Missing configuration key: $key"))
   }
 
+  override protected def runModeConfiguration: Configuration = configuration
 }

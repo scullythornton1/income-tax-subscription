@@ -26,7 +26,7 @@ import play.modules.reactivemongo.ReactiveMongoComponent
 import repositories.LockoutMongoRepository
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class LockoutStatusControllerISpec extends ComponentSpecBase {
+class LockoutStatusControllerISpec extends ComponentSpecBase with BeforeAndAfterEach {
   implicit lazy val mongo = app.injector.instanceOf[ReactiveMongoComponent]
 
   object TestLockoutMongoRepository extends LockoutMongoRepository

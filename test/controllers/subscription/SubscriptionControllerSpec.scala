@@ -22,7 +22,6 @@ import models.frontend.FESuccessResponse
 import play.api.http.Status._
 import play.api.mvc.{AnyContentAsJson, Request, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.stubControllerComponents
 import services.mocks.{MockAuthService, MockSubscriptionManagerService}
 import uk.gov.hmrc.play.test.UnitSpec
 import utils.JsonUtils._
@@ -35,7 +34,7 @@ class SubscriptionControllerSpec extends UnitSpec with MockSubscriptionManagerSe
 
   val logging = mock[Logging]
 
-  object TestController extends SubscriptionController(logging, mockSubscriptionManagerService, mockAuthService, stubControllerComponents())
+  object TestController extends SubscriptionController(logging, mockSubscriptionManagerService, mockAuthService)
 
   def call(request: Request[AnyContentAsJson]): Future[Result] = TestController.subscribe(testNino)(request)
 
