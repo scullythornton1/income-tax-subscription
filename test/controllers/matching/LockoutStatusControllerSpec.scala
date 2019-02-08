@@ -30,8 +30,8 @@ import scala.concurrent.Future
 
 
 class LockoutStatusControllerSpec extends UnitSpec with MockLockoutStatusService with MaterializerSupport with MockAuthService {
-
-  object TestController extends LockoutStatusController(mockAuthService, mockLockoutStatusService)
+  lazy val mockCC = stubControllerComponents()
+  object TestController extends LockoutStatusController(mockAuthService, mockLockoutStatusService, mockCC)
 
   "LockoutStatusController.checkLockoutStatus" should {
     def call: Future[Result] = TestController.checkLockoutStatus(testArn)(FakeRequest())
