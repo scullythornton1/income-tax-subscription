@@ -34,9 +34,7 @@ trait AppConfig {
 }
 
 @Singleton
-class MicroserviceAppConfig @Inject()(val app: Application, servicesConfig:ServicesConfig) extends AppConfig with FeatureSwitching {
-  val configuration = app.configuration
-  val mode = app.mode
+class MicroserviceAppConfig @Inject()(val configuration: Configuration, servicesConfig:ServicesConfig) extends AppConfig with FeatureSwitching {
 
   private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
 
@@ -49,7 +47,7 @@ class MicroserviceAppConfig @Inject()(val app: Application, servicesConfig:Servi
     if (isEnabled(featureswitch.StubDESFeature)) "microservice.services.stub-des"
     else "microservice.services.des"
 
-  override def desURL = loadConfig(s"$desBase.url")
+  override def desURL: String = loadConfig(s"$desBase.url")
 
   override lazy val desEnvironment = loadConfig(s"$desBase.environment")
   override lazy val desToken = loadConfig(s"$desBase.authorization-token")

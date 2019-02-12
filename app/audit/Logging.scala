@@ -38,8 +38,7 @@ object LoggingConfig {
 import utils.JsonUtils._
 
 @Singleton
-class Logging @Inject()(application: Application,
-                        configuration: Configuration,
+class Logging @Inject()(configuration: Configuration,
                         auditConnector: AuditConnector) {
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,6 @@ private object AppDependencies {
 
   private val bootstrapVersion = "0.32.0"
 
-
   val compile = Seq(
     ws,
     "uk.gov.hmrc" %% "bootstrap-play-26" % bootstrapVersion,
@@ -53,13 +52,13 @@ private object AppDependencies {
 
   trait TestDependencies {
     lazy val scope: String = "test"
-    lazy val test: Seq[ModuleID] = ???
+    lazy val test: Seq[ModuleID] = Seq()
   }
 
   object Test {
-    def apply() = new TestDependencies {
+    def apply(): Seq[ModuleID] = new TestDependencies {
       override lazy val test = Seq(
-        "uk.gov.hmrc" %% "bootstrap-play-26" % "0.32.0" % scope,
+        "uk.gov.hmrc" %% "bootstrap-play-26" % bootstrapVersion % scope,
         "uk.gov.hmrc" %% "hmrctest" % hmrcTestVersion % scope,
         "org.scalatest" %% "scalatest" % scalaTestVersion % scope,
         "org.pegdown" % "pegdown" % pegdownVersion % scope,
@@ -75,7 +74,7 @@ private object AppDependencies {
   }
 
   object IntegrationTest {
-    def apply() = new TestDependencies {
+    def apply(): Seq[ModuleID] = new TestDependencies {
 
       override lazy val scope: String = "it"
 
@@ -95,6 +94,27 @@ private object AppDependencies {
     }.test
   }
 
-  def apply() = compile ++ Test() ++ IntegrationTest()
-}
+  // Fixes a transitive dependency clash between wiremock and scalatestplus-play
+  val overrides: Set[ModuleID] = {
+    val jettyFromWiremockVersion = "9.2.24.v20180105"
+    Set(
+      "org.eclipse.jetty" % "jetty-client" % jettyFromWiremockVersion,
+      "org.eclipse.jetty" % "jetty-continuation" % jettyFromWiremockVersion,
+      "org.eclipse.jetty" % "jetty-http" % jettyFromWiremockVersion,
+      "org.eclipse.jetty" % "jetty-io" % jettyFromWiremockVersion,
+      "org.eclipse.jetty" % "jetty-security" % jettyFromWiremockVersion,
+      "org.eclipse.jetty" % "jetty-server" % jettyFromWiremockVersion,
+      "org.eclipse.jetty" % "jetty-servlet" % jettyFromWiremockVersion,
+      "org.eclipse.jetty" % "jetty-servlets" % jettyFromWiremockVersion,
+      "org.eclipse.jetty" % "jetty-util" % jettyFromWiremockVersion,
+      "org.eclipse.jetty" % "jetty-webapp" % jettyFromWiremockVersion,
+      "org.eclipse.jetty" % "jetty-xml" % jettyFromWiremockVersion,
+      "org.eclipse.jetty.websocket" % "websocket-api" % jettyFromWiremockVersion,
+      "org.eclipse.jetty.websocket" % "websocket-client" % jettyFromWiremockVersion,
+      "org.eclipse.jetty.websocket" % "websocket-common" % jettyFromWiremockVersion
+    )
+  }
 
+  def apply(): Seq[ModuleID] = compile ++ Test() ++ IntegrationTest()
+
+}

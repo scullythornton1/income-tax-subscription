@@ -48,7 +48,7 @@ trait MockSubscriptionStatusService extends MockitoSugar {
     mockCheckMtditsaSubscription(nino)(Future.successful(Right(Some(FESuccessResponse(Some(testMtditId))))))
 
   def mockCheckMtditsaNotFound(nino: String): Unit =
-    mockCheckMtditsaSubscription(nino)(Future.successful(Right(None)))
+    mockCheckMtditsaSubscription(nino)(Future.successful(Right(Some(FESuccessResponse(None)))))
 
   def mockCheckMtditsaFailure(nino: String): Unit =
     mockCheckMtditsaSubscription(nino)(Future.successful(Left(INVALID_NINO_MODEL)))
